@@ -1,7 +1,7 @@
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { randomUUID } from 'node:crypto';
-import { ExerciseService } from '../../../main/domain/exercise/ExerciseService.js';
-import { type ExerciseRepository } from '../../../main/domain/exercise/ExerciseRepository.js';
+import { type ExerciseRepository } from '../../../src/main/domain/exercise/ExerciseRepository.js';
+import { ExerciseService } from '../../../src/main/domain/exercise/ExerciseService.js';
 
 describe('ExerciseService', () => {
   let exerciseService: ExerciseService;

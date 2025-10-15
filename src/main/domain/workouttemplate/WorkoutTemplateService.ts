@@ -46,22 +46,26 @@ export class WorkoutTemplateService {
   }
 
   //analyze if it makes sense
-  public async setNumberOfSets(
-    sets: number,
-    workoutTemplateId: UUID,
-    userId: UUID,
-    order: number,
-  ): Promise<WorkoutTemplate> {
-    const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
-    const workoutTemplateExercise = workoutTemplate.exercises.find((ex) => ex.order === order);
-    if (!workoutTemplateExercise) {
-      throw new Error('Exercise not found');
-    }
+  public async setNumberOfSets(sets: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
+    const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
     workoutTemplateExercise.sets = sets;
 
-    await this.workoutTemplateRepository.save(workoutTemplate);
+    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
+      workoutTemplateId,
+      userId,
+      workoutTemplateExercise,
+    );
+  }
 
-    return workoutTemplate;
+  public async setRestPeriod(restPeriod: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
+    const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
+    workoutTemplateExercise.restPeriod = restPeriod;
+
+    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
+      workoutTemplateId,
+      userId,
+      workoutTemplateExercise,
+    );
   }
 
   public async get(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {

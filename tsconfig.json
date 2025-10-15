@@ -7,7 +7,7 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
+    "module": "nodenext",
     "target": "esnext",
     "lib": ["esnext"],
     "types": ["node", "jest"],
@@ -39,6 +39,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "moduleResolution": "nodenext",
     
 
     "incremental": true /* Save .tsbuildinfo files to allow for incremental compilation of projects. */,
@@ -46,7 +47,6 @@
     "experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */,
     "importHelpers": true /* Allow importing helper functions from tslib once per project, instead of including them per-file. */,
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
-    "resolveJsonModule": true /* Enable importing .json files. */,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
     "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
     "noImplicitThis": false /* Enable error reporting when 'this' is given the type 'any'. */,
