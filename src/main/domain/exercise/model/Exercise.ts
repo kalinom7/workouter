@@ -1,6 +1,8 @@
+import { type UUID } from 'node:crypto';
+
 export type Exercise = {
-  id: string;
-  userId: string;
+  id: UUID;
+  userId: UUID;
   name: string;
   description?: string;
 };

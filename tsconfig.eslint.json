@@ -1,5 +1,8 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+  },
   "include": ["**/*.ts", "**/*.js", ".eslintrc.cjs", "**/*.json"],
   "exclude": ["node_modules", "./dist"]
 }

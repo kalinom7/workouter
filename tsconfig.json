@@ -7,10 +7,10 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "node20",
+    "module": "esnext",
     "target": "esnext",
     "lib": ["esnext"],
-    "types": ["node"],
+    "types": ["node", "jest"],
 
     
 
@@ -39,5 +39,23 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    
+
+    "incremental": true /* Save .tsbuildinfo files to allow for incremental compilation of projects. */,
+    "emitDecoratorMetadata": true /* Emit design-type metadata for decorated declarations in source files. */,
+    "experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */,
+    "importHelpers": true /* Allow importing helper functions from tslib once per project, instead of including them per-file. */,
+    "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
+    "resolveJsonModule": true /* Enable importing .json files. */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
+    "noImplicitThis": false /* Enable error reporting when 'this' is given the type 'any'. */,
+    "useUnknownInCatchVariables": true /* Default catch clause variables as 'unknown' instead of 'any'. */,
+    "alwaysStrict": true /* Ensure 'use strict' is always emitted. */,
+    "strictNullChecks": true /* When type checking, take into account 'null' and 'undefined'. */,
+    "pretty": true,
+    "esModuleInterop": true,
   },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["./node_modules", "./jest*.config.ts", "./test/**/*.spec.ts", "./test/**/*.test.ts"]
 }

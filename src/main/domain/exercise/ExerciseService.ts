@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, type UUID } from 'node:crypto';
 import { type ExerciseRepository } from './ExerciseRepository.js';
 import { type Exercise } from './model/Exercise.js';
 
 export class ExerciseService {
   constructor(private readonly exerciseRepository: ExerciseRepository) {}
 
-  public create(name: string, description: string, userId: string): Exercise {
+  public async create(name: string, description: string, userId: UUID): Promise<Exercise> {
     const exercise: Exercise = {
       id: randomUUID(),
       name,
@@ -13,17 +13,17 @@ export class ExerciseService {
       userId,
     };
 
-    this.exerciseRepository.save(exercise);
+    await this.exerciseRepository.save(exercise);
 
     return exercise;
   }
 
-  public get(exerciseId: string, userId: string): Exercise {
+  public async get(exerciseId: UUID, userId: UUID): Promise<Exercise> {
     return this.exerciseRepository.get(exerciseId, userId);
   }
 
   //add data validation?
-  public update(exerciseId: string, name: string, description: string, userId: string): Exercise {
+  public async update(exerciseId: UUID, name: string, description: string, userId: UUID): Promise<Exercise> {
     const exercise: Exercise = {
       id: exerciseId,
       name,
@@ -31,12 +31,12 @@ export class ExerciseService {
       userId,
     };
 
-    this.exerciseRepository.save(exercise);
+    await this.exerciseRepository.save(exercise);
 
     return exercise;
   }
 
-  public delete(exerciseId: string, userId: string): void {
-    this.exerciseRepository.delete(exerciseId, userId);
+  public async delete(exerciseId: string, userId: string): Promise<void> {
+    await this.exerciseRepository.delete(exerciseId, userId);
   }
 }
