@@ -5,7 +5,7 @@ export default {
   testEnvironment: 'node',
 
   
-  //testMatch: [`<rootDir>/src/test/domain/${DOMAIN}/**/*.test.js`],
+  testMatch: [`<rootDir>/src/test/domain/${DOMAIN}/**/*.test.js`],
 
  
   moduleNameMapper: {

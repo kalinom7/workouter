@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { WorkoutTemplate } from "../../../main/domain/workouttemplate/model/WorkoutTemplate.js";
 //import { WorkoutTemplateExercise } from "../../main/domain/workouttemplate/model/WorkoutTemplateExercise.js";
 import { WorkoutTemplateService } from "../../../main/domain/workouttemplate/WorkoutTemplateService.js";
+import { WorkoutTemplateExercise } from '../../../main/domain/workouttemplate/model/WorkoutTemplateExercise.js';
+import { Exercise } from '../../../main/domain/workouttemplate/model/Exercise.js';
 
 //mock repository
 const mockRepository  = {
@@ -67,26 +69,44 @@ describe("WorkoutTemplateService", () => {
 
 
 
-
-    // needs fixing
-    /*test("should add workoutTemplateExercise", () => { 
+    test("should add workoutTemplateExercise to workoutTemplate", () => {
         //given
-        const workoutTemplate = new WorkoutTemplate(randomUUID(), "test workoutTemplate", randomUUID(), []);
-        //when
-        workoutTemplateService.addWorkoutTemplateExercise("test exercise", workoutTemplate.id, workoutTemplate.userId);
+        let userId = randomUUID();
+        let templateId = randomUUID();
+        let workoutTemplate = new WorkoutTemplate(templateId,"tested workoutTemplate",userId,[]);
+        mockRepository.get.mockReturnValue(workoutTemplate);
         mockRepository.save.mockReturnValue(workoutTemplate);
-        
+        let exerciseName = "test exercise name"
+
+        //when
+        workoutTemplate = workoutTemplateService.addWorkoutTemplateExercise(exerciseName,workoutTemplate.id,userId);
         //then
+
         console.log(workoutTemplate);
-        expect(mockRepository.get).toHaveBeenCalledWith(workoutTemplate.id, workoutTemplate.userId);
-        expect(mockRepository.get).toHaveBeenCalledTimes(1);
-       // expect(mockRepository.save).toHaveBeenCalledTimes(2);
+        console.log(workoutTemplate.exercises); 
         expect(workoutTemplate.exercises.length).toBe(1);
-        expect(workoutTemplate.exercises[0].order).toBe(0);
-        expect(workoutTemplate.exercises[0].name.name).toBe("test exercise");
-        expect(workoutTemplate.exercises[0].sets).toBe(0);
-        expect(workoutTemplate.exercises[0].reps).toBe(0);
-    });*/
+
+    });
+    
+    test ("manually added exercise", () => {
+        //given
+        let userId = randomUUID();
+        let templateId = randomUUID();
+        const workoutTemplate = new WorkoutTemplate(templateId, "tested workoutTemplate", userId, []);
+
+        //when
+        const order = workoutTemplate.exercises.length;
+        const workoutTemplateExercise = new WorkoutTemplateExercise(new Exercise("test exercise"),0,0,order);
+        const workoutTemplateExercise2 = new WorkoutTemplateExercise(new Exercise("test exercise2"),0,0,order);
+        workoutTemplate.exercises.push(workoutTemplateExercise);
+        workoutTemplate.exercises.push(workoutTemplateExercise2);
+
+        //then
+        //console.log(workoutTemplate); 
+        //console.log(workoutTemplate.exercises);
+        expect(workoutTemplate.exercises.length).toBe(2);
+        
+    });
 
     });
     

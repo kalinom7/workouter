@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { WorkoutTemplate } from "./model/WorkoutTemplate.js";
 import { WorkoutTemplateExercise} from "./model/WorkoutTemplateExercise.js";
-import { Exercise } from "../exercise/model/Exercise.js";
+import { Exercise } from "./model/Exercise.js";
 
 export class WorkoutTemplateService{
     constructor(workoutTemplateRepository){
@@ -24,7 +24,6 @@ export class WorkoutTemplateService{
          
          //think about why is there a new exercise no something choosen from some list
          const workoutTemplateExercise = new WorkoutTemplateExercise(new Exercise(name),0,0,order);
-
          workoutTemplate.exercises.push(workoutTemplateExercise);
 
         return this.workoutTemplateRepository.save(workoutTemplate);
