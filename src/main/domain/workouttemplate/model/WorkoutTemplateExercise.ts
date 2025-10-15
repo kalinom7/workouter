@@ -1,7 +1,7 @@
-import { type Exercise } from './Exercise.js';
+import { type UUID } from 'node:crypto';
 
 export type WorkoutTemplateExercise = {
-  exercise: Exercise;
+  exercise: UUID;
   sets: number;
   restPeriod: number; //seconds
   order: number;

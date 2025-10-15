@@ -22,7 +22,7 @@ export class WorkoutTemplateService {
 
   //select a workoutTemplateExercise
   public async addWorkoutTemplateExercise(
-    name: string,
+    exerciseId: UUID,
     workoutTemplateId: UUID,
     userId: UUID,
   ): Promise<WorkoutTemplate> {
@@ -32,9 +32,7 @@ export class WorkoutTemplateService {
 
     //think about why is there a new exercise no something choosen from some list
     const workoutTemplateExercise: WorkoutTemplateExercise = {
-      exercise: {
-        name,
-      },
+      exercise: exerciseId,
       order,
       sets: 0,
       restPeriod: 0,
@@ -66,7 +64,7 @@ export class WorkoutTemplateService {
     return workoutTemplate;
   }
 
-  public async getWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {
+  public async get(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {
     return this.workoutTemplateRepository.get(workoutTemplateId, userId);
   }
 
