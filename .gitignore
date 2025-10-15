@@ -4,3 +4,4 @@ dist
 .vscode
 coverage
 tsconfig.tsbuildinfo
+junit*.xml

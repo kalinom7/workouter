@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node src/main/main.js",
+    "start": "node dist/main/main.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --config ./jest.config.ts",
     "lint": "prettier --check \"{src,tests}/**/*.{ts,json}\" && eslint \"{src,tests}/**/*.{ts,json}\"",
     "lint:fix": "prettier --check \"{src,tests}/**/*.{ts,json}\" --write && eslint \"{src,tests}/**/*.{ts,json}\" --fix"
