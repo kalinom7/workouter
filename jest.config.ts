@@ -1,6 +1,6 @@
 export default {
   testEnvironment: 'node',
-  testMatch: [`<rootDir>/src/test/**/*.test.ts`],
+  //testMatch: [`<rootDir>/src/test/**/*.test.ts`],
   preset: 'ts-jest',
   verbose: true,
   coveragePathIgnorePatterns: ['./node_modules/', './dist/', './test'],

@@ -45,7 +45,6 @@ export class WorkoutTemplateService {
     return workoutTemplate;
   }
 
-  //analyze if it makes sense
   public async setNumberOfSets(sets: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
     const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
     workoutTemplateExercise.sets = sets;
@@ -68,7 +67,7 @@ export class WorkoutTemplateService {
     );
   }
 
-  public async get(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {
+  public async getWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {
     return this.workoutTemplateRepository.get(workoutTemplateId, userId);
   }
 
