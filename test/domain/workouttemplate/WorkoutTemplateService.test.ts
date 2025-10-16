@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { type WorkoutTemplate } from '../../../src/main/domain/workouttemplate/model/WorkoutTemplate.js';
 import { WorkoutTemplateService } from '../../../src/main/domain/workouttemplate/WorkoutTemplateService.js';
-import { type WorkoutTemplateExercise } from '../../../src/main/domain/workouttemplate/model/WorkoutTemplateExercise.js';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutTemplateRepository } from '../../../src/main/domain/workouttemplate/WorkoutTemplateRepository.js';
 
