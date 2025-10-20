@@ -22,7 +22,6 @@ export class ExerciseService {
     return this.exerciseRepository.get(exerciseId, userId);
   }
 
-  //add data validation?
   public async update(exerciseId: UUID, name: string, description: string, userId: UUID): Promise<Exercise> {
     const exercise: Exercise = {
       id: exerciseId,
