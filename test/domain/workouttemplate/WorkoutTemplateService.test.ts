@@ -125,9 +125,112 @@ describe('WorkoutTemplateService', () => {
     expect(workoutTemplate.exercises[0].sets).toEqual(numberOfSets);
   });
 
-  test('should throw error when trying to set number of sets for the workoutTemplateExercise if it does not exist', async () => {});
-  test('should set rest period for the workoutTemplateExercise if it exists', async () => {});
-  test('should throw error when trying to set rest period for the workoutTemplateExercise if it does not exist', async () => {});
-  test('should remove workoutTemplateExercise from workoutTemplate if it exists', async () => {});
-  test('should throw error when trying to remove workoutTemplateExercise from workoutTemplate if it does not exist', async () => {});
+  test('should throw error when trying to set number of sets for the workoutTemplateExercise if it does not exist', async () => {
+    //given
+    const numberOfSets = 4;
+    const userId = randomUUID();
+    //when
+    repository.getByOrder.mockResolvedValue(null);
+    await expect(workoutTemplateService.setNumberOfSets(numberOfSets, randomUUID(), userId, 0)).rejects.toThrow();
+    await expect(workoutTemplateService.setNumberOfSets(numberOfSets, randomUUID(), randomUUID(), 0)).rejects.toThrow();
+    //then
+    expect(repository.getByOrder).toHaveBeenCalledTimes(2);
+    expect(repository.saveWorkoutTemplateExercise).not.toHaveBeenCalled();
+  });
+  test('should set rest period for the workoutTemplateExercise if it exists', async () => {
+    //given
+    const userId = randomUUID();
+    const templateId = randomUUID();
+    const workoutTemplate: WorkoutTemplate = {
+      id: templateId,
+      name: 'test workoutTemplate',
+      userId: userId,
+      exercises: [
+        {
+          exercise: randomUUID(),
+          sets: 0,
+          restPeriod: 0,
+          order: 0,
+        },
+      ],
+    };
+    const restPeriod = 180;
+    //when
+    repository.getByOrder.mockResolvedValue(workoutTemplate.exercises[0]);
+    await workoutTemplateService.setRestPeriod(restPeriod, workoutTemplate.id, userId, 0);
+
+    //then
+    expect(repository.getByOrder).toHaveBeenCalledWith(workoutTemplate.id, userId, 0);
+    expect(repository.getByOrder).toHaveBeenCalledTimes(1);
+    expect(workoutTemplate.exercises[0].restPeriod).toEqual(restPeriod);
+    expect(repository.saveWorkoutTemplateExercise).toHaveBeenCalledWith(
+      workoutTemplate.id,
+      userId,
+      expect.objectContaining({
+        exercise: workoutTemplate.exercises[0].exercise,
+        sets: workoutTemplate.exercises[0].sets,
+        restPeriod: restPeriod,
+        order: workoutTemplate.exercises[0].order,
+      }),
+    );
+    expect(repository.saveWorkoutTemplateExercise).toHaveBeenCalledTimes(1);
+  });
+  test('should throw error when trying to set rest period for the workoutTemplateExercise if it does not exist', async () => {
+    //given
+    const restPeriod = 180;
+    const userId = randomUUID();
+    //when
+    repository.getByOrder.mockResolvedValue(null);
+    await expect(workoutTemplateService.setRestPeriod(restPeriod, randomUUID(), userId, 0)).rejects.toThrow();
+    await expect(workoutTemplateService.setRestPeriod(restPeriod, randomUUID(), randomUUID(), 0)).rejects.toThrow();
+    //then
+    expect(repository.getByOrder).toHaveBeenCalledTimes(2);
+    expect(repository.saveWorkoutTemplateExercise).not.toHaveBeenCalled();
+  });
+  test('should remove workoutTemplateExercise from workoutTemplate if it exists', async () => {
+    //given
+    const userId = randomUUID();
+    const templateId = randomUUID();
+    const workoutTemplate: WorkoutTemplate = {
+      id: templateId,
+      name: 'test workoutTemplate',
+      userId: userId,
+      exercises: [
+        {
+          exercise: randomUUID(),
+          sets: 3,
+          restPeriod: 360,
+          order: 0,
+        },
+        {
+          exercise: randomUUID(),
+          sets: 4,
+          restPeriod: 180,
+          order: 1,
+        },
+      ],
+    };
+    console.log(workoutTemplate);
+    //when
+    repository.get.mockResolvedValue(workoutTemplate);
+    await workoutTemplateService.removeWorkoutTemplateExercise(workoutTemplate.id, userId, 0);
+
+    //then
+    console.log(workoutTemplate);
+    expect(repository.get).toHaveBeenCalledWith(workoutTemplate.id, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(workoutTemplate.exercises.length).toBe(1);
+    expect(repository.save).toHaveBeenCalledWith(workoutTemplate);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+  });
+  test('should throw error when trying to remove workoutTemplateExercise from workoutTemplate if it does not exist', async () => {
+    //given
+    const userId = randomUUID();
+    //when
+    repository.get.mockResolvedValue(null);
+    await expect(workoutTemplateService.removeWorkoutTemplateExercise(randomUUID(), userId, 0)).rejects.toThrow();
+    //then
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.saveWorkoutTemplateExercise).not.toHaveBeenCalled();
+  });
 });

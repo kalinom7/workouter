@@ -27,7 +27,9 @@ export class WorkoutTemplateService {
     userId: UUID,
   ): Promise<WorkoutTemplate> {
     const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
-
+    if (workoutTemplate == null) {
+      throw new Error('WorkoutTemplate not found');
+    }
     const order = workoutTemplate.exercises.length;
 
     //think about why is there a new exercise no something choosen from some list
@@ -44,9 +46,31 @@ export class WorkoutTemplateService {
 
     return workoutTemplate;
   }
+  public async removeWorkoutTemplateExercise(workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
+    const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
+
+    if (workoutTemplate == null) {
+      throw new Error('WorkoutTemplate not found');
+    }
+    const exerciseToRemove = workoutTemplate.exercises.find((e) => e.order === order);
+    if (!exerciseToRemove) {
+      throw new Error(`WorkoutTemplateExercise with order ${order} not found`);
+    }
+    workoutTemplate.exercises = workoutTemplate.exercises.filter((e) => e.order !== order);
+    // adjust orders of remaining exercises
+    for (const e of workoutTemplate.exercises) {
+      if (e.order > order) {
+        e.order -= 1;
+      }
+    }
+    await this.workoutTemplateRepository.save(workoutTemplate);
+  }
 
   public async setNumberOfSets(sets: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
     const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
+    if (workoutTemplateExercise == null) {
+      throw new Error('WorkoutTemplateExercise not found');
+    }
     workoutTemplateExercise.sets = sets;
 
     await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
@@ -58,6 +82,9 @@ export class WorkoutTemplateService {
 
   public async setRestPeriod(restPeriod: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
     const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
+    if (workoutTemplateExercise == null) {
+      throw new Error('WorkoutTemplateExercise not found');
+    }
     workoutTemplateExercise.restPeriod = restPeriod;
 
     await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
@@ -68,7 +95,12 @@ export class WorkoutTemplateService {
   }
 
   public async getWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {
-    return this.workoutTemplateRepository.get(workoutTemplateId, userId);
+    const returnedTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
+    if (returnedTemplate == null) {
+      throw new Error('WorkoutTemplate not found');
+    }
+
+    return returnedTemplate;
   }
 
   //delete
