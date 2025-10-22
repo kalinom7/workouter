@@ -210,13 +210,11 @@ describe('WorkoutTemplateService', () => {
         },
       ],
     };
-    console.log(workoutTemplate);
     //when
     repository.get.mockResolvedValue(workoutTemplate);
     await workoutTemplateService.removeWorkoutTemplateExercise(workoutTemplate.id, userId, 0);
 
     //then
-    console.log(workoutTemplate);
     expect(repository.get).toHaveBeenCalledWith(workoutTemplate.id, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(workoutTemplate.exercises.length).toBe(1);

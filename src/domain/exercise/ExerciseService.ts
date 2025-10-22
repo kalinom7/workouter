@@ -18,7 +18,11 @@ export class ExerciseService {
     return exercise;
   }
 
-  public async get(exerciseId: UUID, userId: UUID): Promise<Exercise> {
+  public async get(exerciseId: UUID, userId: UUID): Promise<Exercise | null> {
+    const exercise = await this.exerciseRepository.get(exerciseId, userId);
+    if( exercise == null) {
+      throw new Error('exercise not found');
+    }
     return this.exerciseRepository.get(exerciseId, userId);
   }
 

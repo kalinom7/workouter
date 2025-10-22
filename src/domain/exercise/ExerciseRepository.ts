@@ -3,7 +3,7 @@ import { type Exercise } from './model/Exercise.js';
 export interface ExerciseRepository {
   save(exercise: Exercise): Promise<void>;
 
-  get(exerciseId: string, userId: string): Promise<Exercise>;
+  get(exerciseId: string, userId: string): Promise<Exercise | null>;
 
   delete(exerciseId: string, userId: string): Promise<void>;
 }

@@ -53,7 +53,7 @@ export class WorkoutTemplateService {
       throw new Error('WorkoutTemplate not found');
     }
     const exerciseToRemove = workoutTemplate.exercises.find((e) => e.order === order);
-    if (!exerciseToRemove) {
+    if (exerciseToRemove == null) {
       throw new Error(`WorkoutTemplateExercise with order ${order} not found`);
     }
     workoutTemplate.exercises = workoutTemplate.exercises.filter((e) => e.order !== order);

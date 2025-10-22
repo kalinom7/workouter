@@ -93,5 +93,13 @@ describe('ExerciseService', () => {
     expect(repository.delete).toHaveBeenCalledWith(exercise.id, exercise.userId);
     expect(repository.delete).toHaveBeenCalledTimes(1);
   });
-  test('should throw error when trying to get non existing exercise', async () => {});
+  test('should throw error when trying to get non existing exercise', async () => {
+    //given
+    //when
+    repository.get.mockResolvedValue(null);
+    await expect(exerciseService.get(randomUUID(), randomUUID())).rejects.toThrow();
+
+    //then
+    expect(repository.get).toHaveBeenCalledTimes(1);
+  });
 });
