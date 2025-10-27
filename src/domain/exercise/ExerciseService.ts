@@ -18,12 +18,13 @@ export class ExerciseService {
     return exercise;
   }
 
-  public async get(exerciseId: UUID, userId: UUID): Promise<Exercise | null> {
+  public async get(exerciseId: UUID, userId: UUID): Promise<Exercise> {
     const exercise = await this.exerciseRepository.get(exerciseId, userId);
-    if( exercise == null) {
+    if (exercise == null) {
       throw new Error('exercise not found');
     }
-    return this.exerciseRepository.get(exerciseId, userId);
+
+    return exercise;
   }
 
   public async update(exerciseId: UUID, name: string, description: string, userId: UUID): Promise<Exercise> {
@@ -40,6 +41,10 @@ export class ExerciseService {
   }
 
   public async delete(exerciseId: string, userId: string): Promise<void> {
+    const exercise = await this.exerciseRepository.get(exerciseId, userId);
+    if (exercise == null) {
+      throw new Error('exercise not found');
+    }
     await this.exerciseRepository.delete(exerciseId, userId);
   }
 }
