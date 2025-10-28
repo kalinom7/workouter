@@ -199,33 +199,6 @@ describe('WorkoutScheduleService', () => {
           type: 'rest' as const,
           period: 20,
         },
-      ],
-    };
-    repository.get.mockResolvedValue(workoutSchedule);
-    //when
-    const updatedWorkoutSchedule = await workoutScheduleService.removeBlockItem(userId, workoutScheduleId, blockItemId);
-    //then
-    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
-    expect(repository.get).toHaveBeenCalledTimes(1);
-    expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.block.length).toBe(0);
-  });
-  test('should remove block item if workout schedule and block item exist2', async () => {
-    //given
-    const userId = randomUUID();
-    const workoutScheduleId = randomUUID();
-    const blockItemId = randomUUID();
-    const workoutSchedule = {
-      id: workoutScheduleId,
-      name: 'test schedule',
-      userId: userId,
-      isActive: false,
-      block: [
-        {
-          blockItemId: blockItemId,
-          type: 'rest' as const,
-          period: 20,
-        },
         {
           blockItemId: randomUUID(),
           type: 'rest' as const,
@@ -242,9 +215,88 @@ describe('WorkoutScheduleService', () => {
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(updatedWorkoutSchedule.block.length).toBe(1);
   });
-  test('should throw error when trying to remove block item from a workout schedule that does not exist', async () => {});
-  test('should throw error when trying to remove block item that does not exist in the workout schedule', async () => {});
-  test('should set workout schedule as active if it exists', async () => {});
-  test('should throw error when trying to set workout schedule as active if it does not exist', async () => {});
-  test('should set workout schedule as inactive if it exists', async () => {});
+  test('should throw error when trying to remove block item from a workout schedule that does not exist', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const itemId = randomUUID();
+    repository.get.mockResolvedValueOnce(null);
+    //when & then
+    await expect(workoutScheduleService.removeBlockItem(userId, workoutScheduleId, itemId)).rejects.toThrow(
+      'workout schedule not found',
+    );
+    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+  test('should throw error when trying to remove block item that does not exist in the workout schedule', async () => {
+    //given
+    const mockItemId = randomUUID();
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const workoutSchedule = {
+      id: workoutScheduleId,
+      name: 'test schedule',
+      userId: userId,
+      isActive: false,
+      block: [],
+    };
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    //when & then
+    await expect(workoutScheduleService.removeBlockItem(userId, workoutScheduleId, mockItemId)).rejects.toThrow(
+      'block item not found',
+    );
+    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+  test('should set workout schedule as active if it exists', async () => {
+    //given
+    const workoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: randomUUID(),
+      isActive: false,
+      block: [],
+    };
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    //when
+    const updatedWorkoutSchedule = await workoutScheduleService.setActive(workoutSchedule.id, workoutSchedule.userId);
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutSchedule.id, workoutSchedule.userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedWorkoutSchedule.isActive).toBe(true);
+  });
+  test('should throw error when trying to set workout schedule as active if it does not exist', async () => {
+    //given
+    const workoutScheduleId = randomUUID();
+    const userId = randomUUID();
+    repository.get.mockResolvedValueOnce(null);
+    //when & then
+    await expect(workoutScheduleService.setActive(workoutScheduleId, userId)).rejects.toThrow(
+      'workout schedule not found',
+    );
+    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+  test('should set workout schedule as inactive if it exists', async () => {
+    //given
+    const workoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: randomUUID(),
+      isActive: true,
+      block: [],
+    };
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    //when
+    const updatedWorkoutSchedule = await workoutScheduleService.setInactive(workoutSchedule.id, workoutSchedule.userId);
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutSchedule.id, workoutSchedule.userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedWorkoutSchedule.isActive).toBe(false);
+  });
 });
