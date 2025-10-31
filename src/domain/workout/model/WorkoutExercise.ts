@@ -6,4 +6,5 @@ export type WorkoutExercise = {
   sets: WorkoutExerciseSet[];
   restPeriod?: number; //seconds
   order: number;
+  isCompleted: boolean;
 };
