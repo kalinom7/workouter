@@ -196,11 +196,13 @@ describe('WorkoutScheduleService', () => {
       block: [
         {
           blockItemId: blockItemId,
+          order: 0,
           type: 'rest' as const,
           period: 20,
         },
         {
           blockItemId: randomUUID(),
+          order: 1,
           type: 'rest' as const,
           period: 25,
         },

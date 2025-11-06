@@ -1,8 +1,8 @@
-import express from 'express';
-const app = express();
-app.get('/', (_req, res) => {
-  res.send('Hello World!');
-});
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
-});
+import { Application } from './application/Application.js';
+
+try {
+  await Application.start();
+  console.log('Application started successfully.');
+} catch (error) {
+  console.error('Failed to start application:', error);
+}

@@ -70,7 +70,13 @@ module.exports = {
     '@typescript-eslint/member-ordering': [
       'error',
       {
-        default: ['private-static-field', 'protected-static-field', 'public-static-field'],
+        default: [
+          'private-static-field',
+          'protected-static-field',
+          'public-static-field',
+          'public-instance-method',
+          'private-instance-method',
+        ],
       },
     ],
   },

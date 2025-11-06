@@ -43,6 +43,7 @@ export class WorkoutScheduleService {
     }
     workoutSchedule.block.push({
       blockItemId: randomUUID(),
+      order: workoutSchedule.block.length,
       type: 'workouttemplate',
       WorkoutTemplateId: workoutTemplateId,
     });
@@ -55,19 +56,35 @@ export class WorkoutScheduleService {
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
     }
-    workoutSchedule.block.push({ blockItemId: randomUUID(), type: 'rest', period: restPeriod });
+    workoutSchedule.block.push({
+      blockItemId: randomUUID(),
+      order: workoutSchedule.block.length,
+      type: 'rest',
+      period: restPeriod,
+    });
     await this.workoutScheduleRepository.save(workoutSchedule);
 
     return workoutSchedule;
   }
   public async removeBlockItem(userId: UUID, workoutScheduleId: UUID, itemId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
-    if (workoutSchedule == null) throw new Error('workout schedule not found');
+    if (workoutSchedule == null) {
+      throw new Error('workout schedule not found');
+    }
 
     const found = workoutSchedule.block.some((b) => b.blockItemId === itemId);
-    if (!found) throw new Error('block item not found');
+    if (!found) {
+      throw new Error('block item not found');
+    }
 
     workoutSchedule.block = workoutSchedule.block.filter((b) => b.blockItemId !== itemId);
+
+    workoutSchedule.block = workoutSchedule.block
+      .toSorted((a, b) => a.order - b.order)
+      .map((block, index) => ({
+        ...block,
+        order: index,
+      }));
 
     await this.workoutScheduleRepository.save(workoutSchedule);
 

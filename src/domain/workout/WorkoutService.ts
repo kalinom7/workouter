@@ -1,10 +1,11 @@
 import { randomUUID, type UUID } from 'node:crypto';
-import { type Workout } from './model/Workout.js';
-import { type WorkoutRepository } from './WorkoutRepository.js';
-import { type WorkoutTemplateService } from '../workouttemplate/WorkoutTemplateService.js';
 import { type ExerciseService } from '../exercise/ExerciseService.js';
-import { type WorkoutExerciseSet } from './model/WorkoutExerciseSet.js';
+import { type WorkoutTemplateService } from '../workouttemplate/WorkoutTemplateService.js';
+import { type Workout } from './model/Workout.js';
 import { type WorkoutExercise } from './model/WorkoutExercise.js';
+import { type WorkoutExerciseSet } from './model/WorkoutExerciseSet.js';
+import { type WorkoutRepository } from './WorkoutRepository.js';
+
 export class WorkoutService {
   constructor(
     private readonly workoutRepository: WorkoutRepository,
@@ -56,10 +57,7 @@ export class WorkoutService {
   //add start workout from workoutschedule
 
   public async addExercise(userId: UUID, workoutId: UUID, exerciseId: UUID): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
     const exercise = await this.exerciseService.get(exerciseId, userId);
 
     const order = workout.exercises.length;
@@ -79,10 +77,7 @@ export class WorkoutService {
 
   // remove exercise
   public async removeExercise(userId: UUID, workoutId: UUID, exerciseOrder: number): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
     const exerciseIndex = workout.exercises.findIndex((e) => e.order === exerciseOrder);
     if (exerciseIndex === -1) {
       throw new Error('Exercise not found in workout');
@@ -97,14 +92,8 @@ export class WorkoutService {
 
   // add set to the exercise
   public async addSet(userId: UUID, workoutId: UUID, exerciseOrder: number): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
-    if (exercise == null) {
-      throw new Error('Exercise not found in workout');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
     const setOrder = exercise.sets.length;
     const newSet: WorkoutExerciseSet = {
       weight: null,
@@ -115,16 +104,11 @@ export class WorkoutService {
     exercise.sets.push(newSet);
     await this.workoutRepository.save(workout);
   }
+
   //remove set from the exercise
   public async removeSet(userId: UUID, workoutId: UUID, exerciseOrder: number, setOrder: number): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
-    if (exercise == null) {
-      throw new Error('Exercise not found in workout');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
     const setIndex = exercise.sets.findIndex((s) => s.order === setOrder);
     if (setIndex === -1) {
       throw new Error('Set not found in exercise');
@@ -136,6 +120,7 @@ export class WorkoutService {
     }
     await this.workoutRepository.save(workout);
   }
+
   public async addWeightAndReps(
     userId: UUID,
     workoutId: UUID,
@@ -144,14 +129,8 @@ export class WorkoutService {
     weight: number,
     reps: number,
   ): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
-    if (!exercise) {
-      throw new Error('Exercise not found in workout');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
 
     const set = exercise.sets.find((s) => s.order === setOrder);
     if (!set) {
@@ -171,19 +150,17 @@ export class WorkoutService {
     exerciseOrder: number,
     setOrder: number,
   ): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
-    if (exercise == null) {
-      throw new Error('Exercise not found in workout');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
     const set = exercise.sets.find((s) => s.order === setOrder);
     if (set == null) {
       throw new Error('Set not found in exercise');
     }
     set.isCompleted = true;
+
+    const allSetsCompleted = exercise.sets.every((s) => s.isCompleted);
+    exercise.isCompleted = allSetsCompleted;
+
     await this.workoutRepository.save(workout);
   }
   //mark set as uncompleted
@@ -193,55 +170,53 @@ export class WorkoutService {
     exerciseOrder: number,
     setOrder: number,
   ): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
-    if (exercise == null) {
-      throw new Error('Exercise not found in workout');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
     const set = exercise.sets.find((s) => s.order === setOrder);
     if (set == null) {
       throw new Error('Set not found in exercise');
     }
     set.isCompleted = false;
+    exercise.isCompleted = false;
     await this.workoutRepository.save(workout);
   }
   //mark exercise as completed
   public async markExerciseAsCompleted(userId: UUID, workoutId: UUID, exerciseOrder: number): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
-    if (exercise == null) {
-      throw new Error('Exercise not found in workout');
-    }
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
     exercise.isCompleted = true;
     await this.workoutRepository.save(workout);
   }
   //mark exercise as uncompleted
   public async markExerciseAsUnCompleted(userId: UUID, workoutId: UUID, exerciseOrder: number): Promise<void> {
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
+    exercise.isCompleted = false;
+    await this.workoutRepository.save(workout);
+  }
+
+  // finish workout
+  public async finishWorkout(userId: UUID, workoutId: UUID, endTime: Date): Promise<void> {
+    const workout = await this.getWorkout(workoutId, userId);
+    workout.endTime = endTime;
+
+    await this.workoutRepository.save(workout);
+  }
+
+  public async getWorkout(workoutId: UUID, userId: UUID): Promise<Workout> {
     const workout = await this.workoutRepository.get(workoutId, userId);
     if (workout == null) {
       throw new Error('Workout not found');
     }
+
+    return workout;
+  }
+  private getOrderedExercise(workout: Workout, exerciseOrder: number): WorkoutExercise {
     const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
     if (exercise == null) {
       throw new Error('Exercise not found in workout');
     }
-    exercise.isCompleted = false;
-    await this.workoutRepository.save(workout);
-  }
-  // finish workout
-  public async finishWorkout(userId: UUID, workoutId: UUID, endTime: Date): Promise<void> {
-    const workout = await this.workoutRepository.get(workoutId, userId);
-    if (workout == null) {
-      throw new Error('Workout not found');
-    }
-    workout.endTime = endTime;
 
-    await this.workoutRepository.save(workout);
+    return exercise;
   }
 }
