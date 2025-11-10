@@ -1,22 +1,23 @@
 import express, { type NextFunction, type Application as EA, type Response, type Request } from 'express';
-import { Validator } from './validation/Validator.js';
-import { startWorkoutDto, WorkoutController } from './WorkoutController.js';
-import { WorkoutService } from '../domain/workout/WorkoutService.js';
-import { InMemoWorkoutRepository } from '../domain/workout/WorkoutRepository.js';
-import { WorkoutTemplateService } from '../domain/workouttemplate/WorkoutTemplateService.js';
-import { InMemoWorkoutTemplateRepository } from '../domain/workouttemplate/WorkoutTemplateRepository.js';
-import { ExerciseService } from '../domain/exercise/ExerciseService.js';
-import { InMemoExerciseRepository } from '../domain/exercise/ExerciseRepository.js';
+import { type Validator } from './validation/Validator.js';
+import { startWorkoutDto, type WorkoutController } from './WorkoutController.js';
+import { container } from '../inversify.config.js';
+import { TYPES } from '../types.js';
 
 export class Application {
-  private app: EA;
+  private readonly app: EA;
 
-  private constructor(
+  constructor(
     private readonly workoutController: WorkoutController,
     private readonly validator: Validator,
   ) {
     this.app = express();
     this.app.use(express.json());
+
+    this.app.get('/', (_req, res) => {
+      res.send('Hello wssorld');
+    });
+
     this.app.post('/workout', this.validator.getValidationMiddleware(startWorkoutDto), (req, res) =>
       this.workoutController.start(req, res),
     );
@@ -31,17 +32,9 @@ export class Application {
 
   public static async start(): Promise<void> {
     console.log('Starting application...');
-
-    new Application(
-      new WorkoutController(
-        new WorkoutService(
-          new InMemoWorkoutRepository(),
-          new WorkoutTemplateService(new InMemoWorkoutTemplateRepository()),
-          new ExerciseService(new InMemoExerciseRepository()),
-        ),
-      ),
-      new Validator(),
-    ); // Replace with actual repository
+    const workoutController = container.get<WorkoutController>(TYPES.WorkoutController);
+    const validator = container.get<Validator>(TYPES.Validator);
+    new Application(workoutController, validator);
   }
 
   public stop(): void {

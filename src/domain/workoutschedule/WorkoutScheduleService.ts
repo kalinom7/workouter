@@ -1,9 +1,15 @@
 import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 import { type WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../../types.js';
 
+@injectable()
 export class WorkoutScheduleService {
-  constructor(private readonly workoutScheduleRepository: WorkoutScheduleRepository) {}
+  constructor(
+    @inject(TYPES.WorkoutScheduleRepository)
+    private readonly workoutScheduleRepository: WorkoutScheduleRepository,
+  ) {}
   public async create(name: string, userId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule: WorkoutSchedule = {
       isActive: false,

@@ -1,3 +1,4 @@
+import { injectable } from 'inversify';
 import { type WorkoutTemplate } from './model/WorkoutTemplate.js';
 import { type WorkoutTemplateExercise } from './model/WorkoutTemplateExercise.js';
 
@@ -13,10 +14,10 @@ export interface WorkoutTemplateRepository {
   delete(workoutTemplateId: string, userId: string): Promise<void>;
   removeWorkoutTemplateExercise(workoutTemplateId: string, userId: string, order: number): Promise<void>;
 }
-
+@injectable()
 export class InMemoWorkoutTemplateRepository implements WorkoutTemplateRepository {
-  private workoutTemplates: Map<string, WorkoutTemplate> = new Map();
-  private workoutTemplateExercises: Map<string, WorkoutTemplateExercise[]> = new Map();
+  private readonly workoutTemplates: Map<string, WorkoutTemplate> = new Map();
+  private readonly workoutTemplateExercises: Map<string, WorkoutTemplateExercise[]> = new Map();
   public async save(workoutTemplate: WorkoutTemplate): Promise<void> {
     this.workoutTemplates.set(workoutTemplate.id, workoutTemplate);
   }

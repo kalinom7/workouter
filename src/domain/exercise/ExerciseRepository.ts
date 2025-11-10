@@ -1,5 +1,5 @@
 import { type Exercise } from './model/Exercise.js';
-
+import { injectable } from 'inversify';
 export interface ExerciseRepository {
   save(exercise: Exercise): Promise<void>;
 
@@ -8,8 +8,9 @@ export interface ExerciseRepository {
   delete(exerciseId: string, userId: string): Promise<void>;
 }
 
+@injectable()
 export class InMemoExerciseRepository implements ExerciseRepository {
-  private exercises: Map<string, Exercise> = new Map();
+  private readonly exercises: Map<string, Exercise> = new Map();
 
   public async save(exercise: Exercise): Promise<void> {
     this.exercises.set(exercise.id, exercise);

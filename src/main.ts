@@ -1,4 +1,5 @@
 import { Application } from './application/Application.js';
+import 'reflect-metadata';
 
 try {
   await Application.start();

@@ -5,12 +5,14 @@ import { type Workout } from './model/Workout.js';
 import { type WorkoutExercise } from './model/WorkoutExercise.js';
 import { type WorkoutExerciseSet } from './model/WorkoutExerciseSet.js';
 import { type WorkoutRepository } from './WorkoutRepository.js';
-
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../../types.js';
+@injectable()
 export class WorkoutService {
   constructor(
-    private readonly workoutRepository: WorkoutRepository,
-    private readonly workoutTemplateService: WorkoutTemplateService,
-    private readonly exerciseService: ExerciseService,
+    @inject(TYPES.WorkoutRepository) private readonly workoutRepository: WorkoutRepository,
+    @inject(TYPES.WorkoutTemplateService) private readonly workoutTemplateService: WorkoutTemplateService,
+    @inject(TYPES.ExerciseService) private readonly exerciseService: ExerciseService,
   ) {}
 
   public async startWorkoutFromTemplate(startTime: Date, userId: UUID, workoutTemplateId: UUID): Promise<Workout> {
