@@ -79,19 +79,20 @@ describe('ExerciseService', () => {
       description: 'test description',
       userId: userId,
     };
+    repository.get.mockResolvedValue(exercise);
     //when
     const updatedExercise: Exercise = await exerciseService.update(
       exercise.id,
       'Updated exercise',
-      'updated description',
       exercise.userId,
+      'updated description',
     );
     //then
     expect(repository.save).toHaveBeenCalledWith({
       id: exercise.id,
       name: 'Updated exercise',
-      description: 'updated description',
       userId: exercise.userId,
+      description: 'updated description',
     });
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(exercise.id).toEqual(updatedExercise.id);

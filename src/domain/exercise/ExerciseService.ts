@@ -32,17 +32,21 @@ export class ExerciseService {
     return exercise;
   }
 
-  public async update(exerciseId: UUID, name: string, description: string, userId: UUID): Promise<Exercise> {
-    const exercise: Exercise = {
-      id: exerciseId,
+  public async update(exerciseId: UUID, name: string, userId: UUID, description?: string): Promise<Exercise> {
+    const existing = await this.exerciseRepository.get(exerciseId, userId);
+    if (existing == null) {
+      throw new Error('exercise not found');
+    }
+
+    const updated: Exercise = {
+      ...existing,
       name,
-      description,
-      userId,
+      ...(description === undefined ? {} : { description }),
     };
 
-    await this.exerciseRepository.save(exercise);
+    await this.exerciseRepository.save(updated);
 
-    return exercise;
+    return updated;
   }
 
   public async delete(exerciseId: string, userId: string): Promise<void> {
