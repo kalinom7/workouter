@@ -25,6 +25,28 @@ export const removeWorkoutTemplateExerciseDto = z.object({
 });
 type removeWorkoutTemplateExerciseDto = z.infer<typeof removeWorkoutTemplateExerciseDto>;
 
+export const setNumberOfSetsDto = z.object({
+  sets: z.number().min(1),
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+  userId: z.uuid().transform((str) => str as UUID),
+  order: z.number().min(0),
+});
+type setNumberOfSetsDto = z.infer<typeof setNumberOfSetsDto>;
+
+export const setRestPeriodDto = z.object({
+  restPeriod: z.number().min(0),
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+  userId: z.uuid().transform((str) => str as UUID),
+  order: z.number().min(0),
+});
+type setRestPeriodDto = z.infer<typeof setRestPeriodDto>;
+
+export const getWorkoutTemplateOrDeleteDto = z.object({
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+  userId: z.uuid().transform((str) => str as UUID),
+});
+type getWorkoutTemplateDto = z.infer<typeof getWorkoutTemplateOrDeleteDto>;
+
 @injectable()
 export class WorkoutTemplateController {
   constructor(
@@ -64,5 +86,46 @@ export class WorkoutTemplateController {
       order,
     );
     response.status(200).json(workoutTemplate);
+  }
+
+  public async setNumberOfSets(
+    request: Request<unknown, unknown, setNumberOfSetsDto, unknown>,
+    response: Response,
+  ): Promise<void> {
+    const { sets, workoutTemplateId, userId, order } = request.body;
+    const workoutTemplate = await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
+    response.status(200).json(workoutTemplate);
+  }
+
+  public async setRestPeriod(
+    request: Request<unknown, unknown, setRestPeriodDto, unknown>,
+    response: Response,
+  ): Promise<void> {
+    const { restPeriod, workoutTemplateId, userId, order } = request.body;
+    const workoutTemplate = await this.workoutTemplateService.setRestPeriod(
+      restPeriod,
+      workoutTemplateId,
+      userId,
+      order,
+    );
+    response.status(200).json(workoutTemplate);
+  }
+
+  public async getWorkoutTemplate(
+    request: Request<unknown, unknown, getWorkoutTemplateDto, unknown>,
+    response: Response,
+  ): Promise<void> {
+    const { workoutTemplateId, userId } = request.body;
+    const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
+    response.status(200).json(workoutTemplate);
+  }
+
+  public async deleteWorkoutTemplate(
+    request: Request<unknown, unknown, getWorkoutTemplateDto, unknown>,
+    response: Response,
+  ): Promise<void> {
+    const { workoutTemplateId, userId } = request.body;
+    await this.workoutTemplateService.deleteWorkoutTemplate(workoutTemplateId, userId);
+    response.status(204).send();
   }
 }
