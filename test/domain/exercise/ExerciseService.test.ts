@@ -24,7 +24,7 @@ describe('ExerciseService', () => {
     };
 
     //when
-    const createdExercise = await exerciseService.create('Test exercise', 'test description', userId);
+    const createdExercise = await exerciseService.create('Test exercise', userId, 'test description');
 
     //then
     expect(createdExercise).not.toBeNull();
@@ -33,7 +33,25 @@ describe('ExerciseService', () => {
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(createdExercise.description).toBe('test description');
   });
+  test('should create exercise without description', async () => {
+    //given
+    const userId = randomUUID();
+    const exercise: Exercise = {
+      id: expect.any(String),
+      name: 'Test exercise',
+      userId,
+    };
 
+    //when
+    const createdExercise = await exerciseService.create('Test exercise', userId);
+
+    //then
+    expect(createdExercise).not.toBeNull();
+    expect(createdExercise).toEqual(exercise);
+    expect(repository.save).toHaveBeenCalledWith(exercise);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(createdExercise.description).toBeUndefined();
+  });
   test('should get exercise', async () => {
     //given
     const userId = randomUUID();

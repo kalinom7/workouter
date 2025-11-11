@@ -10,12 +10,12 @@ export class ExerciseService {
     private readonly exerciseRepository: ExerciseRepository,
   ) {}
 
-  public async create(name: string, description: string, userId: UUID): Promise<Exercise> {
+  public async create(name: string, userId: UUID, description?: string): Promise<Exercise> {
     const exercise: Exercise = {
       id: randomUUID(),
       name,
-      description,
       userId,
+      description,
     };
 
     await this.exerciseRepository.save(exercise);

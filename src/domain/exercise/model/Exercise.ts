@@ -4,5 +4,5 @@ export type Exercise = {
   id: UUID;
   userId: UUID;
   name: string;
-  description?: string;
+  description?: string | undefined;
 };
