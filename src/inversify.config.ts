@@ -9,14 +9,19 @@ import { InMemoWorkoutTemplateRepository } from './domain/workouttemplate/Workou
 import { InMemoExerciseRepository } from './domain/exercise/ExerciseRepository.js';
 import { Validator } from './application/validation/Validator.js';
 import { WorkoutTemplateController } from './application/WorkoutTemplateController.js';
+import { ExerciseController } from './application/ExerciseController.js';
+import { WorkoutScheduleController } from './application/WorkoutScheduleController.js';
 
 const container = new Container();
 
+container.bind(TYPES.WorkoutScheduleController).to(WorkoutScheduleController);
+container.bind(TYPES.ExerciseController).to(ExerciseController);
 container.bind(TYPES.WorkoutController).to(WorkoutController);
+container.bind(TYPES.WorkoutTemplateController).to(WorkoutTemplateController);
+
 container.bind(TYPES.WorkoutService).to(WorkoutService);
 container.bind(TYPES.WorkoutTemplateService).to(WorkoutTemplateService);
 container.bind(TYPES.ExerciseService).to(ExerciseService);
-container.bind(TYPES.WorkoutTemplateController).to(WorkoutTemplateController);
 
 container.bind(TYPES.WorkoutRepository).to(InMemoWorkoutRepository).inSingletonScope();
 container.bind(TYPES.WorkoutTemplateRepository).to(InMemoWorkoutTemplateRepository).inSingletonScope();

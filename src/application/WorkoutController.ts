@@ -5,11 +5,11 @@ import z from 'zod';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types.js';
 
-export const startWorkoutDto = z.object({
+export const startWorkoutFromTemplateDto = z.object({
   userId: z.uuid().transform((str) => str as UUID),
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
 });
-type StartWorkoutDto = z.infer<typeof startWorkoutDto>;
+type StartWorkoutFromTemplateDto = z.infer<typeof startWorkoutFromTemplateDto>;
 
 export const finishWorkoutDto = z.object({
   userId: z.uuid().transform((str) => str as UUID),
@@ -24,7 +24,7 @@ export class WorkoutController {
   ) {}
 
   public async startWorkoutFromTemplate(
-    request: Request<unknown, unknown, StartWorkoutDto, unknown>,
+    request: Request<unknown, unknown, StartWorkoutFromTemplateDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { userId, workoutTemplateId } = request.body;

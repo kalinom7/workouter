@@ -1,6 +1,6 @@
 import express, { type NextFunction, type Application as EA, type Response, type Request } from 'express';
 import { type Validator } from './validation/Validator.js';
-import { startWorkoutDto, finishWorkoutDto, type WorkoutController } from './WorkoutController.js';
+import { startWorkoutFromTemplateDto, finishWorkoutDto, type WorkoutController } from './WorkoutController.js';
 import { TYPES } from '../types.js';
 import {
   createWorkoutTemplateDto,
@@ -41,7 +41,7 @@ export class Application {
     );
     //WORKOUT
     //start workout from template
-    this.app.post('/workout', this.validator.getValidationMiddleware(startWorkoutDto), (req, res) =>
+    this.app.post('/workout', this.validator.getValidationMiddleware(startWorkoutFromTemplateDto), (req, res) =>
       this.workoutController.startWorkoutFromTemplate(req, res),
     );
     //finish workout
