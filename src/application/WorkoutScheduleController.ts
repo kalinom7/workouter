@@ -110,7 +110,7 @@ export class WorkoutScheduleController {
   ): Promise<void> {
     const { workoutScheduleId, userId } = request.body;
     const workoutSchedule = await this.workoutScheduleService.setActive(workoutScheduleId, userId);
-    response.status(200).send(workoutSchedule);
+    response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleInActive(
     request: Request<unknown, unknown, SetActiveInactiveDto, unknown>,
@@ -118,6 +118,6 @@ export class WorkoutScheduleController {
   ): Promise<void> {
     const { workoutScheduleId, userId } = request.body;
     const workoutSchedule = await this.workoutScheduleService.setInactive(workoutScheduleId, userId);
-    response.status(200).send(workoutSchedule);
+    response.status(200).json(workoutSchedule);
   }
 }

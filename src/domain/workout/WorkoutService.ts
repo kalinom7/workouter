@@ -213,7 +213,8 @@ export class WorkoutService {
 
     return workout;
   }
-  private getOrderedExercise(workout: Workout, exerciseOrder: number): WorkoutExercise {
+  private getOrderedExercise(workoutId: UUID, userId: UUID, exerciseOrder: number): WorkoutExercise {
+    const workout = this.getWorkout(workoutId, userId);
     const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
     if (exercise == null) {
       throw new Error('Exercise not found in workout');
