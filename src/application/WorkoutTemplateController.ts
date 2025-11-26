@@ -20,7 +20,7 @@ type addWorkoutTemplateExerciseDto = z.infer<typeof addWorkoutTemplateExerciseDt
 
 export const removeWorkoutTemplateExerciseDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  exerciseId: z.uuid().transform((str) => str as UUID),
+  userId: z.uuid().transform((str) => str as UUID),
   order: z.number().min(0),
 });
 type removeWorkoutTemplateExerciseDto = z.infer<typeof removeWorkoutTemplateExerciseDto>;
@@ -79,12 +79,9 @@ export class WorkoutTemplateController {
     request: Request<unknown, unknown, removeWorkoutTemplateExerciseDto, unknown>,
     response: Response,
   ): Promise<void> {
-    const { exerciseId, workoutTemplateId, order } = request.body;
-    const workoutTemplate = await this.workoutTemplateService.removeWorkoutTemplateExercise(
-      exerciseId,
-      workoutTemplateId,
-      order,
-    );
+    const { workoutTemplateId, userId, order } = request.body;
+    await this.workoutTemplateService.removeWorkoutTemplateExercise(workoutTemplateId, userId, order);
+    const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
@@ -93,7 +90,8 @@ export class WorkoutTemplateController {
     response: Response,
   ): Promise<void> {
     const { sets, workoutTemplateId, userId, order } = request.body;
-    const workoutTemplate = await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
+    await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
+    const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
@@ -102,12 +100,8 @@ export class WorkoutTemplateController {
     response: Response,
   ): Promise<void> {
     const { restPeriod, workoutTemplateId, userId, order } = request.body;
-    const workoutTemplate = await this.workoutTemplateService.setRestPeriod(
-      restPeriod,
-      workoutTemplateId,
-      userId,
-      order,
-    );
+    await this.workoutTemplateService.setRestPeriod(restPeriod, workoutTemplateId, userId, order);
+    const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
