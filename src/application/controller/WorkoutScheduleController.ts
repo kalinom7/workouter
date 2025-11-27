@@ -1,44 +1,15 @@
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../types.js';
-import { WorkoutScheduleService } from '../domain/workoutschedule/WorkoutScheduleService.js';
-import { z } from 'zod';
-import { type UUID } from 'node:crypto';
+import { TYPES } from '../../types.js';
+import { WorkoutScheduleService } from '../../domain/workoutschedule/WorkoutScheduleService.js';
 import { type Request, type Response } from 'express';
-
-export const createWorkoutScheduleDto = z.object({
-  name: z.string().min(1),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type CreateWorkoutScheduleDto = z.infer<typeof createWorkoutScheduleDto>;
-
-export const getOrDeleteWorkoutScheduleDto = z.object({
-  workoutScheduleId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type GetOrDeleteWorkoutScheduleDto = z.infer<typeof getOrDeleteWorkoutScheduleDto>;
-
-export const addWorkoutToBlockDto = z.object({
-  workoutScheduleId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-});
-type AddWorkoutToBlockDto = z.infer<typeof addWorkoutToBlockDto>;
-
-export const addRestToBlockDto = z.object({
-  workoutScheduleId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-  restPeriod: z.number().min(1),
-});
-type AddRestToBlockDto = z.infer<typeof addRestToBlockDto>;
-
-export const removeBlockItemDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutScheduleId: z.uuid().transform((str) => str as UUID),
-  blockItemId: z.uuid().transform((str) => str as UUID),
-});
-type RemoveBlockItemDto = z.infer<typeof removeBlockItemDto>;
-
-type SetActiveInactiveDto = z.infer<typeof getOrDeleteWorkoutScheduleDto>;
+import {
+  type CreateWorkoutScheduleDto,
+  type GetOrDeleteWorkoutScheduleDto,
+  type AddWorkoutToBlockDto,
+  type AddRestToBlockDto,
+  type RemoveBlockItemDto,
+  type SetActiveInactiveDto,
+} from '../dto/WorkoutScheduleControllerDto.js';
 
 @injectable()
 export class WorkoutScheduleController {

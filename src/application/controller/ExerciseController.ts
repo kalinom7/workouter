@@ -1,30 +1,9 @@
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../types.js';
-import { type ExerciseService } from '../domain/exercise/ExerciseService.js';
+import { TYPES } from '../../types.js';
+import { type ExerciseService } from '../../domain/exercise/ExerciseService.js';
 import { type Request, type Response } from 'express';
-import { type UUID } from 'node:crypto';
-import { z } from 'zod';
+import { type CreateExerciseDto, type GetExerciseDto, type UpdateExerciseDto } from '../dto/ExerciseControllerDto.js';
 
-export const createExerciseDto = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type CreateExerciseDto = z.infer<typeof createExerciseDto>;
-
-export const getExerciseOrDeleteDto = z.object({
-  exerciseId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type GetExerciseDto = z.infer<typeof getExerciseOrDeleteDto>;
-
-export const updateExerciseDto = z.object({
-  exerciseId: z.uuid().transform((str) => str as UUID),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type UpdateExerciseDto = z.infer<typeof updateExerciseDto>;
 @injectable()
 export class ExerciseController {
   constructor(

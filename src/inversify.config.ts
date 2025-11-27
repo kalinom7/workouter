@@ -1,6 +1,6 @@
 import { Container } from 'inversify';
 import { TYPES } from './types.js';
-import { WorkoutController } from './application/WorkoutController.js';
+import { WorkoutController } from './application/controller/WorkoutController.js';
 import { WorkoutService } from './domain/workout/WorkoutService.js';
 import { WorkoutTemplateService } from './domain/workouttemplate/WorkoutTemplateService.js';
 import { ExerciseService } from './domain/exercise/ExerciseService.js';
@@ -8,9 +8,9 @@ import { InMemoWorkoutRepository } from './domain/workout/WorkoutRepository.js';
 import { InMemoWorkoutTemplateRepository } from './domain/workouttemplate/WorkoutTemplateRepository.js';
 import { InMemoExerciseRepository } from './domain/exercise/ExerciseRepository.js';
 import { Validator } from './application/validation/Validator.js';
-import { WorkoutTemplateController } from './application/WorkoutTemplateController.js';
-import { ExerciseController } from './application/ExerciseController.js';
-import { WorkoutScheduleController } from './application/WorkoutScheduleController.js';
+import { WorkoutTemplateController } from './application/controller/WorkoutTemplateController.js';
+import { ExerciseController } from './application/controller/ExerciseController.js';
+import { WorkoutScheduleController } from './application/controller/WorkoutScheduleController.js';
 
 const container = new Container();
 

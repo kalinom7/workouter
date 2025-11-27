@@ -1,51 +1,15 @@
 import { injectable, inject } from 'inversify';
-import { type UUID } from 'node:crypto';
-import { type WorkoutTemplateService } from '../domain/workouttemplate/WorkoutTemplateService.js';
+import { type WorkoutTemplateService } from '../../domain/workouttemplate/WorkoutTemplateService.js';
 import { type Request, type Response } from 'express';
-import z from 'zod';
-import { TYPES } from '../types.js';
-
-export const createWorkoutTemplateDto = z.object({
-  name: z.string().min(1),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type CreateWorkoutTemplateDto = z.infer<typeof createWorkoutTemplateDto>;
-
-export const addWorkoutTemplateExerciseDto = z.object({
-  exerciseId: z.uuid().transform((str) => str as UUID),
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type addWorkoutTemplateExerciseDto = z.infer<typeof addWorkoutTemplateExerciseDto>;
-
-export const removeWorkoutTemplateExerciseDto = z.object({
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-  order: z.number().min(0),
-});
-type removeWorkoutTemplateExerciseDto = z.infer<typeof removeWorkoutTemplateExerciseDto>;
-
-export const setNumberOfSetsDto = z.object({
-  sets: z.number().min(1),
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-  order: z.number().min(0),
-});
-type setNumberOfSetsDto = z.infer<typeof setNumberOfSetsDto>;
-
-export const setRestPeriodDto = z.object({
-  restPeriod: z.number().min(0),
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-  order: z.number().min(0),
-});
-type setRestPeriodDto = z.infer<typeof setRestPeriodDto>;
-
-export const getWorkoutTemplateOrDeleteDto = z.object({
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type getWorkoutTemplateDto = z.infer<typeof getWorkoutTemplateOrDeleteDto>;
+import { TYPES } from '../../types.js';
+import {
+  type CreateWorkoutTemplateDto,
+  type AddWorkoutTemplateExerciseDto,
+  type RemoveWorkoutTemplateExerciseDto,
+  type SetNumberOfSetsDto,
+  type SetRestPeriodDto,
+  type GetWorkoutTemplateDto,
+} from '../dto/WorkoutTemplateControllerDto.js';
 
 @injectable()
 export class WorkoutTemplateController {
@@ -64,7 +28,7 @@ export class WorkoutTemplateController {
   }
 
   public async addWorkoutTemplateExercise(
-    request: Request<unknown, unknown, addWorkoutTemplateExerciseDto, unknown>,
+    request: Request<unknown, unknown, AddWorkoutTemplateExerciseDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { exerciseId, workoutTemplateId, userId } = request.body;
@@ -76,7 +40,7 @@ export class WorkoutTemplateController {
     response.status(201).json(workoutTemplate);
   }
   public async removeWorkoutTemplateExercise(
-    request: Request<unknown, unknown, removeWorkoutTemplateExerciseDto, unknown>,
+    request: Request<unknown, unknown, RemoveWorkoutTemplateExerciseDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { workoutTemplateId, userId, order } = request.body;
@@ -86,7 +50,7 @@ export class WorkoutTemplateController {
   }
 
   public async setNumberOfSets(
-    request: Request<unknown, unknown, setNumberOfSetsDto, unknown>,
+    request: Request<unknown, unknown, SetNumberOfSetsDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { sets, workoutTemplateId, userId, order } = request.body;
@@ -96,7 +60,7 @@ export class WorkoutTemplateController {
   }
 
   public async setRestPeriod(
-    request: Request<unknown, unknown, setRestPeriodDto, unknown>,
+    request: Request<unknown, unknown, SetRestPeriodDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { restPeriod, workoutTemplateId, userId, order } = request.body;
@@ -106,7 +70,7 @@ export class WorkoutTemplateController {
   }
 
   public async getWorkoutTemplate(
-    request: Request<unknown, unknown, getWorkoutTemplateDto, unknown>,
+    request: Request<unknown, unknown, GetWorkoutTemplateDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { workoutTemplateId, userId } = request.body;
@@ -115,7 +79,7 @@ export class WorkoutTemplateController {
   }
 
   public async deleteWorkoutTemplate(
-    request: Request<unknown, unknown, getWorkoutTemplateDto, unknown>,
+    request: Request<unknown, unknown, GetWorkoutTemplateDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { workoutTemplateId, userId } = request.body;

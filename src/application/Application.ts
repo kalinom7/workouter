@@ -1,14 +1,16 @@
 import express, { type NextFunction, type Application as EA, type Response, type Request } from 'express';
 import { type Validator } from './validation/Validator.js';
-import { startWorkoutFromTemplateDto, finishWorkoutDto, type WorkoutController } from './WorkoutController.js';
 import { TYPES } from '../types.js';
+import { inject, injectable } from 'inversify';
+import { WorkoutController } from './controller/WorkoutController.js';
 import {
   createWorkoutTemplateDto,
   addWorkoutTemplateExerciseDto,
   removeWorkoutTemplateExerciseDto,
-  type WorkoutTemplateController,
-} from './WorkoutTemplateController.js';
-import { inject, injectable } from 'inversify';
+} from './dto/WorkoutTemplateControllerDto.js';
+import { WorkoutTemplateController } from './controller/WorkoutTemplateController.js';
+import { startWorkoutFromTemplateDto, finishWorkoutDto } from './dto/WorkoutControllerDto.js';
+
 @injectable()
 export class Application {
   private readonly app: EA;

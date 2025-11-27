@@ -1,67 +1,18 @@
-import { type UUID } from 'node:crypto';
-import { type WorkoutService } from '../domain/workout/WorkoutService.js';
+import { type WorkoutService } from '../../domain/workout/WorkoutService.js';
 import { type Request, type Response } from 'express';
-import z from 'zod';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../types.js';
-
-export const startWorkoutFromTemplateDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-});
-type StartWorkoutFromTemplateDto = z.infer<typeof startWorkoutFromTemplateDto>;
-
-export const finishWorkoutDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutId: z.uuid().transform((str) => str as UUID),
-});
-type FinishWorkoutDto = z.infer<typeof finishWorkoutDto>;
-
-export const startEmptyWorkoutDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-});
-type StartEmptyWorkoutDto = z.infer<typeof startEmptyWorkoutDto>;
-
-export const addExerciseDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseId: z.uuid().transform((str) => str as UUID),
-});
-type AddExerciseDto = z.infer<typeof addExerciseDto>;
-
-export const removeExerciseAddSetDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-});
-type RemoveExerciseAddSetDto = z.infer<typeof removeExerciseAddSetDto>;
-
-export const removeSetDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-  setOrder: z.number().int().min(0),
-});
-type RemoveSetDto = z.infer<typeof removeSetDto>;
-type markSet = z.infer<typeof removeSetDto>;
-
-export const addWeightAndRepsDto = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-  setOrder: z.number().int().min(0),
-  weight: z.number().nonnegative(),
-  reps: z.number().int().nonnegative(),
-});
-type AddWeightAndRepsDto = z.infer<typeof addWeightAndRepsDto>;
-
-export const markExercise = z.object({
-  userId: z.uuid().transform((str) => str as UUID),
-  workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-});
-type markExercise = z.infer<typeof markExercise>;
-
+import { TYPES } from '../../types.js';
+import {
+  type StartWorkoutFromTemplateDto,
+  type FinishWorkoutDto,
+  type StartEmptyWorkoutDto,
+  type AddExerciseDto,
+  type RemoveExerciseAddSetDto,
+  type RemoveSetDto,
+  type AddWeightAndRepsDto,
+  type MarkSet,
+  type MarkExercise,
+} from '../dto/WorkoutControllerDto.js';
 @injectable()
 export class WorkoutController {
   constructor(
@@ -145,7 +96,7 @@ export class WorkoutController {
   }
 
   public async markSetAsCompleted(
-    request: Request<unknown, unknown, markSet, unknown>,
+    request: Request<unknown, unknown, MarkSet, unknown>,
     response: Response,
   ): Promise<void> {
     const { userId, workoutId, exerciseOrder, setOrder } = request.body;
@@ -155,7 +106,7 @@ export class WorkoutController {
   }
 
   public async markSetAsUncompleted(
-    request: Request<unknown, unknown, markSet, unknown>,
+    request: Request<unknown, unknown, MarkSet, unknown>,
     response: Response,
   ): Promise<void> {
     const { userId, workoutId, exerciseOrder, setOrder } = request.body;
@@ -165,7 +116,7 @@ export class WorkoutController {
   }
 
   public async markExerciseAsCompleted(
-    request: Request<unknown, unknown, markExercise, unknown>,
+    request: Request<unknown, unknown, MarkExercise, unknown>,
     response: Response,
   ): Promise<void> {
     const { userId, workoutId, exerciseOrder } = request.body;
@@ -175,7 +126,7 @@ export class WorkoutController {
   }
 
   public async markExerciseAsUncompleted(
-    request: Request<unknown, unknown, markExercise, unknown>,
+    request: Request<unknown, unknown, MarkExercise, unknown>,
     response: Response,
   ): Promise<void> {
     const { userId, workoutId, exerciseOrder } = request.body;
