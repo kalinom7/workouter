@@ -1,19 +1,30 @@
 import { type RequestHandler } from 'express';
-import { z, type ZodType } from 'zod';
+import { type ZodType } from 'zod';
 
 export class Validator {
-  public getValidationMiddleware<T>(schema: ZodType<T>): RequestHandler<unknown, unknown, T> {
+  public validate<Body, Query, Params>(schema: {
+    body?: ZodType<Body>;
+    query?: ZodType<Query>;
+    params?: ZodType<Params>;
+  }): RequestHandler<Params, unknown, Body, Query> {
     return (req, res, next) => {
-      console.log('Incoming request:', req.body);
+      console.log('Incoming request:', req.body, req.query, req.params);
 
-      const result = schema.safeParse(req.body);
+      try {
+        if (schema.body) {
+          schema.body.parse(req.body);
+        }
+        if (schema.query) {
+          schema.query.parse(req.query);
+        }
+        if (schema.params) {
+          schema.params.parse(req.params);
+        }
+      } catch (error) {
+        console.error('Validation error:', error);
 
-      if (!result.success) {
-        console.error('Validation error:', result.error);
-
-        return res.status(400).json({ errors: z.treeifyError(result.error) });
+        return res.status(400).json({ error: 'Validation failed', details: error });
       }
-      req.body = result.data;
 
       return next();
     };

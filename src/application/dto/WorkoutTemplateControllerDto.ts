@@ -39,6 +39,5 @@ export type SetRestPeriodDto = z.infer<typeof setRestPeriodDto>;
 
 export const getWorkoutTemplateOrDeleteDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
 });
 export type GetWorkoutTemplateDto = z.infer<typeof getWorkoutTemplateOrDeleteDto>;

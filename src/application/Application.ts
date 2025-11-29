@@ -2,10 +2,12 @@ import express, { type Application as EA, type NextFunction, type Request, type 
 import { injectable } from 'inversify';
 import { WorkoutController } from './controller/WorkoutController.js';
 import { WorkoutTemplateController } from './controller/WorkoutTemplateController.js';
+import { authorizationDto } from './dto/AuthorizationDto.js';
 import { finishWorkoutDto, startWorkoutFromTemplateDto } from './dto/WorkoutControllerDto.js';
 import {
   addWorkoutTemplateExerciseDto,
   createWorkoutTemplateDto,
+  getWorkoutTemplateOrDeleteDto,
   removeWorkoutTemplateExerciseDto,
 } from './dto/WorkoutTemplateControllerDto.js';
 import { Validator } from './validation/Validator.js';
@@ -22,28 +24,35 @@ export class Application {
     this.app = express();
     this.app.use(express.json());
     //create workout template
-    this.app.post('/workout-template', this.validator.getValidationMiddleware(createWorkoutTemplateDto), (req, res) =>
+    this.app.post('/workout-template', this.validator.validate({ body: createWorkoutTemplateDto }), (req, res) =>
       this.workoutTemplateController.create(req, res),
     );
+
+    this.app.get(
+      '/workout-template/:workoutTemplateId',
+      this.validator.validate({ params: getWorkoutTemplateOrDeleteDto, query: authorizationDto }),
+      (req, res) => this.workoutTemplateController.getWorkoutTemplate(req, res),
+    );
+
     //add exercise to workout template
     this.app.post(
       '/workout-template/exercise',
-      this.validator.getValidationMiddleware(addWorkoutTemplateExerciseDto),
+      this.validator.validate({ body: addWorkoutTemplateExerciseDto }),
       (req, res) => this.workoutTemplateController.addWorkoutTemplateExercise(req, res),
     );
     //remove exercise from workout template
     this.app.delete(
       '/workout-template/exercise',
-      this.validator.getValidationMiddleware(removeWorkoutTemplateExerciseDto),
+      this.validator.validate({ body: removeWorkoutTemplateExerciseDto }),
       (req, res) => this.workoutTemplateController.removeWorkoutTemplateExercise(req, res),
     );
     //WORKOUT
     //start workout from template
-    this.app.post('/workout', this.validator.getValidationMiddleware(startWorkoutFromTemplateDto), (req, res) =>
+    this.app.post('/workout', this.validator.validate({ body: startWorkoutFromTemplateDto }), (req, res) =>
       this.workoutController.startWorkoutFromTemplate(req, res),
     );
     //finish workout
-    this.app.post('/workout/finish', this.validator.getValidationMiddleware(finishWorkoutDto), (req, res) =>
+    this.app.post('/workout/finish', this.validator.validate({ body: finishWorkoutDto }), (req, res) =>
       this.workoutController.finishWorkout(req, res),
     );
     //GLOBAL

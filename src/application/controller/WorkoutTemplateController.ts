@@ -9,6 +9,7 @@ import {
   type SetNumberOfSetsDto,
   type SetRestPeriodDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
+import { AuthorizationDto } from '../dto/AuthorizationDto.js';
 
 @injectable()
 export class WorkoutTemplateController {
@@ -66,19 +67,21 @@ export class WorkoutTemplateController {
   }
 
   public async getWorkoutTemplate(
-    request: Request<unknown, unknown, GetWorkoutTemplateDto, unknown>,
+    request: Request<GetWorkoutTemplateDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutTemplateId, userId } = request.body;
+    const { workoutTemplateId } = request.params;
+    const { userId } = request.query;
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async deleteWorkoutTemplate(
-    request: Request<unknown, unknown, GetWorkoutTemplateDto, unknown>,
+    request: Request<GetWorkoutTemplateDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutTemplateId, userId } = request.body;
+    const { workoutTemplateId } = request.params;
+    const { userId } = request.query;
     await this.workoutTemplateService.deleteWorkoutTemplate(workoutTemplateId, userId);
     response.status(204).send();
   }
