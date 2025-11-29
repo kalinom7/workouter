@@ -1,15 +1,15 @@
 import { type Exercise } from './model/Exercise.js';
 import { injectable } from 'inversify';
-export interface ExerciseRepository {
-  save(exercise: Exercise): Promise<void>;
+export abstract class ExerciseRepository {
+  public abstract save(exercise: Exercise): Promise<void>;
 
-  get(exerciseId: string, userId: string): Promise<Exercise | null>;
+  public abstract get(exerciseId: string, userId: string): Promise<Exercise | null>;
 
-  delete(exerciseId: string, userId: string): Promise<void>;
+  public abstract delete(exerciseId: string, userId: string): Promise<void>;
 }
 
 @injectable()
-export class InMemoExerciseRepository implements ExerciseRepository {
+export class InMemoExerciseRepository extends ExerciseRepository {
   private readonly exercises: Map<string, Exercise> = new Map();
 
   public async save(exercise: Exercise): Promise<void> {

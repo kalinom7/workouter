@@ -1,15 +1,11 @@
-import { injectable, inject } from 'inversify';
-import { TYPES } from '../../types.js';
-import { type ExerciseService } from '../../domain/exercise/ExerciseService.js';
 import { type Request, type Response } from 'express';
+import { injectable } from 'inversify';
+import { ExerciseService } from '../../domain/exercise/ExerciseService.js';
 import { type CreateExerciseDto, type GetExerciseDto, type UpdateExerciseDto } from '../dto/ExerciseControllerDto.js';
 
 @injectable()
 export class ExerciseController {
-  constructor(
-    @inject(TYPES.ExerciseService)
-    private readonly exerciseService: ExerciseService,
-  ) {}
+  constructor(private readonly exerciseService: ExerciseService) {}
 
   public async create(
     request: Request<unknown, unknown, CreateExerciseDto, unknown>,

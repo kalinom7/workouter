@@ -1,14 +1,11 @@
+import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
-import { type ExerciseRepository } from './ExerciseRepository.js';
+import { ExerciseRepository } from './ExerciseRepository.js';
 import { type Exercise } from './model/Exercise.js';
-import { inject, injectable } from 'inversify';
-import { TYPES } from '../../types.js';
+
 @injectable()
 export class ExerciseService {
-  constructor(
-    @inject(TYPES.ExerciseRepository)
-    private readonly exerciseRepository: ExerciseRepository,
-  ) {}
+  constructor(private readonly exerciseRepository: ExerciseRepository) {}
 
   public async create(name: string, userId: UUID, description?: string): Promise<Exercise> {
     const exercise: Exercise = {

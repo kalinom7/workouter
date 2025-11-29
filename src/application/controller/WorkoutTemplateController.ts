@@ -1,22 +1,18 @@
-import { injectable, inject } from 'inversify';
-import { type WorkoutTemplateService } from '../../domain/workouttemplate/WorkoutTemplateService.js';
 import { type Request, type Response } from 'express';
-import { TYPES } from '../../types.js';
+import { injectable } from 'inversify';
+import { WorkoutTemplateService } from '../../domain/workouttemplate/WorkoutTemplateService.js';
 import {
-  type CreateWorkoutTemplateDto,
   type AddWorkoutTemplateExerciseDto,
+  type CreateWorkoutTemplateDto,
+  type GetWorkoutTemplateDto,
   type RemoveWorkoutTemplateExerciseDto,
   type SetNumberOfSetsDto,
   type SetRestPeriodDto,
-  type GetWorkoutTemplateDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
 
 @injectable()
 export class WorkoutTemplateController {
-  constructor(
-    @inject(TYPES.WorkoutTemplateService)
-    private readonly workoutTemplateService: WorkoutTemplateService,
-  ) {}
+  constructor(private readonly workoutTemplateService: WorkoutTemplateService) {}
 
   public async create(
     request: Request<unknown, unknown, CreateWorkoutTemplateDto, unknown>,

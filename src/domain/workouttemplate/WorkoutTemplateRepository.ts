@@ -2,20 +2,29 @@ import { injectable } from 'inversify';
 import { type WorkoutTemplate } from './model/WorkoutTemplate.js';
 import { type WorkoutTemplateExercise } from './model/WorkoutTemplateExercise.js';
 
-export interface WorkoutTemplateRepository {
-  save(workoutTemplate: WorkoutTemplate): Promise<void>;
-  saveWorkoutTemplateExercise(
+export abstract class WorkoutTemplateRepository {
+  public abstract save(workoutTemplate: WorkoutTemplate): Promise<void>;
+  public abstract saveWorkoutTemplateExercise(
     workoutTemplateId: string,
     userId: string,
     workoutTemplateExercise: WorkoutTemplateExercise,
   ): Promise<void>;
-  get(workoutTemplateId: string, userId: string): Promise<WorkoutTemplate | null>;
-  getByOrder(workoutTemplateId: string, userId: string, order: number): Promise<WorkoutTemplateExercise | null>;
-  delete(workoutTemplateId: string, userId: string): Promise<void>;
-  removeWorkoutTemplateExercise(workoutTemplateId: string, userId: string, order: number): Promise<void>;
+  public abstract get(workoutTemplateId: string, userId: string): Promise<WorkoutTemplate | null>;
+  public abstract getByOrder(
+    workoutTemplateId: string,
+    userId: string,
+    order: number,
+  ): Promise<WorkoutTemplateExercise | null>;
+  public abstract delete(workoutTemplateId: string, userId: string): Promise<void>;
+  public abstract removeWorkoutTemplateExercise(
+    workoutTemplateId: string,
+    userId: string,
+    order: number,
+  ): Promise<void>;
 }
+
 @injectable()
-export class InMemoWorkoutTemplateRepository implements WorkoutTemplateRepository {
+export class InMemoWorkoutTemplateRepository extends WorkoutTemplateRepository {
   private readonly workoutTemplates: Map<string, WorkoutTemplate> = new Map();
   private readonly workoutTemplateExercises: Map<string, WorkoutTemplateExercise[]> = new Map();
   public async save(workoutTemplate: WorkoutTemplate): Promise<void> {

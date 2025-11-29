@@ -1,18 +1,18 @@
+import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
-import { type ExerciseService } from '../exercise/ExerciseService.js';
-import { type WorkoutTemplateService } from '../workouttemplate/WorkoutTemplateService.js';
+import { ExerciseService } from '../exercise/ExerciseService.js';
+import { WorkoutTemplateService } from '../workouttemplate/WorkoutTemplateService.js';
 import { type Workout } from './model/Workout.js';
 import { type WorkoutExercise } from './model/WorkoutExercise.js';
 import { type WorkoutExerciseSet } from './model/WorkoutExerciseSet.js';
-import { type WorkoutRepository } from './WorkoutRepository.js';
-import { inject, injectable } from 'inversify';
-import { TYPES } from '../../types.js';
+import { WorkoutRepository } from './WorkoutRepository.js';
+
 @injectable()
 export class WorkoutService {
   constructor(
-    @inject(TYPES.WorkoutRepository) private readonly workoutRepository: WorkoutRepository,
-    @inject(TYPES.WorkoutTemplateService) private readonly workoutTemplateService: WorkoutTemplateService,
-    @inject(TYPES.ExerciseService) private readonly exerciseService: ExerciseService,
+    private readonly workoutRepository: WorkoutRepository,
+    private readonly workoutTemplateService: WorkoutTemplateService,
+    private readonly exerciseService: ExerciseService,
   ) {}
 
   public async startWorkoutFromTemplate(startTime: Date, userId: UUID, workoutTemplateId: UUID): Promise<Workout> {

@@ -1,24 +1,21 @@
-import { type WorkoutService } from '../../domain/workout/WorkoutService.js';
 import { type Request, type Response } from 'express';
-import { inject, injectable } from 'inversify';
-import { TYPES } from '../../types.js';
+import { injectable } from 'inversify';
+import { WorkoutService } from '../../domain/workout/WorkoutService.js';
 import {
-  type StartWorkoutFromTemplateDto,
-  type FinishWorkoutDto,
-  type StartEmptyWorkoutDto,
   type AddExerciseDto,
+  type AddWeightAndRepsDto,
+  type FinishWorkoutDto,
+  type MarkExercise,
+  type MarkSet,
   type RemoveExerciseAddSetDto,
   type RemoveSetDto,
-  type AddWeightAndRepsDto,
-  type MarkSet,
-  type MarkExercise,
+  type StartEmptyWorkoutDto,
+  type StartWorkoutFromTemplateDto,
 } from '../dto/WorkoutControllerDto.js';
+
 @injectable()
 export class WorkoutController {
-  constructor(
-    @inject(TYPES.WorkoutService)
-    private readonly workoutService: WorkoutService,
-  ) {}
+  constructor(private readonly workoutService: WorkoutService) {}
 
   public async startWorkoutFromTemplate(
     request: Request<unknown, unknown, StartWorkoutFromTemplateDto, unknown>,

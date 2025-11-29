@@ -1,26 +1,22 @@
-import express, { type NextFunction, type Application as EA, type Response, type Request } from 'express';
-import { type Validator } from './validation/Validator.js';
-import { TYPES } from '../types.js';
-import { inject, injectable } from 'inversify';
+import express, { type Application as EA, type NextFunction, type Request, type Response } from 'express';
+import { injectable } from 'inversify';
 import { WorkoutController } from './controller/WorkoutController.js';
+import { WorkoutTemplateController } from './controller/WorkoutTemplateController.js';
+import { finishWorkoutDto, startWorkoutFromTemplateDto } from './dto/WorkoutControllerDto.js';
 import {
-  createWorkoutTemplateDto,
   addWorkoutTemplateExerciseDto,
+  createWorkoutTemplateDto,
   removeWorkoutTemplateExerciseDto,
 } from './dto/WorkoutTemplateControllerDto.js';
-import { WorkoutTemplateController } from './controller/WorkoutTemplateController.js';
-import { startWorkoutFromTemplateDto, finishWorkoutDto } from './dto/WorkoutControllerDto.js';
+import { Validator } from './validation/Validator.js';
 
 @injectable()
 export class Application {
   private readonly app: EA;
 
   constructor(
-    @inject(TYPES.WorkoutController)
     private readonly workoutController: WorkoutController,
-    @inject(TYPES.Validator)
     private readonly validator: Validator,
-    @inject(TYPES.WorkoutTemplateController)
     private readonly workoutTemplateController: WorkoutTemplateController,
   ) {
     this.app = express();

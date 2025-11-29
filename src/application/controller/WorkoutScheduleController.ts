@@ -1,22 +1,18 @@
-import { inject, injectable } from 'inversify';
-import { TYPES } from '../../types.js';
-import { WorkoutScheduleService } from '../../domain/workoutschedule/WorkoutScheduleService.js';
 import { type Request, type Response } from 'express';
+import { injectable } from 'inversify';
+import { WorkoutScheduleService } from '../../domain/workoutschedule/WorkoutScheduleService.js';
 import {
+  type AddRestToBlockDto,
+  type AddWorkoutToBlockDto,
   type CreateWorkoutScheduleDto,
   type GetOrDeleteWorkoutScheduleDto,
-  type AddWorkoutToBlockDto,
-  type AddRestToBlockDto,
   type RemoveBlockItemDto,
   type SetActiveInactiveDto,
 } from '../dto/WorkoutScheduleControllerDto.js';
 
 @injectable()
 export class WorkoutScheduleController {
-  constructor(
-    @inject(TYPES.WorkoutScheduleService)
-    private readonly workoutScheduleService: WorkoutScheduleService,
-  ) {}
+  constructor(private readonly workoutScheduleService: WorkoutScheduleService) {}
 
   public async createWorkoutSchedule(
     request: Request<unknown, unknown, CreateWorkoutScheduleDto, unknown>,
