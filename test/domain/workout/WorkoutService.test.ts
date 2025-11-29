@@ -65,7 +65,7 @@ describe('WorkoutService', () => {
     const startTime = new Date();
 
     //when
-    const workout = await workoutService.StartEmptyWorkout(startTime, userId);
+    const workout = await workoutService.startEmptyWorkout(startTime, userId);
 
     //then
     expect(workout).toBeDefined();

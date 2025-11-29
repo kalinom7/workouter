@@ -26,12 +26,12 @@ export class WorkoutController {
     response.status(201).json(workout);
   }
 
-  public async StartEmptyWorkout(
+  public async startEmptyWorkout(
     request: Request<unknown, unknown, StartEmptyWorkoutDto, unknown>,
     response: Response,
   ): Promise<void> {
     const { userId } = request.body;
-    const workout = await this.workoutService.StartEmptyWorkout(new Date(), userId);
+    const workout = await this.workoutService.startEmptyWorkout(new Date(), userId);
     response.status(201).json(workout);
   }
 
@@ -75,7 +75,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async RemoveSet(request: Request<unknown, unknown, RemoveSetDto, unknown>, response: Response): Promise<void> {
+  public async removeSet(request: Request<unknown, unknown, RemoveSetDto, unknown>, response: Response): Promise<void> {
     const { userId, workoutId, exerciseOrder, setOrder } = request.body;
     await this.workoutService.removeSet(userId, workoutId, exerciseOrder, setOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);

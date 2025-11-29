@@ -42,7 +42,7 @@ export class WorkoutService {
   }
 
   // start workout without template
-  public async StartEmptyWorkout(startTime: Date, userId: UUID): Promise<Workout> {
+  public async startEmptyWorkout(startTime: Date, userId: UUID): Promise<Workout> {
     const workout: Workout = {
       id: randomUUID(),
       userId,
