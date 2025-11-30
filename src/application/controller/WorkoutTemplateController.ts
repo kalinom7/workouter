@@ -2,12 +2,17 @@ import { type Request, type Response } from 'express';
 import { injectable } from 'inversify';
 import { WorkoutTemplateService } from '../../domain/workouttemplate/WorkoutTemplateService.js';
 import {
-  type AddWorkoutTemplateExerciseDto,
-  type CreateWorkoutTemplateDto,
-  type GetWorkoutTemplateDto,
-  type RemoveWorkoutTemplateExerciseDto,
-  type SetNumberOfSetsDto,
-  type SetRestPeriodDto,
+  AddWorkoutTemplateExerciseBodyDto,
+  AddWorkoutTemplateExerciseParamsDto,
+  DeleteWorkoutTemplateParamsDto,
+  RemoveWorkoutTemplateExerciseBodyDto,
+  RemoveWorkoutTemplateExerciseParamsDto,
+  SetNumberOfSetsBodyDto,
+  SetNumberOfSetsParamsDto,
+  SetRestPeriodBodyDto,
+  SetRestPeriodParamsDto,
+  CreateWorkoutTemplateDto,
+  GetWorkoutTemplateParamsDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
 import { AuthorizationDto } from '../dto/AuthorizationDto.js';
 
@@ -16,58 +21,72 @@ export class WorkoutTemplateController {
   constructor(private readonly workoutTemplateService: WorkoutTemplateService) {}
 
   public async create(
-    request: Request<unknown, unknown, CreateWorkoutTemplateDto, unknown>,
+    request: Request<unknown, unknown, CreateWorkoutTemplateDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { name, userId } = request.body;
+    const { name } = request.body;
+    const { userId } = request.query;
     const workoutTemplate = await this.workoutTemplateService.createWorkoutTemplate(name, userId);
     response.status(201).json(workoutTemplate);
   }
 
   public async addWorkoutTemplateExercise(
-    request: Request<unknown, unknown, AddWorkoutTemplateExerciseDto, unknown>,
+    request: Request<AddWorkoutTemplateExerciseParamsDto, unknown, AddWorkoutTemplateExerciseBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { exerciseId, workoutTemplateId, userId } = request.body;
+    const { exerciseId } = request.body;
+    const { userId } = request.query;
+    const { workoutTemplateId } = request.params;
     const workoutTemplate = await this.workoutTemplateService.addWorkoutTemplateExercise(
       exerciseId,
       workoutTemplateId,
       userId,
     );
-    response.status(201).json(workoutTemplate);
+    response.status(200).json(workoutTemplate);
   }
   public async removeWorkoutTemplateExercise(
-    request: Request<unknown, unknown, RemoveWorkoutTemplateExerciseDto, unknown>,
+    request: Request<
+      RemoveWorkoutTemplateExerciseParamsDto,
+      unknown,
+      RemoveWorkoutTemplateExerciseBodyDto,
+      AuthorizationDto
+    >,
     response: Response,
   ): Promise<void> {
-    const { workoutTemplateId, userId, order } = request.body;
+    const { order } = request.body;
+    const { userId } = request.query;
+    const { workoutTemplateId } = request.params;
     await this.workoutTemplateService.removeWorkoutTemplateExercise(workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async setNumberOfSets(
-    request: Request<unknown, unknown, SetNumberOfSetsDto, unknown>,
+    request: Request<SetNumberOfSetsParamsDto, unknown, SetNumberOfSetsBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { sets, workoutTemplateId, userId, order } = request.body;
+    const { sets } = request.body;
+    const { workoutTemplateId, order } = request.params;
+    const { userId } = request.query;
     await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async setRestPeriod(
-    request: Request<unknown, unknown, SetRestPeriodDto, unknown>,
+    request: Request<SetRestPeriodParamsDto, unknown, SetRestPeriodBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { restPeriod, workoutTemplateId, userId, order } = request.body;
+    const { restPeriod } = request.body;
+    const { workoutTemplateId, order } = request.params;
+    const { userId } = request.query;
     await this.workoutTemplateService.setRestPeriod(restPeriod, workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async getWorkoutTemplate(
-    request: Request<GetWorkoutTemplateDto, unknown, unknown, AuthorizationDto>,
+    request: Request<GetWorkoutTemplateParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
     const { workoutTemplateId } = request.params;
@@ -77,7 +96,7 @@ export class WorkoutTemplateController {
   }
 
   public async deleteWorkoutTemplate(
-    request: Request<GetWorkoutTemplateDto, unknown, unknown, AuthorizationDto>,
+    request: Request<DeleteWorkoutTemplateParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
     const { workoutTemplateId } = request.params;

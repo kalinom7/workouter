@@ -3,41 +3,58 @@ import { type UUID } from 'node:crypto';
 
 export const createWorkoutTemplateDto = z.object({
   name: z.string().min(1),
-  userId: z.uuid().transform((str) => str as UUID),
 });
 export type CreateWorkoutTemplateDto = z.infer<typeof createWorkoutTemplateDto>;
 
-export const addWorkoutTemplateExerciseDto = z.object({
+export const addWorkoutTemplateExerciseBodyDto = z.object({
   exerciseId: z.uuid().transform((str) => str as UUID),
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
 });
-export type AddWorkoutTemplateExerciseDto = z.infer<typeof addWorkoutTemplateExerciseDto>;
+export type AddWorkoutTemplateExerciseBodyDto = z.infer<typeof addWorkoutTemplateExerciseBodyDto>;
 
-export const removeWorkoutTemplateExerciseDto = z.object({
+export const addWorkoutTemplateExerciseParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
+});
+export type AddWorkoutTemplateExerciseParamsDto = z.infer<typeof addWorkoutTemplateExerciseParamsDto>;
+
+export const removeWorkoutTemplateExerciseBodyDto = z.object({
   order: z.number().min(0),
 });
-export type RemoveWorkoutTemplateExerciseDto = z.infer<typeof removeWorkoutTemplateExerciseDto>;
+export type RemoveWorkoutTemplateExerciseBodyDto = z.infer<typeof removeWorkoutTemplateExerciseBodyDto>;
+
+export const removeWorkoutTemplateExerciseParamsDto = z.object({
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+});
+export type RemoveWorkoutTemplateExerciseParamsDto = z.infer<typeof removeWorkoutTemplateExerciseParamsDto>;
 
 export const setNumberOfSetsDto = z.object({
   sets: z.number().min(1),
+});
+export type SetNumberOfSetsBodyDto = z.infer<typeof setNumberOfSetsDto>;
+
+export const setNumberOfSetsParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
   order: z.number().min(0),
 });
-export type SetNumberOfSetsDto = z.infer<typeof setNumberOfSetsDto>;
+export type SetNumberOfSetsParamsDto = z.infer<typeof setNumberOfSetsParamsDto>;
 
-export const setRestPeriodDto = z.object({
+export const setRestPeriodBodyDto = z.object({
   restPeriod: z.number().min(0),
+});
+export type SetRestPeriodBodyDto = z.infer<typeof setRestPeriodBodyDto>;
+
+export const setRestPeriodParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
   order: z.number().min(0),
 });
-export type SetRestPeriodDto = z.infer<typeof setRestPeriodDto>;
+export type SetRestPeriodParamsDto = z.infer<typeof setRestPeriodParamsDto>;
 
-export const getWorkoutTemplateOrDeleteDto = z.object({
+export const getWorkoutTemplateParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
 });
-export type GetWorkoutTemplateDto = z.infer<typeof getWorkoutTemplateOrDeleteDto>;
+export type GetWorkoutTemplateParamsDto = z.infer<typeof getWorkoutTemplateParamsDto>;
+
+export const deleteWorkoutTemplateParamsDto = z.object({
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+});
+
+export type DeleteWorkoutTemplateParamsDto = z.infer<typeof deleteWorkoutTemplateParamsDto>;
