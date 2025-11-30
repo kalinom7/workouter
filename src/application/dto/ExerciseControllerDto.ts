@@ -1,23 +1,29 @@
 import { z } from 'zod';
 import { type UUID } from 'node:crypto';
 
-export const createExerciseDto = z.object({
+export const createExerciseBodyDto = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  userId: z.uuid().transform((str) => str as UUID),
 });
-export type CreateExerciseDto = z.infer<typeof createExerciseDto>;
+export type CreateExerciseBodyDto = z.infer<typeof createExerciseBodyDto>;
 
-export const getExerciseOrDeleteDto = z.object({
+export const getExerciseParamsDto = z.object({
   exerciseId: z.uuid().transform((str) => str as UUID),
-  userId: z.uuid().transform((str) => str as UUID),
 });
-export type GetExerciseDto = z.infer<typeof getExerciseOrDeleteDto>;
+export type GetExerciseParamsDto = z.infer<typeof getExerciseParamsDto>;
 
-export const updateExerciseDto = z.object({
-  exerciseId: z.uuid().transform((str) => str as UUID),
+export const updateExerciseBodyDto = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  userId: z.uuid().transform((str) => str as UUID),
 });
-export type UpdateExerciseDto = z.infer<typeof updateExerciseDto>;
+export type UpdateExerciseBodyDto = z.infer<typeof updateExerciseBodyDto>;
+
+export const updateExerciseParamsDto = z.object({
+  exerciseId: z.uuid().transform((str) => str as UUID),
+});
+export type UpdateExerciseParamsDto = z.infer<typeof updateExerciseParamsDto>;
+
+export const deleteExerciseParamsDto = z.object({
+  exerciseId: z.uuid().transform((str) => str as UUID),
+});
+export type DeleteExerciseParamsDto = z.infer<typeof deleteExerciseParamsDto>;
