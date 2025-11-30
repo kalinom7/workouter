@@ -2,50 +2,62 @@ import { type Request, type Response } from 'express';
 import { injectable } from 'inversify';
 import { WorkoutScheduleService } from '../../domain/workoutschedule/WorkoutScheduleService.js';
 import {
-  type AddRestToBlockDto,
-  type AddWorkoutToBlockDto,
-  type CreateWorkoutScheduleDto,
-  type GetOrDeleteWorkoutScheduleDto,
-  type RemoveBlockItemDto,
-  type SetActiveInactiveDto,
+  AddRestToBlockBodyDto,
+  AddRestToBlockParamsDto,
+  AddWorkoutToBlockBodyDto,
+  AddWorkoutToBlockParamsDto,
+  CreateWorkoutScheduleBodyDto,
+  DeleteWorkoutScheduleParamsDto,
+  GetWorkoutScheduleParamsDto,
+  RemoveBlockItemBodyDto,
+  RemoveBlockItemParamsDto,
+  SetWorkoutScheduleActiveParamsDto,
+  SetWorkoutScheduleInActiveParamsDto,
 } from '../dto/WorkoutScheduleControllerDto.js';
+import { AuthorizationDto } from '../dto/AuthorizationDto.js';
 
 @injectable()
 export class WorkoutScheduleController {
   constructor(private readonly workoutScheduleService: WorkoutScheduleService) {}
 
   public async createWorkoutSchedule(
-    request: Request<unknown, unknown, CreateWorkoutScheduleDto, unknown>,
+    request: Request<unknown, unknown, CreateWorkoutScheduleBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { name, userId } = request.body;
+    const { name } = request.body;
+    const { userId } = request.query;
+
     const WorkoutSchedule = await this.workoutScheduleService.create(name, userId);
     response.status(201).json(WorkoutSchedule);
   }
 
   public async getWorkoutSchedule(
-    request: Request<unknown, unknown, unknown, GetOrDeleteWorkoutScheduleDto>,
+    request: Request<GetWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutScheduleId, userId } = request.query;
+    const { workoutScheduleId } = request.params;
+    const { userId } = request.query;
     const workoutSchedule = await this.workoutScheduleService.get(workoutScheduleId, userId);
     response.status(200).json(workoutSchedule);
   }
 
   public async deleteWorkoutSchedule(
-    request: Request<unknown, unknown, unknown, GetOrDeleteWorkoutScheduleDto>,
+    request: Request<DeleteWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutScheduleId, userId } = request.query;
+    const { workoutScheduleId } = request.params;
+    const { userId } = request.query;
     await this.workoutScheduleService.delete(workoutScheduleId, userId);
     response.status(204).send();
   }
 
   public async addWorkoutToBlock(
-    request: Request<unknown, unknown, AddWorkoutToBlockDto, unknown>,
+    request: Request<AddWorkoutToBlockParamsDto, unknown, AddWorkoutToBlockBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutTemplateId, userId, workoutScheduleId } = request.body;
+    const { workoutTemplateId } = request.body;
+    const { userId } = request.query;
+    const { workoutScheduleId } = request.params;
     const workoutSchedule = await this.workoutScheduleService.addWorkoutToBlock(
       workoutTemplateId,
       userId,
@@ -55,35 +67,41 @@ export class WorkoutScheduleController {
   }
 
   public async addRestToBlock(
-    request: Request<unknown, unknown, AddRestToBlockDto, unknown>,
+    request: Request<AddRestToBlockParamsDto, unknown, AddRestToBlockBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { restPeriod, userId, workoutScheduleId } = request.body;
+    const { restPeriod } = request.body;
+    const { userId } = request.query;
+    const { workoutScheduleId } = request.params;
     const workoutSchedule = await this.workoutScheduleService.addRestToBlock(restPeriod, userId, workoutScheduleId);
     response.status(200).json(workoutSchedule);
   }
 
   public async removeBlockItem(
-    request: Request<unknown, unknown, RemoveBlockItemDto, unknown>,
+    request: Request<RemoveBlockItemParamsDto, unknown, RemoveBlockItemBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { userId, workoutScheduleId, blockItemId } = request.body;
+    const { blockItemId } = request.body;
+    const { userId } = request.query;
+    const { workoutScheduleId } = request.params;
     const workoutSchedule = await this.workoutScheduleService.removeBlockItem(userId, workoutScheduleId, blockItemId);
     response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleActive(
-    request: Request<unknown, unknown, SetActiveInactiveDto, unknown>,
+    request: Request<SetWorkoutScheduleActiveParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutScheduleId, userId } = request.body;
+    const { workoutScheduleId } = request.params;
+    const { userId } = request.query;
     const workoutSchedule = await this.workoutScheduleService.setActive(workoutScheduleId, userId);
     response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleInActive(
-    request: Request<unknown, unknown, SetActiveInactiveDto, unknown>,
+    request: Request<SetWorkoutScheduleInActiveParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { workoutScheduleId, userId } = request.body;
+    const { workoutScheduleId } = request.params;
+    const { userId } = request.query;
     const workoutSchedule = await this.workoutScheduleService.setInactive(workoutScheduleId, userId);
     response.status(200).json(workoutSchedule);
   }
