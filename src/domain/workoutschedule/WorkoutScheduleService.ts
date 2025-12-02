@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
-import { type WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
+import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
 
 @injectable()
 export class WorkoutScheduleService {

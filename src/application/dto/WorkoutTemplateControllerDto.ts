@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { type UUID } from 'node:crypto';
 
-export const createWorkoutTemplateDto = z.object({
+export const createWorkoutTemplateBodyDto = z.object({
   name: z.string().min(1),
 });
-export type CreateWorkoutTemplateDto = z.infer<typeof createWorkoutTemplateDto>;
+export type CreateWorkoutTemplateBodyDto = z.infer<typeof createWorkoutTemplateBodyDto>;
 
 export const addWorkoutTemplateExerciseBodyDto = z.object({
   exerciseId: z.uuid().transform((str) => str as UUID),
@@ -26,10 +26,10 @@ export const removeWorkoutTemplateExerciseParamsDto = z.object({
 });
 export type RemoveWorkoutTemplateExerciseParamsDto = z.infer<typeof removeWorkoutTemplateExerciseParamsDto>;
 
-export const setNumberOfSetsDto = z.object({
+export const setNumberOfSetsBodyDto = z.object({
   sets: z.number().min(1),
 });
-export type SetNumberOfSetsBodyDto = z.infer<typeof setNumberOfSetsDto>;
+export type SetNumberOfSetsBodyDto = z.infer<typeof setNumberOfSetsBodyDto>;
 
 export const setNumberOfSetsParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),

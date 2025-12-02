@@ -21,11 +21,11 @@ export const addExerciseParamsDto = z.object({
 });
 export type AddExerciseParamsDto = z.infer<typeof addExerciseParamsDto>;
 
-export const RemoveExerciseParamsDto = z.object({
+export const removeExerciseParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
   exerciseOrder: z.number().int().min(0),
 });
-export type RemoveExerciseParamsDto = z.infer<typeof RemoveExerciseParamsDto>;
+export type RemoveExerciseParamsDto = z.infer<typeof removeExerciseParamsDto>;
 
 export const addSetParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),

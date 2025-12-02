@@ -1,14 +1,14 @@
 import { injectable } from 'inversify';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 
-export interface WorkoutScheduleRepository {
-  save(workoutSchedule: WorkoutSchedule): Promise<void>;
-  get(workoutScheduleId: string, userId: string): Promise<WorkoutSchedule | null>;
-  delete(workoutScheduleId: string, userId: string): Promise<void>;
+export abstract class WorkoutScheduleRepository {
+  public abstract save(workoutSchedule: WorkoutSchedule): Promise<void>;
+  public abstract get(workoutScheduleId: string, userId: string): Promise<WorkoutSchedule | null>;
+  public abstract delete(workoutScheduleId: string, userId: string): Promise<void>;
 }
 
 @injectable()
-export class InMemoWorkoutScheduleRepository implements WorkoutScheduleRepository {
+export class InMemoWorkoutScheduleRepository extends WorkoutScheduleRepository {
   private readonly workoutSchedules: Map<string, WorkoutSchedule> = new Map();
 
   public async save(workoutSchedule: WorkoutSchedule): Promise<void> {

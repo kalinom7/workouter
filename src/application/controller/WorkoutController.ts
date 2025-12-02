@@ -61,7 +61,7 @@ export class WorkoutController {
     const { workoutId } = request.params;
     await this.workoutService.addExercise(userId, workoutId, exerciseId);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
-    response.status(200).json(workout);
+    response.status(201).json(workout);
   }
 
   public async removeExercise(
@@ -83,7 +83,7 @@ export class WorkoutController {
     const { userId } = request.query;
     await this.workoutService.addSet(userId, workoutId, exerciseOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
-    response.status(200).json(workout);
+    response.status(201).json(workout);
   }
 
   public async removeSet(

@@ -12,7 +12,7 @@ import {
   RemoveBlockItemBodyDto,
   RemoveBlockItemParamsDto,
   SetWorkoutScheduleActiveParamsDto,
-  SetWorkoutScheduleInActiveParamsDto,
+  SetWorkoutScheduleInactiveParamsDto,
 } from '../dto/WorkoutScheduleControllerDto.js';
 import { AuthorizationDto } from '../dto/AuthorizationDto.js';
 
@@ -63,7 +63,7 @@ export class WorkoutScheduleController {
       userId,
       workoutScheduleId,
     );
-    response.status(200).json(workoutSchedule);
+    response.status(201).json(workoutSchedule);
   }
 
   public async addRestToBlock(
@@ -74,7 +74,7 @@ export class WorkoutScheduleController {
     const { userId } = request.query;
     const { workoutScheduleId } = request.params;
     const workoutSchedule = await this.workoutScheduleService.addRestToBlock(restPeriod, userId, workoutScheduleId);
-    response.status(200).json(workoutSchedule);
+    response.status(201).json(workoutSchedule);
   }
 
   public async removeBlockItem(
@@ -97,7 +97,7 @@ export class WorkoutScheduleController {
     response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleInActive(
-    request: Request<SetWorkoutScheduleInActiveParamsDto, unknown, unknown, AuthorizationDto>,
+    request: Request<SetWorkoutScheduleInactiveParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
     const { workoutScheduleId } = request.params;

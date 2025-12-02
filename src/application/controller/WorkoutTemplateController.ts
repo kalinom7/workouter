@@ -11,7 +11,7 @@ import {
   SetNumberOfSetsParamsDto,
   SetRestPeriodBodyDto,
   SetRestPeriodParamsDto,
-  CreateWorkoutTemplateDto,
+  CreateWorkoutTemplateBodyDto,
   GetWorkoutTemplateParamsDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
 import { AuthorizationDto } from '../dto/AuthorizationDto.js';
@@ -21,7 +21,7 @@ export class WorkoutTemplateController {
   constructor(private readonly workoutTemplateService: WorkoutTemplateService) {}
 
   public async create(
-    request: Request<unknown, unknown, CreateWorkoutTemplateDto, AuthorizationDto>,
+    request: Request<unknown, unknown, CreateWorkoutTemplateBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
     const { name } = request.body;
@@ -42,7 +42,7 @@ export class WorkoutTemplateController {
       workoutTemplateId,
       userId,
     );
-    response.status(200).json(workoutTemplate);
+    response.status(201).json(workoutTemplate);
   }
   public async removeWorkoutTemplateExercise(
     request: Request<
