@@ -1,26 +1,12 @@
 import express, { type Application as EA, type NextFunction, type Request, type Response } from 'express';
-import { injectable } from 'inversify';
-import { WorkoutController } from './controller/WorkoutController.js';
+import { injectable, multiInject } from 'inversify';
 import { WorkoutTemplateController } from './controller/WorkoutTemplateController.js';
 import { authorizationDto } from './dto/AuthorizationDto.js';
 
-import { Validator } from './validation/Validator.js';
+import { Controller } from './controller/Controller.js';
+import { ExerciseController } from './controller/ExerciseController.js';
 import { WorkoutScheduleController } from './controller/WorkoutScheduleController.js';
 import { createExerciseBodyDto, getExerciseParamsDto } from './dto/ExerciseControllerDto.js';
-import { ExerciseController } from './controller/ExerciseController.js';
-import {
-  addWorkoutTemplateExerciseBodyDto,
-  addWorkoutTemplateExerciseParamsDto,
-  createWorkoutTemplateBodyDto,
-  deleteWorkoutTemplateParamsDto,
-  getWorkoutTemplateParamsDto,
-  removeWorkoutTemplateExerciseBodyDto,
-  removeWorkoutTemplateExerciseParamsDto,
-  setNumberOfSetsBodyDto,
-  setNumberOfSetsParamsDto,
-  setRestPeriodBodyDto,
-  setRestPeriodParamsDto,
-} from './dto/WorkoutTemplateControllerDto.js';
 import {
   addRestToBlockBodyDto,
   addRestToBlockParamsDto,
@@ -35,27 +21,27 @@ import {
   setWorkoutScheduleInactiveParamsDto,
 } from './dto/WorkoutScheduleControllerDto.js';
 import {
-  addExerciseBodyDto,
-  addExerciseParamsDto,
-  finishWorkoutParamsDto,
-  startWorkoutFromTemplateBodyDto,
-  removeExerciseParamsDto,
-  addSetParamsDto,
-  removeSetParamsDto,
-  addWeightAndRepsBodyDto,
-  addWeightAndRepsParamsDto,
-  markSetAsCompletedParamsDto,
-  markSetAsUnCompletedParamsDto,
-  MarkExerciseAsCompletedParamsDto,
-  MarkExerciseAsUnCompletedParamsDto,
-} from './dto/WorkoutControllerDto.js';
+  addWorkoutTemplateExerciseBodyDto,
+  addWorkoutTemplateExerciseParamsDto,
+  createWorkoutTemplateBodyDto,
+  deleteWorkoutTemplateParamsDto,
+  getWorkoutTemplateParamsDto,
+  removeWorkoutTemplateExerciseBodyDto,
+  removeWorkoutTemplateExerciseParamsDto,
+  setNumberOfSetsBodyDto,
+  setNumberOfSetsParamsDto,
+  setRestPeriodBodyDto,
+  setRestPeriodParamsDto,
+} from './dto/WorkoutTemplateControllerDto.js';
+import { Validator } from './validation/Validator.js';
 
 @injectable()
 export class Application {
   private readonly app: EA;
 
   constructor(
-    private readonly workoutController: WorkoutController,
+    @multiInject(Controller)
+    private readonly controllers: Controller[],
     private readonly validator: Validator,
     private readonly workoutTemplateController: WorkoutTemplateController,
     private readonly workoutScheduleController: WorkoutScheduleController,
@@ -63,6 +49,10 @@ export class Application {
   ) {
     this.app = express();
     this.app.use(express.json());
+
+    for (const controller of this.controllers) {
+      this.app.use(controller.getRoutes());
+    }
 
     //GLOBAL
     //EXERCISE CONTROLLER ROUTES
@@ -213,79 +203,6 @@ export class Application {
     );
 
     //WORKOUT CONTROLLER
-    this.app.post(
-      '/workouts/from-template',
-      this.validator.validate({ body: startWorkoutFromTemplateBodyDto, query: authorizationDto }),
-      (req, res) => this.workoutController.startWorkoutFromTemplate(req, res),
-    );
-
-    this.app.post('/workouts/empty', this.validator.validate({ query: authorizationDto }), (req, res) =>
-      this.workoutController.startEmptyWorkout(req, res),
-    );
-
-    this.app.patch(
-      '/workouts/:workoutId/finish',
-      this.validator.validate({ params: finishWorkoutParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.finishWorkout(req, res),
-    );
-
-    this.app.post(
-      '/workouts/:workoutId/exercises',
-      this.validator.validate({ body: addExerciseBodyDto, params: addExerciseParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.addExercise(req, res),
-    );
-
-    this.app.delete(
-      '/workouts/:workoutId/exercises/:exerciseOrder',
-      this.validator.validate({ params: removeExerciseParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.removeExercise(req, res),
-    );
-
-    this.app.post(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets',
-      this.validator.validate({ params: addSetParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.addSet(req, res),
-    );
-
-    this.app.delete(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder',
-      this.validator.validate({ params: removeSetParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.removeSet(req, res),
-    );
-
-    this.app.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/weight-and-reps',
-      this.validator.validate({
-        body: addWeightAndRepsBodyDto,
-        params: addWeightAndRepsParamsDto,
-        query: authorizationDto,
-      }),
-      (req, res) => this.workoutController.addWeightAndReps(req, res),
-    );
-
-    this.app.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/complete',
-      this.validator.validate({ params: markSetAsCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.markSetAsCompleted(req, res),
-    );
-
-    this.app.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/un-complete',
-      this.validator.validate({ params: markSetAsUnCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.markSetAsUncompleted(req, res),
-    );
-
-    this.app.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/complete',
-      this.validator.validate({ params: MarkExerciseAsCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.markExerciseAsCompleted(req, res),
-    );
-
-    this.app.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/un-complete',
-      this.validator.validate({ params: MarkExerciseAsUnCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutController.markExerciseAsUncompleted(req, res),
-    );
 
     //global error handler
 

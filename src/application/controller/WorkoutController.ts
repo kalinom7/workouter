@@ -1,28 +1,126 @@
-import { type Request, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { injectable } from 'inversify';
 import { WorkoutService } from '../../domain/workout/WorkoutService.js';
+import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import {
   AddExerciseBodyDto,
+  addExerciseBodyDto,
   AddExerciseParamsDto,
+  addExerciseParamsDto,
   AddSetParamsDto,
+  addSetParamsDto,
   AddWeightAndRepsBodyDto,
+  addWeightAndRepsBodyDto,
   AddWeightAndRepsParamsDto,
+  addWeightAndRepsParamsDto,
   FinishWorkoutParamsDto,
+  finishWorkoutParamsDto,
   MarkExerciseAsCompletedParamsDto,
   MarkExerciseAsUnCompletedParamsDto,
   MarkSetAsCompletedParamsDto,
+  markSetAsCompletedParamsDto,
   MarkSetAsUnCompletedParamsDto,
+  markSetAsUnCompletedParamsDto,
   RemoveExerciseParamsDto,
+  removeExerciseParamsDto,
   RemoveSetParamsDto,
+  removeSetParamsDto,
   StartWorkoutFromTemplateBodyDto,
+  startWorkoutFromTemplateBodyDto,
 } from '../dto/WorkoutControllerDto.js';
-import { AuthorizationDto } from '../dto/AuthorizationDto.js';
+import { Validator } from '../validation/Validator.js';
+import { Controller } from './Controller.js';
 
 @injectable()
-export class WorkoutController {
-  constructor(private readonly workoutService: WorkoutService) {}
+export class WorkoutController extends Controller {
+  constructor(
+    private readonly workoutService: WorkoutService,
+    private readonly validator: Validator,
+  ) {
+    super();
+  }
 
-  public async startWorkoutFromTemplate(
+  public getRoutes(): Router {
+    const router = Router();
+
+    router.post(
+      '/workouts/from-template',
+      this.validator.validate({ body: startWorkoutFromTemplateBodyDto, query: authorizationDto }),
+      (req, res) => this.startWorkoutFromTemplate(req, res),
+    );
+
+    router.post('/workouts/empty', this.validator.validate({ query: authorizationDto }), (req, res) =>
+      this.startEmptyWorkout(req, res),
+    );
+
+    router.patch(
+      '/workouts/:workoutId/finish',
+      this.validator.validate({ params: finishWorkoutParamsDto, query: authorizationDto }),
+      (req, res) => this.finishWorkout(req, res),
+    );
+
+    router.post(
+      '/workouts/:workoutId/exercises',
+      this.validator.validate({ body: addExerciseBodyDto, params: addExerciseParamsDto, query: authorizationDto }),
+      (req, res) => this.addExercise(req, res),
+    );
+
+    router.delete(
+      '/workouts/:workoutId/exercises/:exerciseOrder',
+      this.validator.validate({ params: removeExerciseParamsDto, query: authorizationDto }),
+      (req, res) => this.removeExercise(req, res),
+    );
+
+    router.post(
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets',
+      this.validator.validate({ params: addSetParamsDto, query: authorizationDto }),
+      (req, res) => this.addSet(req, res),
+    );
+
+    router.delete(
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder',
+      this.validator.validate({ params: removeSetParamsDto, query: authorizationDto }),
+      (req, res) => this.removeSet(req, res),
+    );
+
+    router.patch(
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/weight-and-reps',
+      this.validator.validate({
+        body: addWeightAndRepsBodyDto,
+        params: addWeightAndRepsParamsDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.addWeightAndReps(req, res),
+    );
+
+    router.patch(
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/complete',
+      this.validator.validate({ params: markSetAsCompletedParamsDto, query: authorizationDto }),
+      (req, res) => this.markSetAsCompleted(req, res),
+    );
+
+    router.patch(
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/un-complete',
+      this.validator.validate({ params: markSetAsUnCompletedParamsDto, query: authorizationDto }),
+      (req, res) => this.markSetAsUncompleted(req, res),
+    );
+
+    router.patch(
+      '/workouts/:workoutId/exercises/:exerciseOrder/complete',
+      this.validator.validate({ params: MarkExerciseAsCompletedParamsDto, query: authorizationDto }),
+      (req, res) => this.markExerciseAsCompleted(req, res),
+    );
+
+    router.patch(
+      '/workouts/:workoutId/exercises/:exerciseOrder/un-complete',
+      this.validator.validate({ params: MarkExerciseAsUnCompletedParamsDto, query: authorizationDto }),
+      (req, res) => this.markExerciseAsUncompleted(req, res),
+    );
+
+    return router;
+  }
+
+  private async startWorkoutFromTemplate(
     request: Request<unknown, unknown, StartWorkoutFromTemplateBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -32,7 +130,7 @@ export class WorkoutController {
     response.status(201).json(workout);
   }
 
-  public async startEmptyWorkout(
+  private async startEmptyWorkout(
     request: Request<unknown, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -41,7 +139,7 @@ export class WorkoutController {
     response.status(201).json(workout);
   }
 
-  public async finishWorkout(
+  private async finishWorkout(
     request: Request<FinishWorkoutParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -52,7 +150,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async addExercise(
+  private async addExercise(
     request: Request<AddExerciseParamsDto, unknown, AddExerciseBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -64,7 +162,7 @@ export class WorkoutController {
     response.status(201).json(workout);
   }
 
-  public async removeExercise(
+  private async removeExercise(
     request: Request<RemoveExerciseParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -75,7 +173,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async addSet(
+  private async addSet(
     request: Request<AddSetParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -86,7 +184,7 @@ export class WorkoutController {
     response.status(201).json(workout);
   }
 
-  public async removeSet(
+  private async removeSet(
     request: Request<RemoveSetParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -97,7 +195,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async addWeightAndReps(
+  private async addWeightAndReps(
     request: Request<AddWeightAndRepsParamsDto, unknown, AddWeightAndRepsBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -109,7 +207,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async markSetAsCompleted(
+  private async markSetAsCompleted(
     request: Request<MarkSetAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -120,7 +218,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async markSetAsUncompleted(
+  private async markSetAsUncompleted(
     request: Request<MarkSetAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -131,7 +229,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async markExerciseAsCompleted(
+  private async markExerciseAsCompleted(
     request: Request<MarkExerciseAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
@@ -142,7 +240,7 @@ export class WorkoutController {
     response.status(200).json(workout);
   }
 
-  public async markExerciseAsUncompleted(
+  private async markExerciseAsUncompleted(
     request: Request<MarkExerciseAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
