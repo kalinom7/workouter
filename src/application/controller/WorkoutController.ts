@@ -15,7 +15,11 @@ import {
   addWeightAndRepsParamsDto,
   FinishWorkoutParamsDto,
   finishWorkoutParamsDto,
+  getWorkoutParamsDto,
+  GetWorkoutParamsDto,
+  markExerciseAsCompletedParamsDto,
   MarkExerciseAsCompletedParamsDto,
+  markExerciseAsUnCompletedParamsDto,
   MarkExerciseAsUnCompletedParamsDto,
   MarkSetAsCompletedParamsDto,
   markSetAsCompletedParamsDto,
@@ -51,6 +55,12 @@ export class WorkoutController extends Controller {
 
     router.post('/workouts/empty', this.validator.validate({ query: authorizationDto }), (req, res) =>
       this.startEmptyWorkout(req, res),
+    );
+
+    router.get(
+      '/workouts/:workoutId',
+      this.validator.validate({ params: getWorkoutParamsDto, query: authorizationDto }),
+      (req, res) => this.getWorkout(req, res),
     );
 
     router.patch(
@@ -107,13 +117,13 @@ export class WorkoutController extends Controller {
 
     router.patch(
       '/workouts/:workoutId/exercises/:exerciseOrder/complete',
-      this.validator.validate({ params: MarkExerciseAsCompletedParamsDto, query: authorizationDto }),
+      this.validator.validate({ params: markExerciseAsCompletedParamsDto, query: authorizationDto }),
       (req, res) => this.markExerciseAsCompleted(req, res),
     );
 
     router.patch(
       '/workouts/:workoutId/exercises/:exerciseOrder/un-complete',
-      this.validator.validate({ params: MarkExerciseAsUnCompletedParamsDto, query: authorizationDto }),
+      this.validator.validate({ params: markExerciseAsUnCompletedParamsDto, query: authorizationDto }),
       (req, res) => this.markExerciseAsUncompleted(req, res),
     );
 
@@ -146,6 +156,16 @@ export class WorkoutController extends Controller {
     const { workoutId } = request.params;
     const { userId } = request.query;
     await this.workoutService.finishWorkout(userId, workoutId, new Date());
+    const workout = await this.workoutService.getWorkout(workoutId, userId);
+    response.status(200).json(workout);
+  }
+
+  private async getWorkout(
+    request: Request<GetWorkoutParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response,
+  ): Promise<void> {
+    const { workoutId } = request.params;
+    const { userId } = request.query;
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }

@@ -67,14 +67,19 @@ export const markSetAsUnCompletedParamsDto = z.object({
 });
 export type MarkSetAsUnCompletedParamsDto = z.infer<typeof markSetAsUnCompletedParamsDto>;
 
-export const MarkExerciseAsCompletedParamsDto = z.object({
+export const markExerciseAsCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
   exerciseOrder: z.number().int().min(0),
 });
-export type MarkExerciseAsCompletedParamsDto = z.infer<typeof MarkExerciseAsCompletedParamsDto>;
+export type MarkExerciseAsCompletedParamsDto = z.infer<typeof markExerciseAsCompletedParamsDto>;
 
-export const MarkExerciseAsUnCompletedParamsDto = z.object({
+export const markExerciseAsUnCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
   exerciseOrder: z.number().int().min(0),
 });
-export type MarkExerciseAsUnCompletedParamsDto = z.infer<typeof MarkExerciseAsUnCompletedParamsDto>;
+export type MarkExerciseAsUnCompletedParamsDto = z.infer<typeof markExerciseAsUnCompletedParamsDto>;
+
+export const getWorkoutParamsDto = z.object({
+  workoutId: z.uuid().transform((str) => str as UUID),
+});
+export type GetWorkoutParamsDto = z.infer<typeof getWorkoutParamsDto>;
