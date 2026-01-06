@@ -16,8 +16,6 @@ import {
   DeleteWorkoutScheduleParamsDto,
   getWorkoutScheduleParamsDto,
   GetWorkoutScheduleParamsDto,
-  removeBlockItemBodyDto,
-  RemoveBlockItemBodyDto,
   removeBlockItemParamsDto,
   RemoveBlockItemParamsDto,
   setWorkoutScheduleActiveParamsDto,
@@ -81,7 +79,6 @@ export class WorkoutScheduleController extends Controller {
       '/workout-schedules/:workoutScheduleId/block/:blockItemId',
       this.validator.validate({
         params: removeBlockItemParamsDto,
-        body: removeBlockItemBodyDto,
         query: authorizationDto,
       }),
       (req, res) => this.removeBlockItem(req, res),
@@ -159,12 +156,11 @@ export class WorkoutScheduleController extends Controller {
   }
 
   public async removeBlockItem(
-    request: Request<RemoveBlockItemParamsDto, unknown, RemoveBlockItemBodyDto, AuthorizationDto>,
+    request: Request<RemoveBlockItemParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { blockItemId } = request.body;
     const { userId } = request.query;
-    const { workoutScheduleId } = request.params;
+    const { workoutScheduleId, blockItemId } = request.params;
     const workoutSchedule = await this.workoutScheduleService.removeBlockItem(userId, workoutScheduleId, blockItemId);
     response.status(200).json(workoutSchedule);
   }

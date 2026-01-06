@@ -36,13 +36,9 @@ export const addRestToBlockParamsDto = z.object({
 });
 export type AddRestToBlockParamsDto = z.infer<typeof addRestToBlockParamsDto>;
 
-export const removeBlockItemBodyDto = z.object({
-  blockItemId: z.uuid().transform((str) => str as UUID),
-});
-export type RemoveBlockItemBodyDto = z.infer<typeof removeBlockItemBodyDto>;
-
 export const removeBlockItemParamsDto = z.object({
   workoutScheduleId: z.uuid().transform((str) => str as UUID),
+  blockItemId: z.uuid().transform((str) => str as UUID),
 });
 export type RemoveBlockItemParamsDto = z.infer<typeof removeBlockItemParamsDto>;
 
