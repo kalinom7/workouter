@@ -1,4 +1,4 @@
-import { type Request, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { injectable } from 'inversify';
 import { WorkoutTemplateService } from '../../domain/workouttemplate/WorkoutTemplateService.js';
 import {
@@ -13,12 +13,93 @@ import {
   SetRestPeriodParamsDto,
   CreateWorkoutTemplateBodyDto,
   GetWorkoutTemplateParamsDto,
+  createWorkoutTemplateBodyDto,
+  addWorkoutTemplateExerciseParamsDto,
+  addWorkoutTemplateExerciseBodyDto,
+  removeWorkoutTemplateExerciseParamsDto,
+  removeWorkoutTemplateExerciseBodyDto,
+  setNumberOfSetsParamsDto,
+  setNumberOfSetsBodyDto,
+  setRestPeriodParamsDto,
+  setRestPeriodBodyDto,
+  getWorkoutTemplateParamsDto,
+  deleteWorkoutTemplateParamsDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
-import { AuthorizationDto } from '../dto/AuthorizationDto.js';
+import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
+import { Controller } from './Controller.js';
+import { Validator } from '../validation/Validator.js';
 
 @injectable()
-export class WorkoutTemplateController {
-  constructor(private readonly workoutTemplateService: WorkoutTemplateService) {}
+export class WorkoutTemplateController extends Controller {
+  constructor(
+    private readonly workoutTemplateService: WorkoutTemplateService,
+    private readonly validator: Validator,
+  ) {
+    super();
+  }
+
+  public getRoutes(): Router {
+    const router = Router();
+
+    router.post(
+      '/workout-templates',
+      this.validator.validate({ body: createWorkoutTemplateBodyDto, query: authorizationDto }),
+      (req, res) => this.create(req, res),
+    );
+    router.post(
+      '/workout-templates/:workoutTemplateId/exercises',
+      this.validator.validate({
+        params: addWorkoutTemplateExerciseParamsDto,
+        body: addWorkoutTemplateExerciseBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.addWorkoutTemplateExercise(req, res),
+    );
+
+    router.delete(
+      '/workout-templates/:workoutTemplateId/exercises',
+      this.validator.validate({
+        params: removeWorkoutTemplateExerciseParamsDto,
+        body: removeWorkoutTemplateExerciseBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.removeWorkoutTemplateExercise(req, res),
+    );
+
+    router.patch(
+      '/workout-templates/:workoutTemplateId/exercises/:order/sets',
+      this.validator.validate({
+        params: setNumberOfSetsParamsDto,
+        body: setNumberOfSetsBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.setNumberOfSets(req, res),
+    );
+
+    router.patch(
+      '/workout-templates/:workoutTemplateId/exercises/:order/rest-period',
+      this.validator.validate({
+        params: setRestPeriodParamsDto,
+        body: setRestPeriodBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.setRestPeriod(req, res),
+    );
+
+    router.get(
+      '/workout-templates/:workoutTemplateId',
+      this.validator.validate({ params: getWorkoutTemplateParamsDto, query: authorizationDto }),
+      (req, res) => this.getWorkoutTemplate(req, res),
+    );
+
+    router.delete(
+      '/workout-templates/:workoutTemplateId',
+      this.validator.validate({ params: deleteWorkoutTemplateParamsDto, query: authorizationDto }),
+      (req, res) => this.deleteWorkoutTemplate(req, res),
+    );
+
+    return router;
+  }
 
   public async create(
     request: Request<unknown, unknown, CreateWorkoutTemplateBodyDto, AuthorizationDto>,
