@@ -58,30 +58,6 @@ export class Application {
 
     //GLOBAL
     //EXERCISE CONTROLLER ROUTES
-    this.app.post(
-      '/exercises',
-      this.validator.validate({ body: createExerciseBodyDto, query: authorizationDto }),
-      (req, res) => this.exerciseController.create(req, res),
-    );
-    this.app.get(
-      '/exercises/:exerciseId',
-      this.validator.validate({ params: getExerciseParamsDto, query: authorizationDto }),
-      (req, res) => this.exerciseController.get(req, res),
-    );
-    this.app.patch(
-      '/exercises/:exerciseId',
-      this.validator.validate({
-        params: getExerciseParamsDto,
-        body: createExerciseBodyDto,
-        query: authorizationDto,
-      }),
-      (req, res) => this.exerciseController.update(req, res),
-    );
-    this.app.delete(
-      '/exercises/:exerciseId',
-      this.validator.validate({ params: getExerciseParamsDto, query: authorizationDto }),
-      (req, res) => this.exerciseController.delete(req, res),
-    );
 
     //WORKOUT TEMPLATE CONTOLLER ROUTERS
 

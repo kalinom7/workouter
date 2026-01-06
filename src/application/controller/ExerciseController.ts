@@ -1,18 +1,58 @@
-import { type Request, type Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { injectable } from 'inversify';
 import { ExerciseService } from '../../domain/exercise/ExerciseService.js';
-import { AuthorizationDto } from '../dto/AuthorizationDto.js';
+import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import {
+  createExerciseBodyDto,
   CreateExerciseBodyDto,
   DeleteExerciseParamsDto,
+  getExerciseParamsDto,
   GetExerciseParamsDto,
   UpdateExerciseBodyDto,
   UpdateExerciseParamsDto,
 } from '../dto/ExerciseControllerDto.js';
+import { Controller } from './Controller.js';
+import { Validator } from '../validation/Validator.js';
 
 @injectable()
-export class ExerciseController {
-  constructor(private readonly exerciseService: ExerciseService) {}
+export class ExerciseController extends Controller {
+  constructor(
+    private readonly exerciseService: ExerciseService,
+    private readonly validator: Validator,
+  ) {
+    super();
+  }
+
+  public getRoutes(): Router {
+    const router = Router();
+
+    router.post(
+      '/exercises',
+      this.validator.validate({ body: createExerciseBodyDto, query: authorizationDto }),
+      (req, res) => this.create(req, res),
+    );
+    router.get(
+      '/exercises/:exerciseId',
+      this.validator.validate({ params: getExerciseParamsDto, query: authorizationDto }),
+      (req, res) => this.get(req, res),
+    );
+    router.patch(
+      '/exercises/:exerciseId',
+      this.validator.validate({
+        params: getExerciseParamsDto,
+        body: createExerciseBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.update(req, res),
+    );
+    router.delete(
+      '/exercises/:exerciseId',
+      this.validator.validate({ params: getExerciseParamsDto, query: authorizationDto }),
+      (req, res) => this.delete(req, res),
+    );
+
+    return router;
+  }
 
   public async create(
     request: Request<unknown, unknown, CreateExerciseBodyDto, AuthorizationDto>,
