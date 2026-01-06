@@ -16,13 +16,9 @@ export const addWorkoutTemplateExerciseParamsDto = z.object({
 });
 export type AddWorkoutTemplateExerciseParamsDto = z.infer<typeof addWorkoutTemplateExerciseParamsDto>;
 
-export const removeWorkoutTemplateExerciseBodyDto = z.object({
-  order: z.number().min(0),
-});
-export type RemoveWorkoutTemplateExerciseBodyDto = z.infer<typeof removeWorkoutTemplateExerciseBodyDto>;
-
 export const removeWorkoutTemplateExerciseParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
+  order: z.number().min(0),
 });
 export type RemoveWorkoutTemplateExerciseParamsDto = z.infer<typeof removeWorkoutTemplateExerciseParamsDto>;
 

@@ -5,7 +5,6 @@ import {
   AddWorkoutTemplateExerciseBodyDto,
   AddWorkoutTemplateExerciseParamsDto,
   DeleteWorkoutTemplateParamsDto,
-  RemoveWorkoutTemplateExerciseBodyDto,
   RemoveWorkoutTemplateExerciseParamsDto,
   SetNumberOfSetsBodyDto,
   SetNumberOfSetsParamsDto,
@@ -17,7 +16,6 @@ import {
   addWorkoutTemplateExerciseParamsDto,
   addWorkoutTemplateExerciseBodyDto,
   removeWorkoutTemplateExerciseParamsDto,
-  removeWorkoutTemplateExerciseBodyDto,
   setNumberOfSetsParamsDto,
   setNumberOfSetsBodyDto,
   setRestPeriodParamsDto,
@@ -57,10 +55,9 @@ export class WorkoutTemplateController extends Controller {
     );
 
     router.delete(
-      '/workout-templates/:workoutTemplateId/exercises',
+      '/workout-templates/:workoutTemplateId/exercises/:order',
       this.validator.validate({
         params: removeWorkoutTemplateExerciseParamsDto,
-        body: removeWorkoutTemplateExerciseBodyDto,
         query: authorizationDto,
       }),
       (req, res) => this.removeWorkoutTemplateExercise(req, res),
@@ -126,17 +123,11 @@ export class WorkoutTemplateController extends Controller {
     response.status(201).json(workoutTemplate);
   }
   public async removeWorkoutTemplateExercise(
-    request: Request<
-      RemoveWorkoutTemplateExerciseParamsDto,
-      unknown,
-      RemoveWorkoutTemplateExerciseBodyDto,
-      AuthorizationDto
-    >,
+    request: Request<RemoveWorkoutTemplateExerciseParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { order } = request.body;
     const { userId } = request.query;
-    const { workoutTemplateId } = request.params;
+    const { workoutTemplateId, order } = request.params;
     await this.workoutTemplateService.removeWorkoutTemplateExercise(workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
