@@ -2,24 +2,8 @@ import express, { type Application as EA, type NextFunction, type Request, type 
 import { injectable, multiInject } from 'inversify';
 import { WorkoutTemplateController } from './controller/WorkoutTemplateController.js';
 import { authorizationDto } from './dto/AuthorizationDto.js';
-
 import { Controller } from './controller/Controller.js';
-import { ExerciseController } from './controller/ExerciseController.js';
-import { WorkoutScheduleController } from './controller/WorkoutScheduleController.js';
-import { createExerciseBodyDto, getExerciseParamsDto } from './dto/ExerciseControllerDto.js';
-import {
-  addRestToBlockBodyDto,
-  addRestToBlockParamsDto,
-  addWorkoutToBlockBodyDto,
-  addWorkoutToBlockParamsDto,
-  createWorkoutScheduleBodyDto,
-  deleteWorkoutScheduleParamsDto,
-  getWorkoutScheduleParamsDto,
-  removeBlockItemBodyDto,
-  removeBlockItemParamsDto,
-  setWorkoutScheduleActiveParamsDto,
-  setWorkoutScheduleInactiveParamsDto,
-} from './dto/WorkoutScheduleControllerDto.js';
+
 import {
   addWorkoutTemplateExerciseBodyDto,
   addWorkoutTemplateExerciseParamsDto,
@@ -45,8 +29,6 @@ export class Application {
     private readonly controllers: Controller[],
     private readonly validator: Validator,
     private readonly workoutTemplateController: WorkoutTemplateController,
-    private readonly workoutScheduleController: WorkoutScheduleController,
-    private readonly exerciseController: ExerciseController,
   ) {
     this.app = express();
     this.app.use(cors());
@@ -119,66 +101,6 @@ export class Application {
     );
 
     //WORKOUT SCHEDULE CONTROLLER ROUTES
-
-    this.app.post(
-      '/workout-schedules',
-      this.validator.validate({ body: createWorkoutScheduleBodyDto, query: authorizationDto }),
-      (req, res) => this.workoutScheduleController.createWorkoutSchedule(req, res),
-    );
-
-    this.app.get(
-      '/workout-schedules/:workoutScheduleId',
-      this.validator.validate({ params: getWorkoutScheduleParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutScheduleController.getWorkoutSchedule(req, res),
-    );
-
-    this.app.delete(
-      '/workout-schedules/:workoutScheduleId',
-      this.validator.validate({ params: deleteWorkoutScheduleParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutScheduleController.deleteWorkoutSchedule(req, res),
-    );
-
-    this.app.post(
-      '/workout-schedules/:workoutScheduleId/block/workout',
-      this.validator.validate({
-        params: addWorkoutToBlockParamsDto,
-        body: addWorkoutToBlockBodyDto,
-        query: authorizationDto,
-      }),
-      (req, res) => this.workoutScheduleController.addWorkoutToBlock(req, res),
-    );
-
-    this.app.post(
-      '/workout-schedules/:workoutScheduleId/block/rest',
-      this.validator.validate({
-        params: addRestToBlockParamsDto,
-        body: addRestToBlockBodyDto,
-        query: authorizationDto,
-      }),
-      (req, res) => this.workoutScheduleController.addRestToBlock(req, res),
-    );
-
-    this.app.delete(
-      '/workout-schedules/:workoutScheduleId/block/:blockItemId',
-      this.validator.validate({
-        params: removeBlockItemParamsDto,
-        body: removeBlockItemBodyDto,
-        query: authorizationDto,
-      }),
-      (req, res) => this.workoutScheduleController.removeBlockItem(req, res),
-    );
-
-    this.app.patch(
-      '/workout-schedules/:workoutScheduleId/activate',
-      this.validator.validate({ params: setWorkoutScheduleActiveParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutScheduleController.setWorkoutScheduleActive(req, res),
-    );
-
-    this.app.patch(
-      '/workout-schedules/:workoutScheduleId/deactivate',
-      this.validator.validate({ params: setWorkoutScheduleInactiveParamsDto, query: authorizationDto }),
-      (req, res) => this.workoutScheduleController.setWorkoutScheduleInActive(req, res),
-    );
 
     //WORKOUT CONTROLLER
 
