@@ -33,6 +33,7 @@ import {
   setRestPeriodBodyDto,
   setRestPeriodParamsDto,
 } from './dto/WorkoutTemplateControllerDto.js';
+import cors from 'cors';
 import { Validator } from './validation/Validator.js';
 
 @injectable()
@@ -48,6 +49,7 @@ export class Application {
     private readonly exerciseController: ExerciseController,
   ) {
     this.app = express();
+    this.app.use(cors());
     this.app.use(express.json());
 
     for (const controller of this.controllers) {
