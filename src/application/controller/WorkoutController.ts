@@ -48,12 +48,12 @@ export class WorkoutController extends Controller {
     const router = Router();
 
     router.post(
-      '/workouts/from-template',
+      '/workouts/start/from-template',
       this.validator.validate({ body: startWorkoutFromTemplateBodyDto, query: authorizationDto }),
       (req, res) => this.startWorkoutFromTemplate(req, res),
     );
 
-    router.post('/workouts/empty', this.validator.validate({ query: authorizationDto }), (req, res) =>
+    router.post('/workouts/start/empty', this.validator.validate({ query: authorizationDto }), (req, res) =>
       this.startEmptyWorkout(req, res),
     );
 
@@ -94,7 +94,7 @@ export class WorkoutController extends Controller {
     );
 
     router.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/weight-and-reps',
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder',
       this.validator.validate({
         body: addWeightAndRepsBodyDto,
         params: addWeightAndRepsParamsDto,
@@ -110,7 +110,7 @@ export class WorkoutController extends Controller {
     );
 
     router.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/un-complete',
+      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/uncomplete',
       this.validator.validate({ params: markSetAsUnCompletedParamsDto, query: authorizationDto }),
       (req, res) => this.markSetAsUncompleted(req, res),
     );
