@@ -6,6 +6,8 @@ export abstract class ExerciseRepository {
   public abstract get(exerciseId: string, userId: string): Promise<Exercise | null>;
 
   public abstract delete(exerciseId: string, userId: string): Promise<void>;
+
+  public abstract getAll(userId: string): Promise<Exercise[]>;
 }
 
 @injectable()
@@ -23,6 +25,17 @@ export class InMemoExerciseRepository extends ExerciseRepository {
     }
 
     return null;
+  }
+
+  public async getAll(userId: string): Promise<Exercise[]> {
+    const exercises: Exercise[] = [];
+    for (const exercise of this.exercises.values()) {
+      if (exercise.userId === userId) {
+        exercises.push(exercise);
+      }
+    }
+
+    return exercises;
   }
 
   public async delete(exerciseId: string, userId: string): Promise<void> {

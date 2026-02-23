@@ -140,6 +140,7 @@ export class WorkoutTemplateController extends Controller {
     const { sets } = request.body;
     const { workoutTemplateId, order } = request.params;
     const { userId } = request.query;
+    console.log('order type:', typeof order);
     await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);

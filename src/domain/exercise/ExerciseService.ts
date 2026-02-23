@@ -29,6 +29,12 @@ export class ExerciseService {
     return exercise;
   }
 
+  public async getAll(userId: UUID): Promise<Exercise[]> {
+    const exercises = await this.exerciseRepository.getAll(userId);
+
+    return exercises;
+  }
+
   public async update(exerciseId: UUID, name: string, userId: UUID, description?: string): Promise<Exercise> {
     const existing = await this.exerciseRepository.get(exerciseId, userId);
     if (existing == null) {
