@@ -105,7 +105,15 @@ export class WorkoutTemplateService {
     return returnedTemplate;
   }
 
-  //delete
+  public async getAllWorkoutTemplates(userId: UUID): Promise<WorkoutTemplate[]> {
+    const returnedTemplates = await this.workoutTemplateRepository.getAll(userId);
+
+    if (returnedTemplates == null) {
+      throw new Error('No WorkoutTemplates found for user');
+    }
+
+    return returnedTemplates;
+  }
   public async deleteWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<void> {
     await this.workoutTemplateRepository.delete(workoutTemplateId, userId);
   }

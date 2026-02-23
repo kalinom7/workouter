@@ -89,6 +89,10 @@ export class WorkoutTemplateController extends Controller {
       (req, res) => this.getWorkoutTemplate(req, res),
     );
 
+    router.get('/workout-templates', this.validator.validate({ query: authorizationDto }), (req, res) =>
+      this.getAllWorkoutTemplates(req, res),
+    );
+
     router.delete(
       '/workout-templates/:workoutTemplateId',
       this.validator.validate({ params: deleteWorkoutTemplateParamsDto, query: authorizationDto }),
@@ -166,6 +170,15 @@ export class WorkoutTemplateController extends Controller {
     const { userId } = request.query;
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
+  }
+
+  public async getAllWorkoutTemplates(
+    request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response,
+  ): Promise<void> {
+    const { userId } = request.query;
+    const workoutTemplates = await this.workoutTemplateService.getAllWorkoutTemplates(userId);
+    response.status(200).json(workoutTemplates);
   }
 
   public async deleteWorkoutTemplate(

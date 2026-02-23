@@ -10,6 +10,7 @@ export abstract class WorkoutTemplateRepository {
     workoutTemplateExercise: WorkoutTemplateExercise,
   ): Promise<void>;
   public abstract get(workoutTemplateId: string, userId: string): Promise<WorkoutTemplate | null>;
+  public abstract getAll(userId: string): Promise<WorkoutTemplate[]>;
   public abstract getByOrder(
     workoutTemplateId: string,
     userId: string,
@@ -47,6 +48,17 @@ export class InMemoWorkoutTemplateRepository extends WorkoutTemplateRepository {
     }
 
     return null;
+  }
+
+  public async getAll(userId: string): Promise<WorkoutTemplate[]> {
+    const workoutTemplates: WorkoutTemplate[] = [];
+    for (const workoutTemplate of this.workoutTemplates.values()) {
+      if (workoutTemplate.userId === userId) {
+        workoutTemplates.push(workoutTemplate);
+      }
+    }
+
+    return workoutTemplates;
   }
 
   public async getByOrder(
