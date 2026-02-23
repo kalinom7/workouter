@@ -36,6 +36,9 @@ export class ExerciseController extends Controller {
       this.validator.validate({ params: getExerciseParamsDto, query: authorizationDto }),
       (req, res) => this.get(req, res),
     );
+
+    router.get('/exercises', this.validator.validate({ query: authorizationDto }), (req, res) => this.getAll(req, res));
+
     router.patch(
       '/exercises/:exerciseId',
       this.validator.validate({
@@ -72,6 +75,15 @@ export class ExerciseController extends Controller {
     const { userId } = request.query;
     const exercise = await this.exerciseService.get(exerciseId, userId);
     response.status(200).json(exercise);
+  }
+
+  public async getAll(
+    request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response,
+  ): Promise<void> {
+    const { userId } = request.query;
+    const exercises = await this.exerciseService.getAll(userId);
+    response.status(200).json(exercises);
   }
 
   public async update(
