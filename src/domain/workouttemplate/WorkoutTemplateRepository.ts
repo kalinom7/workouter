@@ -28,10 +28,12 @@ export abstract class WorkoutTemplateRepository {
 export class InMemoWorkoutTemplateRepository extends WorkoutTemplateRepository {
   private readonly workoutTemplates: Map<string, WorkoutTemplate> = new Map();
   private readonly workoutTemplateExercises: Map<string, WorkoutTemplateExercise[]> = new Map();
+
   public async save(workoutTemplate: WorkoutTemplate): Promise<void> {
     this.workoutTemplates.set(workoutTemplate.id, workoutTemplate);
   }
 
+  //todo: NOT USED - may need fixing or deleting
   public async saveWorkoutTemplateExercise(
     workoutTemplateId: string,
     _userId: string,
@@ -61,6 +63,7 @@ export class InMemoWorkoutTemplateRepository extends WorkoutTemplateRepository {
     return workoutTemplates;
   }
 
+  //todo: NOT USED - needs fixing or deleting
   public async getByOrder(
     workoutTemplateId: string,
     _userId: string,
