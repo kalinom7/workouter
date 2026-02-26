@@ -25,7 +25,7 @@ import {
 } from '../dto/WorkoutTemplateControllerDto.js';
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
-import { Validator } from '../validation/Validator.js';
+import { ParsedData, Validator } from '../validation/Validator.js';
 
 @injectable()
 export class WorkoutTemplateController extends Controller {
@@ -103,22 +103,30 @@ export class WorkoutTemplateController extends Controller {
   }
 
   public async create(
-    request: Request<unknown, unknown, CreateWorkoutTemplateBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<unknown, unknown, CreateWorkoutTemplateBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, CreateWorkoutTemplateBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { name } = request.body;
-    const { userId } = request.query;
+    const { name } = response.locals.body;
+    const { userId } = response.locals.query;
     const workoutTemplate = await this.workoutTemplateService.createWorkoutTemplate(name, userId);
     response.status(201).json(workoutTemplate);
   }
 
   public async addWorkoutTemplateExercise(
-    request: Request<AddWorkoutTemplateExerciseParamsDto, unknown, AddWorkoutTemplateExerciseBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<
+      AddWorkoutTemplateExerciseParamsDto,
+      unknown,
+      AddWorkoutTemplateExerciseBodyDto,
+      AuthorizationDto
+    >,
+    response: Response<
+      unknown,
+      ParsedData<AddWorkoutTemplateExerciseParamsDto, AddWorkoutTemplateExerciseBodyDto, AuthorizationDto>
+    >,
   ): Promise<void> {
-    const { exerciseId } = request.body;
-    const { userId } = request.query;
-    const { workoutTemplateId } = request.params;
+    const { exerciseId } = response.locals.body;
+    const { userId } = response.locals.query;
+    const { workoutTemplateId } = response.locals.params;
     const workoutTemplate = await this.workoutTemplateService.addWorkoutTemplateExercise(
       exerciseId,
       workoutTemplateId,
@@ -127,23 +135,23 @@ export class WorkoutTemplateController extends Controller {
     response.status(201).json(workoutTemplate);
   }
   public async removeWorkoutTemplateExercise(
-    request: Request<RemoveWorkoutTemplateExerciseParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<RemoveWorkoutTemplateExerciseParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<RemoveWorkoutTemplateExerciseParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutTemplateId, order } = request.params;
+    const { userId } = response.locals.query;
+    const { workoutTemplateId, order } = response.locals.params;
     await this.workoutTemplateService.removeWorkoutTemplateExercise(workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async setNumberOfSets(
-    request: Request<SetNumberOfSetsParamsDto, unknown, SetNumberOfSetsBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<SetNumberOfSetsParamsDto, unknown, SetNumberOfSetsBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<SetNumberOfSetsParamsDto, SetNumberOfSetsBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { sets } = request.body;
-    const { workoutTemplateId, order } = request.params;
-    const { userId } = request.query;
+    const { sets } = response.locals.body;
+    const { workoutTemplateId, order } = response.locals.params;
+    const { userId } = response.locals.query;
     console.log('order type:', typeof order);
     await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
@@ -151,42 +159,42 @@ export class WorkoutTemplateController extends Controller {
   }
 
   public async setRestPeriod(
-    request: Request<SetRestPeriodParamsDto, unknown, SetRestPeriodBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<SetRestPeriodParamsDto, unknown, SetRestPeriodBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<SetRestPeriodParamsDto, SetRestPeriodBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { restPeriod } = request.body;
-    const { workoutTemplateId, order } = request.params;
-    const { userId } = request.query;
+    const { restPeriod } = response.locals.body;
+    const { workoutTemplateId, order } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutTemplateService.setRestPeriod(restPeriod, workoutTemplateId, userId, order);
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async getWorkoutTemplate(
-    request: Request<GetWorkoutTemplateParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<GetWorkoutTemplateParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<GetWorkoutTemplateParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutTemplateId } = request.params;
-    const { userId } = request.query;
+    const { workoutTemplateId } = response.locals.params;
+    const { userId } = response.locals.query;
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }
 
   public async getAllWorkoutTemplates(
-    request: Request<unknown, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
+    const { userId } = response.locals.query;
     const workoutTemplates = await this.workoutTemplateService.getAllWorkoutTemplates(userId);
     response.status(200).json(workoutTemplates);
   }
 
   public async deleteWorkoutTemplate(
-    request: Request<DeleteWorkoutTemplateParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<DeleteWorkoutTemplateParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<DeleteWorkoutTemplateParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutTemplateId } = request.params;
-    const { userId } = request.query;
+    const { workoutTemplateId } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutTemplateService.deleteWorkoutTemplate(workoutTemplateId, userId);
     response.status(204).send();
   }

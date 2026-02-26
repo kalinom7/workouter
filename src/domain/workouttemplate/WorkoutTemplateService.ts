@@ -43,7 +43,7 @@ export class WorkoutTemplateService {
     };
 
     workoutTemplate.exercises.push(workoutTemplateExercise);
-    //think about save workoutTemplateExercise
+
     await this.workoutTemplateRepository.save(workoutTemplate);
 
     return workoutTemplate;
@@ -69,29 +69,31 @@ export class WorkoutTemplateService {
   }
 
   public async setNumberOfSets(sets: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
-    const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
-    if (!workoutTemplate) {
-      throw new Error('WorkoutTemplate not found');
+    const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
+    if (workoutTemplateExercise == null) {
+      throw new Error('WorkoutTemplateExercise not found');
     }
-    const exercise = workoutTemplate.exercises.find((e) => e.order === order);
-    if (!exercise) {
-      throw new Error(`WorkoutTemplateExercise with order ${order} not found`);
-    }
-    exercise.sets = sets;
-    await this.workoutTemplateRepository.save(workoutTemplate);
+    workoutTemplateExercise.sets = sets;
+
+    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
+      workoutTemplateId,
+      userId,
+      workoutTemplateExercise,
+    );
   }
 
   public async setRestPeriod(restPeriod: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
-    const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
-    if (!workoutTemplate) {
-      throw new Error('WorkoutTemplate not found');
+    const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
+    if (workoutTemplateExercise == null) {
+      throw new Error('WorkoutTemplateExercise not found');
     }
-    const exercise = workoutTemplate.exercises.find((e) => e.order === order);
-    if (!exercise) {
-      throw new Error(`WorkoutTemplateExercise with order ${order} not found`);
-    }
-    exercise.restPeriod = restPeriod;
-    await this.workoutTemplateRepository.save(workoutTemplate);
+    workoutTemplateExercise.restPeriod = restPeriod;
+
+    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
+      workoutTemplateId,
+      userId,
+      workoutTemplateExercise,
+    );
   }
 
   public async getWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {

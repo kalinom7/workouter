@@ -18,13 +18,7 @@ export type AddWorkoutTemplateExerciseParamsDto = z.infer<typeof addWorkoutTempl
 
 export const removeWorkoutTemplateExerciseParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  order: z.preprocess((value) => {
-    if (typeof value === 'string') {
-      return Number(value);
-    }
-
-    return value;
-  }, z.number().min(0)),
+  order: z.coerce.number().min(0),
 });
 export type RemoveWorkoutTemplateExerciseParamsDto = z.infer<typeof removeWorkoutTemplateExerciseParamsDto>;
 
@@ -35,15 +29,8 @@ export type SetNumberOfSetsBodyDto = z.infer<typeof setNumberOfSetsBodyDto>;
 
 export const setNumberOfSetsParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  order: z.preprocess((value) => {
-    if (typeof value === 'string') {
-      return Number(value);
-    }
-
-    return value;
-  }, z.number().min(0)),
+  order: z.coerce.number().min(0),
 });
-
 export type SetNumberOfSetsParamsDto = z.infer<typeof setNumberOfSetsParamsDto>;
 
 export const setRestPeriodBodyDto = z.object({
@@ -53,13 +40,7 @@ export type SetRestPeriodBodyDto = z.infer<typeof setRestPeriodBodyDto>;
 
 export const setRestPeriodParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  order: z.preprocess((value) => {
-    if (typeof value === 'string') {
-      return Number(value);
-    }
-
-    return value;
-  }, z.number().min(0)),
+  order: z.coerce.number().min(0),
 });
 export type SetRestPeriodParamsDto = z.infer<typeof setRestPeriodParamsDto>;
 
