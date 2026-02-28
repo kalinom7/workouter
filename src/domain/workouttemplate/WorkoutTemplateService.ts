@@ -27,19 +27,22 @@ export class WorkoutTemplateService {
     exerciseId: UUID,
     workoutTemplateId: UUID,
     userId: UUID,
+    sets: number,
+    restPeriod: number,
   ): Promise<WorkoutTemplate> {
     const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
+
     if (workoutTemplate == null) {
       throw new Error('WorkoutTemplate not found');
     }
+
     const order = workoutTemplate.exercises.length;
 
-    //think about why is there a new exercise no something choosen from some list
     const workoutTemplateExercise: WorkoutTemplateExercise = {
       exercise: exerciseId,
       order,
-      sets: 0,
-      restPeriod: 0,
+      sets,
+      restPeriod,
     };
 
     workoutTemplate.exercises.push(workoutTemplateExercise);
@@ -66,6 +69,30 @@ export class WorkoutTemplateService {
       }
     }
     await this.workoutTemplateRepository.save(workoutTemplate);
+  }
+
+  //put
+  public async editWorkoutTemplateExercise(
+    workoutTemplateId: UUID,
+    userId: UUID,
+    order: number,
+    exerciseId: UUID,
+    sets: number,
+    restPeriod: number,
+  ): Promise<void> {
+    const exercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
+    if (exercise == null) {
+      throw new Error('WorkoutTemplateExercise not found');
+    }
+
+    const updatedExercise: WorkoutTemplateExercise = {
+      exercise: exerciseId,
+      order,
+      sets,
+      restPeriod,
+    };
+
+    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(workoutTemplateId, userId, updatedExercise);
   }
 
   public async setNumberOfSets(sets: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
