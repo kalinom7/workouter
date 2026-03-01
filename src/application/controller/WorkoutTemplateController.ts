@@ -6,22 +6,18 @@ import {
   AddWorkoutTemplateExerciseParamsDto,
   DeleteWorkoutTemplateParamsDto,
   RemoveWorkoutTemplateExerciseParamsDto,
-  SetNumberOfSetsBodyDto,
-  SetNumberOfSetsParamsDto,
-  SetRestPeriodBodyDto,
-  SetRestPeriodParamsDto,
   CreateWorkoutTemplateBodyDto,
   GetWorkoutTemplateParamsDto,
   createWorkoutTemplateBodyDto,
   addWorkoutTemplateExerciseParamsDto,
   addWorkoutTemplateExerciseBodyDto,
   removeWorkoutTemplateExerciseParamsDto,
-  setNumberOfSetsParamsDto,
-  setNumberOfSetsBodyDto,
-  setRestPeriodParamsDto,
-  setRestPeriodBodyDto,
   getWorkoutTemplateParamsDto,
   deleteWorkoutTemplateParamsDto,
+  editWorkoutTemplateExerciseBodyDto,
+  editWorkoutTemplateExerciseParamsDto,
+  EditWorkoutTemplateExerciseBodyDto,
+  EditWorkoutTemplateExerciseParamsDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
@@ -63,24 +59,14 @@ export class WorkoutTemplateController extends Controller {
       (req, res) => this.removeWorkoutTemplateExercise(req, res),
     );
 
-    router.patch(
-      '/workout-templates/:workoutTemplateId/exercises/:order/sets',
+    router.put(
+      '/workout-templates/:workoutTemplateId/exercises/:order',
       this.validator.validate({
-        params: setNumberOfSetsParamsDto,
-        body: setNumberOfSetsBodyDto,
+        params: editWorkoutTemplateExerciseParamsDto,
+        body: editWorkoutTemplateExerciseBodyDto,
         query: authorizationDto,
       }),
-      (req, res) => this.setNumberOfSets(req, res),
-    );
-
-    router.patch(
-      '/workout-templates/:workoutTemplateId/exercises/:order/rest-period',
-      this.validator.validate({
-        params: setRestPeriodParamsDto,
-        body: setRestPeriodBodyDto,
-        query: authorizationDto,
-      }),
-      (req, res) => this.setRestPeriod(req, res),
+      (req, res) => this.editWorkoutTemplateExercise(req, res),
     );
 
     router.get(
@@ -124,13 +110,15 @@ export class WorkoutTemplateController extends Controller {
       ParsedData<AddWorkoutTemplateExerciseParamsDto, AddWorkoutTemplateExerciseBodyDto, AuthorizationDto>
     >,
   ): Promise<void> {
-    const { exerciseId } = response.locals.body;
+    const { exerciseId, sets, restPeriod } = response.locals.body;
     const { userId } = response.locals.query;
     const { workoutTemplateId } = response.locals.params;
     const workoutTemplate = await this.workoutTemplateService.addWorkoutTemplateExercise(
       exerciseId,
       workoutTemplateId,
       userId,
+      sets,
+      restPeriod,
     );
     response.status(201).json(workoutTemplate);
   }
@@ -145,27 +133,30 @@ export class WorkoutTemplateController extends Controller {
     response.status(200).json(workoutTemplate);
   }
 
-  public async setNumberOfSets(
-    _request: Request<SetNumberOfSetsParamsDto, unknown, SetNumberOfSetsBodyDto, AuthorizationDto>,
-    response: Response<unknown, ParsedData<SetNumberOfSetsParamsDto, SetNumberOfSetsBodyDto, AuthorizationDto>>,
+  public async editWorkoutTemplateExercise(
+    _request: Request<
+      EditWorkoutTemplateExerciseParamsDto,
+      unknown,
+      EditWorkoutTemplateExerciseBodyDto,
+      AuthorizationDto
+    >,
+    response: Response<
+      unknown,
+      ParsedData<EditWorkoutTemplateExerciseParamsDto, EditWorkoutTemplateExerciseBodyDto, AuthorizationDto>
+    >,
   ): Promise<void> {
-    const { sets } = response.locals.body;
-    const { workoutTemplateId, order } = response.locals.params;
     const { userId } = response.locals.query;
-    console.log('order type:', typeof order);
-    await this.workoutTemplateService.setNumberOfSets(sets, workoutTemplateId, userId, order);
-    const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
-    response.status(200).json(workoutTemplate);
-  }
+    const { workoutTemplateId, order } = response.locals.params;
+    const { exerciseId, sets, restPeriod } = response.locals.body;
 
-  public async setRestPeriod(
-    _request: Request<SetRestPeriodParamsDto, unknown, SetRestPeriodBodyDto, AuthorizationDto>,
-    response: Response<unknown, ParsedData<SetRestPeriodParamsDto, SetRestPeriodBodyDto, AuthorizationDto>>,
-  ): Promise<void> {
-    const { restPeriod } = response.locals.body;
-    const { workoutTemplateId, order } = response.locals.params;
-    const { userId } = response.locals.query;
-    await this.workoutTemplateService.setRestPeriod(restPeriod, workoutTemplateId, userId, order);
+    await this.workoutTemplateService.editWorkoutTemplateExercise(
+      workoutTemplateId,
+      userId,
+      order,
+      exerciseId,
+      sets,
+      restPeriod,
+    );
     const workoutTemplate = await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId);
     response.status(200).json(workoutTemplate);
   }

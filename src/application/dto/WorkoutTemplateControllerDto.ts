@@ -42,6 +42,7 @@ export const editWorkoutTemplateExerciseParamsDto = z.object({
 export type EditWorkoutTemplateExerciseParamsDto = z.infer<typeof editWorkoutTemplateExerciseParamsDto>;
 
 export const editWorkoutTemplateExerciseBodyDto = z.object({
+  exerciseId: z.uuid().transform((str) => str as UUID),
   sets: z.number().min(0),
   restPeriod: z.number().min(0),
 });
