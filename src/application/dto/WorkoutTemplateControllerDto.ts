@@ -8,6 +8,8 @@ export type CreateWorkoutTemplateBodyDto = z.infer<typeof createWorkoutTemplateB
 
 export const addWorkoutTemplateExerciseBodyDto = z.object({
   exerciseId: z.uuid().transform((str) => str as UUID),
+  sets: z.number().min(0),
+  restPeriod: z.number().min(0),
 });
 export type AddWorkoutTemplateExerciseBodyDto = z.infer<typeof addWorkoutTemplateExerciseBodyDto>;
 
@@ -22,28 +24,6 @@ export const removeWorkoutTemplateExerciseParamsDto = z.object({
 });
 export type RemoveWorkoutTemplateExerciseParamsDto = z.infer<typeof removeWorkoutTemplateExerciseParamsDto>;
 
-export const setNumberOfSetsBodyDto = z.object({
-  sets: z.number().min(1),
-});
-export type SetNumberOfSetsBodyDto = z.infer<typeof setNumberOfSetsBodyDto>;
-
-export const setNumberOfSetsParamsDto = z.object({
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  order: z.coerce.number().min(0),
-});
-export type SetNumberOfSetsParamsDto = z.infer<typeof setNumberOfSetsParamsDto>;
-
-export const setRestPeriodBodyDto = z.object({
-  restPeriod: z.number().min(0),
-});
-export type SetRestPeriodBodyDto = z.infer<typeof setRestPeriodBodyDto>;
-
-export const setRestPeriodParamsDto = z.object({
-  workoutTemplateId: z.uuid().transform((str) => str as UUID),
-  order: z.coerce.number().min(0),
-});
-export type SetRestPeriodParamsDto = z.infer<typeof setRestPeriodParamsDto>;
-
 export const getWorkoutTemplateParamsDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
 });
@@ -54,3 +34,15 @@ export const deleteWorkoutTemplateParamsDto = z.object({
 });
 
 export type DeleteWorkoutTemplateParamsDto = z.infer<typeof deleteWorkoutTemplateParamsDto>;
+
+export const editWorkoutTemplateExerciseParamsDto = z.object({
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+  order: z.coerce.number().min(0),
+});
+export type EditWorkoutTemplateExerciseParamsDto = z.infer<typeof editWorkoutTemplateExerciseParamsDto>;
+
+export const editWorkoutTemplateExerciseBodyDto = z.object({
+  sets: z.number().min(0),
+  restPeriod: z.number().min(0),
+});
+export type EditWorkoutTemplateExerciseBodyDto = z.infer<typeof editWorkoutTemplateExerciseBodyDto>;
