@@ -31,6 +31,7 @@ export class InMemoWorkoutTemplateRepository extends WorkoutTemplateRepository {
 
   public async save(workoutTemplate: WorkoutTemplate): Promise<void> {
     this.workoutTemplates.set(workoutTemplate.id, workoutTemplate);
+    this.workoutTemplateExercises.set(workoutTemplate.id, workoutTemplate.exercises);
   }
 
   public async saveWorkoutTemplateExercise(
@@ -39,7 +40,14 @@ export class InMemoWorkoutTemplateRepository extends WorkoutTemplateRepository {
     workoutTemplateExercise: WorkoutTemplateExercise,
   ): Promise<void> {
     const exercises = this.workoutTemplateExercises.get(workoutTemplateId) || [];
-    exercises.push(workoutTemplateExercise);
+    const index = exercises.findIndex((e) => e.order === workoutTemplateExercise.order);
+
+    if (index === -1) {
+      throw new Error('WorkoutTemplateExercise not found');
+    } else {
+      exercises[index] = workoutTemplateExercise;
+    }
+
     this.workoutTemplateExercises.set(workoutTemplateId, exercises);
   }
 
