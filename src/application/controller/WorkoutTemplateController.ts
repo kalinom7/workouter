@@ -18,6 +18,10 @@ import {
   editWorkoutTemplateExerciseParamsDto,
   EditWorkoutTemplateExerciseBodyDto,
   EditWorkoutTemplateExerciseParamsDto,
+  EditWorkoutTemplateNameBodyDto,
+  EditWorkoutTemplateNameParamsDto,
+  editWorkoutTemplateNameBodyDto,
+  editWorkoutTemplateNameParamsDto,
 } from '../dto/WorkoutTemplateControllerDto.js';
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
@@ -40,6 +44,16 @@ export class WorkoutTemplateController extends Controller {
       this.validator.validate({ body: createWorkoutTemplateBodyDto, query: authorizationDto }),
       (req, res) => this.create(req, res),
     );
+    router.patch(
+      `/workout-templates/:workoutTemplateId/edit-name`,
+      this.validator.validate({
+        params: editWorkoutTemplateNameParamsDto,
+        body: editWorkoutTemplateNameBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.editName(req, res),
+    );
+
     router.post(
       '/workout-templates/:workoutTemplateId/exercises',
       this.validator.validate({
@@ -96,6 +110,24 @@ export class WorkoutTemplateController extends Controller {
     const { userId } = response.locals.query;
     const workoutTemplate = await this.workoutTemplateService.createWorkoutTemplate(name, userId);
     response.status(201).json(workoutTemplate);
+  }
+
+  public async editName(
+    _request: Request<EditWorkoutTemplateNameParamsDto, unknown, EditWorkoutTemplateNameBodyDto, AuthorizationDto>,
+    response: Response<
+      unknown,
+      ParsedData<EditWorkoutTemplateNameParamsDto, EditWorkoutTemplateNameBodyDto, AuthorizationDto>
+    >,
+  ): Promise<void> {
+    const { workoutTemplateId } = response.locals.params;
+    const { newName } = response.locals.body;
+    const { userId } = response.locals.query;
+    const workoutTemplate = await this.workoutTemplateService.editWorkoutTemplateName(
+      workoutTemplateId,
+      userId,
+      newName,
+    );
+    response.status(200).json(workoutTemplate);
   }
 
   public async addWorkoutTemplateExercise(

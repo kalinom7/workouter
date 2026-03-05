@@ -22,6 +22,24 @@ export class WorkoutTemplateService {
     return workoutTemplate;
   }
 
+  public async editWorkoutTemplateName(
+    workoutTemplateId: UUID,
+    userId: UUID,
+    newName: string,
+  ): Promise<WorkoutTemplate> {
+    const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
+
+    if (workoutTemplate == null) {
+      throw new Error('WorkoutTemplate not found');
+    }
+
+    workoutTemplate.name = newName;
+
+    await this.workoutTemplateRepository.save(workoutTemplate);
+
+    return workoutTemplate;
+  }
+
   //select a workoutTemplateExercise
   public async addWorkoutTemplateExercise(
     exerciseId: UUID,
@@ -93,34 +111,6 @@ export class WorkoutTemplateService {
     };
 
     await this.workoutTemplateRepository.saveWorkoutTemplateExercise(workoutTemplateId, userId, updatedExercise);
-  }
-
-  public async setNumberOfSets(sets: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
-    const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
-    if (workoutTemplateExercise == null) {
-      throw new Error('WorkoutTemplateExercise not found');
-    }
-    workoutTemplateExercise.sets = sets;
-
-    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
-      workoutTemplateId,
-      userId,
-      workoutTemplateExercise,
-    );
-  }
-
-  public async setRestPeriod(restPeriod: number, workoutTemplateId: UUID, userId: UUID, order: number): Promise<void> {
-    const workoutTemplateExercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
-    if (workoutTemplateExercise == null) {
-      throw new Error('WorkoutTemplateExercise not found');
-    }
-    workoutTemplateExercise.restPeriod = restPeriod;
-
-    await this.workoutTemplateRepository.saveWorkoutTemplateExercise(
-      workoutTemplateId,
-      userId,
-      workoutTemplateExercise,
-    );
   }
 
   public async getWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {

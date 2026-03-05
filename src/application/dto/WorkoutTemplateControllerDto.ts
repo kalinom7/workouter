@@ -47,3 +47,13 @@ export const editWorkoutTemplateExerciseBodyDto = z.object({
   restPeriod: z.number().min(0),
 });
 export type EditWorkoutTemplateExerciseBodyDto = z.infer<typeof editWorkoutTemplateExerciseBodyDto>;
+
+export const editWorkoutTemplateNameParamsDto = z.object({
+  workoutTemplateId: z.uuid().transform((str) => str as UUID),
+});
+export type EditWorkoutTemplateNameParamsDto = z.infer<typeof editWorkoutTemplateNameParamsDto>;
+
+export const editWorkoutTemplateNameBodyDto = z.object({
+  newName: z.string().min(1),
+});
+export type EditWorkoutTemplateNameBodyDto = z.infer<typeof editWorkoutTemplateNameBodyDto>;
