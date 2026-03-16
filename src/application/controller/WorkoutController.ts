@@ -32,7 +32,7 @@ import {
   StartWorkoutFromTemplateBodyDto,
   startWorkoutFromTemplateBodyDto,
 } from '../dto/WorkoutControllerDto.js';
-import { Validator } from '../validation/Validator.js';
+import { ParsedData, Validator } from '../validation/Validator.js';
 import { Controller } from './Controller.js';
 
 @injectable()
@@ -131,141 +131,141 @@ export class WorkoutController extends Controller {
   }
 
   private async startWorkoutFromTemplate(
-    request: Request<unknown, unknown, StartWorkoutFromTemplateBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<unknown, unknown, StartWorkoutFromTemplateBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, StartWorkoutFromTemplateBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutTemplateId } = request.body;
-    const { userId } = request.query;
+    const { workoutTemplateId } = response.locals.body;
+    const { userId } = response.locals.query;
     const workout = await this.workoutService.startWorkoutFromTemplate(new Date(), userId, workoutTemplateId);
     response.status(201).json(workout);
   }
 
   private async startEmptyWorkout(
-    request: Request<unknown, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
+    const { userId } = response.locals.query;
     const workout = await this.workoutService.startEmptyWorkout(new Date(), userId);
     response.status(201).json(workout);
   }
 
   private async finishWorkout(
-    request: Request<FinishWorkoutParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<FinishWorkoutParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<FinishWorkoutParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutId } = request.params;
-    const { userId } = request.query;
+    const { workoutId } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutService.finishWorkout(userId, workoutId, new Date());
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async getWorkout(
-    request: Request<GetWorkoutParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<GetWorkoutParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<GetWorkoutParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutId } = request.params;
-    const { userId } = request.query;
+    const { workoutId } = response.locals.params;
+    const { userId } = response.locals.query;
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async addExercise(
-    request: Request<AddExerciseParamsDto, unknown, AddExerciseBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<AddExerciseParamsDto, unknown, AddExerciseBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<AddExerciseParamsDto, AddExerciseBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { exerciseId } = request.body;
-    const { userId } = request.query;
-    const { workoutId } = request.params;
+    const { exerciseId } = response.locals.body;
+    const { userId } = response.locals.query;
+    const { workoutId } = response.locals.params;
     await this.workoutService.addExercise(userId, workoutId, exerciseId);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(201).json(workout);
   }
 
   private async removeExercise(
-    request: Request<RemoveExerciseParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<RemoveExerciseParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<RemoveExerciseParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutId, exerciseOrder } = request.params;
-    const { userId } = request.query;
+    const { workoutId, exerciseOrder } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutService.removeExercise(userId, workoutId, exerciseOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async addSet(
-    request: Request<AddSetParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<AddSetParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<AddSetParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutId, exerciseOrder } = request.params;
-    const { userId } = request.query;
+    const { workoutId, exerciseOrder } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutService.addSet(userId, workoutId, exerciseOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(201).json(workout);
   }
 
   private async removeSet(
-    request: Request<RemoveSetParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<RemoveSetParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<RemoveSetParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutId, exerciseOrder, setOrder } = request.params;
-    const { userId } = request.query;
+    const { workoutId, exerciseOrder, setOrder } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutService.removeSet(userId, workoutId, exerciseOrder, setOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async addWeightAndReps(
-    request: Request<AddWeightAndRepsParamsDto, unknown, AddWeightAndRepsBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<AddWeightAndRepsParamsDto, unknown, AddWeightAndRepsBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<AddWeightAndRepsParamsDto, AddWeightAndRepsBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { weight, reps } = request.body;
-    const { userId } = request.query;
-    const { workoutId, exerciseOrder, setOrder } = request.params;
+    const { weight, reps } = response.locals.body;
+    const { userId } = response.locals.query;
+    const { workoutId, exerciseOrder, setOrder } = response.locals.params;
     await this.workoutService.addWeightAndReps(userId, workoutId, exerciseOrder, setOrder, weight, reps);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async markSetAsCompleted(
-    request: Request<MarkSetAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<MarkSetAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<MarkSetAsCompletedParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutId, exerciseOrder, setOrder } = request.params;
+    const { userId } = response.locals.query;
+    const { workoutId, exerciseOrder, setOrder } = response.locals.params;
     await this.workoutService.markSetAsCompleted(userId, workoutId, exerciseOrder, setOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async markSetAsUncompleted(
-    request: Request<MarkSetAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<MarkSetAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<MarkSetAsUnCompletedParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutId, exerciseOrder, setOrder } = request.params;
+    const { userId } = response.locals.query;
+    const { workoutId, exerciseOrder, setOrder } = response.locals.params;
     await this.workoutService.markSetAsUnCompleted(userId, workoutId, exerciseOrder, setOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async markExerciseAsCompleted(
-    request: Request<MarkExerciseAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<MarkExerciseAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<MarkExerciseAsCompletedParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutId, exerciseOrder } = request.params;
+    const { userId } = response.locals.query;
+    const { workoutId, exerciseOrder } = response.locals.params;
     await this.workoutService.markExerciseAsCompleted(userId, workoutId, exerciseOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
 
   private async markExerciseAsUncompleted(
-    request: Request<MarkExerciseAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<MarkExerciseAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<MarkExerciseAsUnCompletedParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutId, exerciseOrder } = request.params;
+    const { userId } = response.locals.query;
+    const { workoutId, exerciseOrder } = response.locals.params;
     await this.workoutService.markExerciseAsUnCompleted(userId, workoutId, exerciseOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
