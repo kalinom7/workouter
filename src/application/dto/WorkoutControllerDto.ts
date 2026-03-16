@@ -23,20 +23,20 @@ export type AddExerciseParamsDto = z.infer<typeof addExerciseParamsDto>;
 
 export const removeExerciseParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
 });
 export type RemoveExerciseParamsDto = z.infer<typeof removeExerciseParamsDto>;
 
 export const addSetParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
 });
 export type AddSetParamsDto = z.infer<typeof addSetParamsDto>;
 
 export const removeSetParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-  setOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
+  setOrder: z.coerce.number().int().min(0),
 });
 export type RemoveSetParamsDto = z.infer<typeof removeSetParamsDto>;
 
@@ -48,34 +48,34 @@ export type AddWeightAndRepsBodyDto = z.infer<typeof addWeightAndRepsBodyDto>;
 
 export const addWeightAndRepsParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-  setOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
+  setOrder: z.coerce.number().int().min(0),
 });
 export type AddWeightAndRepsParamsDto = z.infer<typeof addWeightAndRepsParamsDto>;
 
 export const markSetAsCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-  setOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
+  setOrder: z.coerce.number().int().min(0),
 });
 export type MarkSetAsCompletedParamsDto = z.infer<typeof markSetAsCompletedParamsDto>;
 
 export const markSetAsUnCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
-  setOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
+  setOrder: z.coerce.number().int().min(0),
 });
 export type MarkSetAsUnCompletedParamsDto = z.infer<typeof markSetAsUnCompletedParamsDto>;
 
 export const markExerciseAsCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
 });
 export type MarkExerciseAsCompletedParamsDto = z.infer<typeof markExerciseAsCompletedParamsDto>;
 
 export const markExerciseAsUnCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.number().int().min(0),
+  exerciseOrder: z.coerce.number().int().min(0),
 });
 export type MarkExerciseAsUnCompletedParamsDto = z.infer<typeof markExerciseAsUnCompletedParamsDto>;
 
