@@ -141,11 +141,15 @@ export class WorkoutService {
 
     set.weight = weight;
     set.reps = reps;
+    set.isCompleted = true;
+
+    const allSetsCompleted = exercise.sets.every((s) => s.isCompleted);
+    exercise.isCompleted = allSetsCompleted;
 
     await this.workoutRepository.save(workout);
   }
 
-  // mark set as completed
+  // TODO: think about deleting this method and refactor addWeightAndReps
   public async markSetAsCompleted(
     userId: UUID,
     workoutId: UUID,
