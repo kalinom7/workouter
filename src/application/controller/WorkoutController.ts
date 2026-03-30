@@ -27,6 +27,10 @@ import {
   saveSetBodyDto,
   SaveSetParamsDto,
   saveSetParamsDto,
+  setRestPeriodBodyDto,
+  SetRestPeriodBodyDto,
+  setRestPeriodParamsDto,
+  SetRestPeriodParamsDto,
   StartWorkoutFromTemplateBodyDto,
   startWorkoutFromTemplateBodyDto,
 } from '../dto/WorkoutControllerDto.js';
@@ -117,6 +121,11 @@ export class WorkoutController extends Controller {
       '/workouts/:workoutId/exercises/:exerciseOrder/un-complete',
       this.validator.validate({ params: markExerciseAsUnCompletedParamsDto, query: authorizationDto }),
       (req, res) => this.markExerciseAsUncompleted(req, res),
+    );
+    router.patch(
+      '/workouts/:workoutId/exercises/:exerciseOrder/setRestPeriod',
+      this.validator.validate({ body: setRestPeriodBodyDto, params: setRestPeriodParamsDto, query: authorizationDto }),
+      (req, res) => this.setRestPeriod(req, res),
     );
 
     return router;
@@ -248,6 +257,18 @@ export class WorkoutController extends Controller {
     const { userId } = response.locals.query;
     const { workoutId, exerciseOrder } = response.locals.params;
     await this.workoutService.markExerciseAsUnCompleted(userId, workoutId, exerciseOrder);
+    const workout = await this.workoutService.getWorkout(workoutId, userId);
+    response.status(200).json(workout);
+  }
+
+  private async setRestPeriod(
+    _request: Request<SetRestPeriodParamsDto, unknown, SetRestPeriodBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<SetRestPeriodParamsDto, SetRestPeriodBodyDto, AuthorizationDto>>,
+  ): Promise<void> {
+    const { userId } = response.locals.query;
+    const { workoutId, exerciseOrder } = response.locals.params;
+    const { restPeriod } = response.locals.body;
+    await this.workoutService.setRestPeriod(workoutId, exerciseOrder, restPeriod, userId);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }

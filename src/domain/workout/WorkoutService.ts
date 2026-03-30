@@ -197,6 +197,14 @@ export class WorkoutService {
 
     return workout;
   }
+  public async setRestPeriod(workoutId: UUID, exerciseOrder: number, restPeriod: number, userId: UUID): Promise<void> {
+    const workout = await this.getWorkout(workoutId, userId);
+    const exercise = this.getOrderedExercise(workout, exerciseOrder);
+
+    exercise.restPeriod = restPeriod;
+    await this.workoutRepository.save(workout);
+  }
+
   private getOrderedExercise(workout: Workout, exerciseOrder: number): WorkoutExercise {
     const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
     if (exercise == null) {

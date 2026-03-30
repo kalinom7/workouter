@@ -76,3 +76,14 @@ export const getWorkoutParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
 });
 export type GetWorkoutParamsDto = z.infer<typeof getWorkoutParamsDto>;
+
+export const setRestPeriodBodyDto = z.object({
+  restPeriod: z.number().int().min(0),
+});
+export type SetRestPeriodBodyDto = z.infer<typeof setRestPeriodBodyDto>;
+
+export const setRestPeriodParamsDto = z.object({
+  workoutId: z.uuid().transform((str) => str as UUID),
+  exerciseOrder: z.coerce.number().int().min(0),
+});
+export type SetRestPeriodParamsDto = z.infer<typeof setRestPeriodParamsDto>;
