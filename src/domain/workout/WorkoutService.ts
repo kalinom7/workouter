@@ -123,7 +123,7 @@ export class WorkoutService {
     await this.workoutRepository.save(workout);
   }
 
-  public async addWeightAndReps(
+  public async saveSet(
     userId: UUID,
     workoutId: UUID,
     exerciseOrder: number,
@@ -149,26 +149,6 @@ export class WorkoutService {
     await this.workoutRepository.save(workout);
   }
 
-  // TODO: think about deleting this method and refactor addWeightAndReps
-  public async markSetAsCompleted(
-    userId: UUID,
-    workoutId: UUID,
-    exerciseOrder: number,
-    setOrder: number,
-  ): Promise<void> {
-    const workout = await this.getWorkout(workoutId, userId);
-    const exercise = this.getOrderedExercise(workout, exerciseOrder);
-    const set = exercise.sets.find((s) => s.order === setOrder);
-    if (set == null) {
-      throw new Error('Set not found in exercise');
-    }
-    set.isCompleted = true;
-
-    const allSetsCompleted = exercise.sets.every((s) => s.isCompleted);
-    exercise.isCompleted = allSetsCompleted;
-
-    await this.workoutRepository.save(workout);
-  }
   //mark set as uncompleted
   public async markSetAsUnCompleted(
     userId: UUID,

@@ -9,10 +9,6 @@ import {
   addExerciseParamsDto,
   AddSetParamsDto,
   addSetParamsDto,
-  AddWeightAndRepsBodyDto,
-  addWeightAndRepsBodyDto,
-  AddWeightAndRepsParamsDto,
-  addWeightAndRepsParamsDto,
   FinishWorkoutParamsDto,
   finishWorkoutParamsDto,
   getWorkoutParamsDto,
@@ -21,14 +17,16 @@ import {
   MarkExerciseAsCompletedParamsDto,
   markExerciseAsUnCompletedParamsDto,
   MarkExerciseAsUnCompletedParamsDto,
-  MarkSetAsCompletedParamsDto,
-  markSetAsCompletedParamsDto,
   MarkSetAsUnCompletedParamsDto,
   markSetAsUnCompletedParamsDto,
   RemoveExerciseParamsDto,
   removeExerciseParamsDto,
   RemoveSetParamsDto,
   removeSetParamsDto,
+  SaveSetBodyDto,
+  saveSetBodyDto,
+  SaveSetParamsDto,
+  saveSetParamsDto,
   StartWorkoutFromTemplateBodyDto,
   startWorkoutFromTemplateBodyDto,
 } from '../dto/WorkoutControllerDto.js';
@@ -96,17 +94,11 @@ export class WorkoutController extends Controller {
     router.patch(
       '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder',
       this.validator.validate({
-        body: addWeightAndRepsBodyDto,
-        params: addWeightAndRepsParamsDto,
+        body: saveSetBodyDto,
+        params: saveSetParamsDto,
         query: authorizationDto,
       }),
-      (req, res) => this.addWeightAndReps(req, res),
-    );
-
-    router.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/sets/:setOrder/complete',
-      this.validator.validate({ params: markSetAsCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.markSetAsCompleted(req, res),
+      (req, res) => this.saveSet(req, res),
     );
 
     router.patch(
@@ -215,25 +207,14 @@ export class WorkoutController extends Controller {
     response.status(200).json(workout);
   }
 
-  private async addWeightAndReps(
-    _request: Request<AddWeightAndRepsParamsDto, unknown, AddWeightAndRepsBodyDto, AuthorizationDto>,
-    response: Response<unknown, ParsedData<AddWeightAndRepsParamsDto, AddWeightAndRepsBodyDto, AuthorizationDto>>,
+  private async saveSet(
+    _request: Request<SaveSetParamsDto, unknown, SaveSetBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<SaveSetParamsDto, SaveSetBodyDto, AuthorizationDto>>,
   ): Promise<void> {
     const { weight, reps } = response.locals.body;
     const { userId } = response.locals.query;
     const { workoutId, exerciseOrder, setOrder } = response.locals.params;
-    await this.workoutService.addWeightAndReps(userId, workoutId, exerciseOrder, setOrder, weight, reps);
-    const workout = await this.workoutService.getWorkout(workoutId, userId);
-    response.status(200).json(workout);
-  }
-
-  private async markSetAsCompleted(
-    _request: Request<MarkSetAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response<unknown, ParsedData<MarkSetAsCompletedParamsDto, unknown, AuthorizationDto>>,
-  ): Promise<void> {
-    const { userId } = response.locals.query;
-    const { workoutId, exerciseOrder, setOrder } = response.locals.params;
-    await this.workoutService.markSetAsCompleted(userId, workoutId, exerciseOrder, setOrder);
+    await this.workoutService.saveSet(userId, workoutId, exerciseOrder, setOrder, weight, reps);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }

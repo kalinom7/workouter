@@ -40,25 +40,18 @@ export const removeSetParamsDto = z.object({
 });
 export type RemoveSetParamsDto = z.infer<typeof removeSetParamsDto>;
 
-export const addWeightAndRepsBodyDto = z.object({
+export const saveSetBodyDto = z.object({
   weight: z.number().nonnegative(),
   reps: z.number().int().nonnegative(),
 });
-export type AddWeightAndRepsBodyDto = z.infer<typeof addWeightAndRepsBodyDto>;
+export type SaveSetBodyDto = z.infer<typeof saveSetBodyDto>;
 
-export const addWeightAndRepsParamsDto = z.object({
+export const saveSetParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
   exerciseOrder: z.coerce.number().int().min(0),
   setOrder: z.coerce.number().int().min(0),
 });
-export type AddWeightAndRepsParamsDto = z.infer<typeof addWeightAndRepsParamsDto>;
-
-export const markSetAsCompletedParamsDto = z.object({
-  workoutId: z.uuid().transform((str) => str as UUID),
-  exerciseOrder: z.coerce.number().int().min(0),
-  setOrder: z.coerce.number().int().min(0),
-});
-export type MarkSetAsCompletedParamsDto = z.infer<typeof markSetAsCompletedParamsDto>;
+export type SaveSetParamsDto = z.infer<typeof saveSetParamsDto>;
 
 export const markSetAsUnCompletedParamsDto = z.object({
   workoutId: z.uuid().transform((str) => str as UUID),
