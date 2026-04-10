@@ -104,6 +104,7 @@ export class WorkoutService {
       isCompleted: false,
     };
     exercise.sets.push(newSet);
+    exercise.isCompleted = false;
     await this.workoutRepository.save(workout);
   }
 
@@ -163,20 +164,6 @@ export class WorkoutService {
       throw new Error('Set not found in exercise');
     }
     set.isCompleted = false;
-    exercise.isCompleted = false;
-    await this.workoutRepository.save(workout);
-  }
-  //mark exercise as completed
-  public async markExerciseAsCompleted(userId: UUID, workoutId: UUID, exerciseOrder: number): Promise<void> {
-    const workout = await this.getWorkout(workoutId, userId);
-    const exercise = this.getOrderedExercise(workout, exerciseOrder);
-    exercise.isCompleted = true;
-    await this.workoutRepository.save(workout);
-  }
-  //mark exercise as uncompleted
-  public async markExerciseAsUnCompleted(userId: UUID, workoutId: UUID, exerciseOrder: number): Promise<void> {
-    const workout = await this.getWorkout(workoutId, userId);
-    const exercise = this.getOrderedExercise(workout, exerciseOrder);
     exercise.isCompleted = false;
     await this.workoutRepository.save(workout);
   }

@@ -289,7 +289,7 @@ describe('WorkoutService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
-  test('should add weight and reps to set in exercise in workour', async () => {
+  test('should save set in exercise in workout', async () => {
     //given
     const userId = randomUUID();
     const workoutId = randomUUID();
@@ -310,15 +310,16 @@ describe('WorkoutService', () => {
     };
     repository.get.mockResolvedValue(existingWorkout);
     //when
-    await workoutService.addWeightAndReps(userId, workoutId, 0, 0, 80, 10);
+    await workoutService.saveSet(userId, workoutId, 0, 0, 80, 10);
     const savedWorkout = repository.save.mock.calls[0][0];
     //then
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).toHaveBeenCalled();
     expect(savedWorkout.exercises[0].sets[0].weight).toBe(80);
     expect(savedWorkout.exercises[0].sets[0].reps).toBe(10);
+    expect(savedWorkout.exercises[0].sets[0].isCompleted).toBe(true);
   });
-  test('should throw error when adding weight and reps to set in non-existing exercise in workout', async () => {
+  test('should throw error when saving set in non-existing exercise in workout', async () => {
     //given
     const userId = randomUUID();
     const workoutId = randomUUID();
@@ -332,13 +333,13 @@ describe('WorkoutService', () => {
     };
     repository.get.mockResolvedValue(existingWorkout);
     //when & then
-    await expect(workoutService.addWeightAndReps(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow(
+    await expect(workoutService.saveSet(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow(
       'Exercise not found in workout',
     );
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
-  test('should throw error when adding weight and reps to set in exercise in non-existing workout', async () => {
+  test('should throw error when saving set in exercise in non-existing workout', async () => {
     //given
     const userId = randomUUID();
     const workoutId = randomUUID();
@@ -346,7 +347,7 @@ describe('WorkoutService', () => {
     repository.get.mockResolvedValue(null);
 
     //when & then
-    await expect(workoutService.addWeightAndReps(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow('Workout not found');
+    await expect(workoutService.saveSet(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow('Workout not found');
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -371,7 +372,8 @@ describe('WorkoutService', () => {
     };
     repository.get.mockResolvedValue(existingWorkout);
     //when
-    await workoutService.markSetAsCompleted(userId, workoutId, 0, 0);
+    //front end will always send weight and reps default value is 0
+    await workoutService.saveSet(userId, workoutId, 0, 0, 0, 0);
     const savedWorkout = repository.save.mock.calls[0][0];
     //then
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
@@ -427,5 +429,34 @@ describe('WorkoutService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).toHaveBeenCalled();
     expect(savedWorkout.endTime).toBe(endTime);
+  });
+
+  test('exercise should not be completed after adding new set to completed exercise', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutId = randomUUID();
+
+    const existingWorkout: Workout = {
+      id: workoutId,
+      userId,
+      startTime: new Date(),
+      endTime: null,
+      exercises: [
+        {
+          exerciseId: randomUUID(),
+          sets: [{ weight: 80, reps: 10, order: 0, isCompleted: true }],
+          order: 0,
+          isCompleted: true,
+        },
+      ],
+    };
+    repository.get.mockResolvedValue(existingWorkout);
+    //when
+    await workoutService.addSet(userId, workoutId, 0);
+    const savedWorkout = repository.save.mock.calls[0][0];
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
+    expect(repository.save).toHaveBeenCalled();
+    expect(savedWorkout.exercises[0].isCompleted).toBe(false);
   });
 });

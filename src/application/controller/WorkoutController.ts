@@ -13,10 +13,6 @@ import {
   finishWorkoutParamsDto,
   getWorkoutParamsDto,
   GetWorkoutParamsDto,
-  markExerciseAsCompletedParamsDto,
-  MarkExerciseAsCompletedParamsDto,
-  markExerciseAsUnCompletedParamsDto,
-  MarkExerciseAsUnCompletedParamsDto,
   MarkSetAsUnCompletedParamsDto,
   markSetAsUnCompletedParamsDto,
   RemoveExerciseParamsDto,
@@ -111,17 +107,6 @@ export class WorkoutController extends Controller {
       (req, res) => this.markSetAsUncompleted(req, res),
     );
 
-    router.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/complete',
-      this.validator.validate({ params: markExerciseAsCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.markExerciseAsCompleted(req, res),
-    );
-
-    router.patch(
-      '/workouts/:workoutId/exercises/:exerciseOrder/un-complete',
-      this.validator.validate({ params: markExerciseAsUnCompletedParamsDto, query: authorizationDto }),
-      (req, res) => this.markExerciseAsUncompleted(req, res),
-    );
     router.patch(
       '/workouts/:workoutId/exercises/:exerciseOrder/setRestPeriod',
       this.validator.validate({ body: setRestPeriodBodyDto, params: setRestPeriodParamsDto, query: authorizationDto }),
@@ -235,28 +220,6 @@ export class WorkoutController extends Controller {
     const { userId } = response.locals.query;
     const { workoutId, exerciseOrder, setOrder } = response.locals.params;
     await this.workoutService.markSetAsUnCompleted(userId, workoutId, exerciseOrder, setOrder);
-    const workout = await this.workoutService.getWorkout(workoutId, userId);
-    response.status(200).json(workout);
-  }
-
-  private async markExerciseAsCompleted(
-    _request: Request<MarkExerciseAsCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response<unknown, ParsedData<MarkExerciseAsCompletedParamsDto, unknown, AuthorizationDto>>,
-  ): Promise<void> {
-    const { userId } = response.locals.query;
-    const { workoutId, exerciseOrder } = response.locals.params;
-    await this.workoutService.markExerciseAsCompleted(userId, workoutId, exerciseOrder);
-    const workout = await this.workoutService.getWorkout(workoutId, userId);
-    response.status(200).json(workout);
-  }
-
-  private async markExerciseAsUncompleted(
-    _request: Request<MarkExerciseAsUnCompletedParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response<unknown, ParsedData<MarkExerciseAsUnCompletedParamsDto, unknown, AuthorizationDto>>,
-  ): Promise<void> {
-    const { userId } = response.locals.query;
-    const { workoutId, exerciseOrder } = response.locals.params;
-    await this.workoutService.markExerciseAsUnCompleted(userId, workoutId, exerciseOrder);
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
   }
