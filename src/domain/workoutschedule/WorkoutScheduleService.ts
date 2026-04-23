@@ -27,6 +27,13 @@ export class WorkoutScheduleService {
 
     return workoutSchedule;
   }
+
+  public async getAll(userId: UUID): Promise<WorkoutSchedule[]> {
+    const workoutSchedules = await this.workoutScheduleRepository.getAll(userId);
+
+    return workoutSchedules;
+  }
+
   public async delete(workoutScheduleId: UUID, userId: UUID): Promise<void> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {

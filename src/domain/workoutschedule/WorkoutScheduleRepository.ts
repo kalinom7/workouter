@@ -4,6 +4,7 @@ import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 export abstract class WorkoutScheduleRepository {
   public abstract save(workoutSchedule: WorkoutSchedule): Promise<void>;
   public abstract get(workoutScheduleId: string, userId: string): Promise<WorkoutSchedule | null>;
+  public abstract getAll(userId: string): Promise<WorkoutSchedule[]>;
   public abstract delete(workoutScheduleId: string, userId: string): Promise<void>;
 }
 
@@ -22,6 +23,17 @@ export class InMemoWorkoutScheduleRepository extends WorkoutScheduleRepository {
     }
 
     return null;
+  }
+
+  public async getAll(userId: string): Promise<WorkoutSchedule[]> {
+    const workoutSchedules: WorkoutSchedule[] = [];
+    for (const workoutSchedule of this.workoutSchedules.values()) {
+      if (workoutSchedule.userId === userId) {
+        workoutSchedules.push(workoutSchedule);
+      }
+    }
+
+    return workoutSchedules;
   }
 
   public async delete(workoutScheduleId: string, userId: string): Promise<void> {

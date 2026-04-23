@@ -49,6 +49,10 @@ export class WorkoutScheduleController extends Controller {
       (req, res) => this.getWorkoutSchedule(req, res),
     );
 
+    router.get('/workout-schedules', this.validator.validate({ query: authorizationDto }), (req, res) =>
+      this.getAllWorkoutSchedules(req, res),
+    );
+
     router.delete(
       '/workout-schedules/:workoutScheduleId',
       this.validator.validate({ params: deleteWorkoutScheduleParamsDto, query: authorizationDto }),
@@ -119,6 +123,14 @@ export class WorkoutScheduleController extends Controller {
     response.status(200).json(workoutSchedule);
   }
 
+  public async getAllWorkoutSchedules(
+    request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response,
+  ): Promise<void> {
+    const { userId } = request.query;
+    const workoutSchedules = await this.workoutScheduleService.getAll(userId);
+    response.status(200).json(workoutSchedules);
+  }
   public async deleteWorkoutSchedule(
     request: Request<DeleteWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
     response: Response,
