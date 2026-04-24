@@ -188,7 +188,7 @@ export class WorkoutService {
   public async getAllFinishedWorkouts(userId: string): Promise<Workout[]> {
     const workouts = await this.workoutRepository.getAllFinished(userId);
     if (!workouts) {
-      throw new Error('Workouts not found');
+      return [];
     }
 
     return workouts;

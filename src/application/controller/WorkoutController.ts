@@ -61,7 +61,7 @@ export class WorkoutController extends Controller {
       (req, res) => this.getWorkout(req, res),
     );
 
-    router.get('/workouts', this.validator.validate({ query: authorizationDto }), (req, res) =>
+    router.get('/workoutsFinished', this.validator.validate({ query: authorizationDto }), (req, res) =>
       this.getAllFinishedWorkouts(req, res),
     );
 
