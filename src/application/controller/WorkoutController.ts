@@ -62,7 +62,7 @@ export class WorkoutController extends Controller {
     );
 
     router.get('/workouts', this.validator.validate({ query: authorizationDto }), (req, res) =>
-      this.getAllWorkouts(req, res),
+      this.getAllFinishedWorkouts(req, res),
     );
 
     router.patch(
@@ -160,13 +160,13 @@ export class WorkoutController extends Controller {
     response.status(200).json(workout);
   }
 
-  private async getAllWorkouts(
+  private async getAllFinishedWorkouts(
     _request: Request<unknown, unknown, unknown, AuthorizationDto>,
     response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
   ): Promise<void> {
     const { userId } = response.locals.query;
 
-    const workouts = await this.workoutService.getAllWorkouts(userId);
+    const workouts = await this.workoutService.getAllFinishedWorkouts(userId);
     response.status(200).json(workouts);
   }
 
