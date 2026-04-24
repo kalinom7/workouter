@@ -3,6 +3,8 @@ import { type Workout } from './model/Workout.js';
 
 export abstract class WorkoutRepository {
   public abstract get(workoutId: string, userId: string): Promise<Workout | null>;
+  public abstract getAll(userId: string): Promise<Workout[] | null>;
+
   public abstract save(workout: Workout): Promise<void>;
 }
 
@@ -17,6 +19,17 @@ export class InMemoWorkoutRepository extends WorkoutRepository {
     }
 
     return null;
+  }
+
+  public async getAll(userId: string): Promise<Workout[]> {
+    const allWorkouts: Workout[] = [];
+    for (const workout of this.workouts.values()) {
+      if (workout.userId === userId) {
+        allWorkouts.push(workout);
+      }
+    }
+
+    return allWorkouts;
   }
 
   public async save(workout: Workout): Promise<void> {

@@ -184,6 +184,15 @@ export class WorkoutService {
 
     return workout;
   }
+
+  public async getAllWorkouts(userId: string): Promise<Workout[]> {
+    const workouts = await this.workoutRepository.getAll(userId);
+    if (!workouts) {
+      throw new Error('Workouts not found');
+    }
+
+    return workouts;
+  }
   public async setRestPeriod(workoutId: UUID, exerciseOrder: number, restPeriod: number, userId: UUID): Promise<void> {
     const workout = await this.getWorkout(workoutId, userId);
     const exercise = this.getOrderedExercise(workout, exerciseOrder);

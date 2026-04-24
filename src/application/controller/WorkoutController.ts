@@ -61,6 +61,10 @@ export class WorkoutController extends Controller {
       (req, res) => this.getWorkout(req, res),
     );
 
+    router.get('/workouts', this.validator.validate({ query: authorizationDto }), (req, res) =>
+      this.getAllWorkouts(req, res),
+    );
+
     router.patch(
       '/workouts/:workoutId/finish',
       this.validator.validate({ params: finishWorkoutParamsDto, query: authorizationDto }),
@@ -154,6 +158,16 @@ export class WorkoutController extends Controller {
     const { userId } = response.locals.query;
     const workout = await this.workoutService.getWorkout(workoutId, userId);
     response.status(200).json(workout);
+  }
+
+  private async getAllWorkouts(
+    _request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
+  ): Promise<void> {
+    const { userId } = response.locals.query;
+
+    const workouts = await this.workoutService.getAllWorkouts(userId);
+    response.status(200).json(workouts);
   }
 
   private async addExercise(
