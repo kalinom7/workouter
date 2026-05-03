@@ -48,15 +48,19 @@ export class WorkoutScheduleService {
       workoutSchedule.setActiveDate,
     );
 
-    const lastIndex = workoutSchedule.pattern.findIndex(
+    const lastDoneItem = workoutSchedule.pattern.find(
       (item) => item.type === 'workout' && item.workoutTemplateId === lastDoneWorkoutTemplate,
     );
 
-    const nextIndex = (lastIndex + 1) % workoutSchedule.pattern.length;
+    if (!lastDoneItem) {
+      throw new Error('Last done workout template not found in pattern');
+    }
 
-    workoutSchedule.pattern = workoutSchedule.pattern.map((item, index) => ({
+    const shift = lastDoneItem.useOrder + 1;
+
+    workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
       ...item,
-      useOrder: (index - nextIndex + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
+      useOrder: (item.useOrder - shift + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
     }));
 
     await this.workoutScheduleRepository.save(workoutSchedule);
