@@ -2,17 +2,21 @@ import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
+import { WorkoutRepository } from '../workout/WorkoutRepository.js';
 
 @injectable()
 export class WorkoutScheduleService {
-  constructor(private readonly workoutScheduleRepository: WorkoutScheduleRepository) {}
+  constructor(
+    private readonly workoutScheduleRepository: WorkoutScheduleRepository,
+    private readonly workoutRepository: WorkoutRepository,
+  ) {}
   public async create(name: string, userId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule: WorkoutSchedule = {
       isActive: false,
       id: randomUUID(),
       name,
       userId: userId,
-      block: [],
+      pattern: [],
     };
 
     await this.workoutScheduleRepository.save(workoutSchedule);
@@ -50,26 +54,27 @@ export class WorkoutScheduleService {
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
     }
-    workoutSchedule.block.push({
-      blockItemId: randomUUID(),
-      order: workoutSchedule.block.length,
-      type: 'workouttemplate',
+    workoutSchedule.pattern.push({
+      patternItemId: randomUUID(),
+      order: workoutSchedule.pattern.length,
+      useOrder: workoutSchedule.pattern.length,
+      type: 'workout',
       WorkoutTemplateId: workoutTemplateId,
     });
     await this.workoutScheduleRepository.save(workoutSchedule);
 
     return workoutSchedule;
   }
-  public async addRestToBlock(restPeriod: number, userId: UUID, workoutScheduleId: UUID): Promise<WorkoutSchedule> {
+  public async addRestToBlock(userId: UUID, workoutScheduleId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
     }
-    workoutSchedule.block.push({
-      blockItemId: randomUUID(),
-      order: workoutSchedule.block.length,
+    workoutSchedule.pattern.push({
+      patternItemId: randomUUID(),
+      order: workoutSchedule.pattern.length,
+      useOrder: workoutSchedule.pattern.length,
       type: 'rest',
-      period: restPeriod,
     });
     await this.workoutScheduleRepository.save(workoutSchedule);
 
@@ -81,14 +86,14 @@ export class WorkoutScheduleService {
       throw new Error('workout schedule not found');
     }
 
-    const found = workoutSchedule.block.some((b) => b.blockItemId === itemId);
+    const found = workoutSchedule.pattern.some((b) => b.patternItemId === itemId);
     if (!found) {
       throw new Error('block item not found');
     }
 
-    workoutSchedule.block = workoutSchedule.block.filter((b) => b.blockItemId !== itemId);
+    workoutSchedule.pattern = workoutSchedule.pattern.filter((b) => b.patternItemId !== itemId);
 
-    workoutSchedule.block = workoutSchedule.block
+    workoutSchedule.pattern = workoutSchedule.pattern
       .toSorted((a, b) => a.order - b.order)
       .map((block, index) => ({
         ...block,
