@@ -14,6 +14,7 @@ export class WorkoutScheduleService {
     const workoutSchedule: WorkoutSchedule = {
       isActive: false,
       id: randomUUID(),
+      setActiveDate: null,
       name,
       userId: userId,
       pattern: [],
@@ -32,6 +33,35 @@ export class WorkoutScheduleService {
     return workoutSchedule;
   }
 
+  public async adjustPatternOrder(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule> {
+    const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+    if (workoutSchedule === null || workoutSchedule.setActiveDate === null) {
+      throw new Error('Incorrect workout schedule');
+    }
+    const templateIdsInPattern = workoutSchedule.pattern
+      .filter((item) => item.type === 'workout' && item.workoutTemplateId !== null)
+      .map((item) => item.workoutTemplateId);
+
+    const lastDoneWorkoutTemplate = await this.workoutRepository.findLastFinishedFromTemplate(
+      userId,
+      templateIdsInPattern,
+      workoutSchedule.setActiveDate,
+    );
+
+    const lastIndex = workoutSchedule.pattern.findIndex(
+      (item) => item.type === 'workout' && item.workoutTemplateId === lastDoneWorkoutTemplate,
+    );
+
+    const nextIndex = (lastIndex + 1) % workoutSchedule.pattern.length;
+
+    workoutSchedule.pattern = workoutSchedule.pattern.map((item, index) => ({
+      ...item,
+      useOrder: (index - nextIndex + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
+    }));
+
+    return workoutSchedule;
+  }
+
   public async getAll(userId: UUID): Promise<WorkoutSchedule[]> {
     const workoutSchedules = await this.workoutScheduleRepository.getAll(userId);
 
@@ -45,7 +75,7 @@ export class WorkoutScheduleService {
     }
     await this.workoutScheduleRepository.delete(workoutScheduleId, userId);
   }
-  public async addWorkoutToBlock(
+  public async addWorkoutToPattern(
     workoutTemplateId: UUID,
     userId: UUID,
     workoutScheduleId: UUID,
@@ -59,13 +89,13 @@ export class WorkoutScheduleService {
       order: workoutSchedule.pattern.length,
       useOrder: workoutSchedule.pattern.length,
       type: 'workout',
-      WorkoutTemplateId: workoutTemplateId,
+      workoutTemplateId: workoutTemplateId,
     });
     await this.workoutScheduleRepository.save(workoutSchedule);
 
     return workoutSchedule;
   }
-  public async addRestToBlock(userId: UUID, workoutScheduleId: UUID): Promise<WorkoutSchedule> {
+  public async addRestToPattern(userId: UUID, workoutScheduleId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
@@ -75,12 +105,13 @@ export class WorkoutScheduleService {
       order: workoutSchedule.pattern.length,
       useOrder: workoutSchedule.pattern.length,
       type: 'rest',
+      workoutTemplateId: null,
     });
     await this.workoutScheduleRepository.save(workoutSchedule);
 
     return workoutSchedule;
   }
-  public async removeBlockItem(userId: UUID, workoutScheduleId: UUID, itemId: UUID): Promise<WorkoutSchedule> {
+  public async removePatternItem(userId: UUID, workoutScheduleId: UUID, itemId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
@@ -88,15 +119,15 @@ export class WorkoutScheduleService {
 
     const found = workoutSchedule.pattern.some((b) => b.patternItemId === itemId);
     if (!found) {
-      throw new Error('block item not found');
+      throw new Error('Pattern item not found');
     }
 
     workoutSchedule.pattern = workoutSchedule.pattern.filter((b) => b.patternItemId !== itemId);
 
     workoutSchedule.pattern = workoutSchedule.pattern
       .toSorted((a, b) => a.order - b.order)
-      .map((block, index) => ({
-        ...block,
+      .map((pattern, index) => ({
+        ...pattern,
         order: index,
       }));
 
