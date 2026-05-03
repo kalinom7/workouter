@@ -59,6 +59,8 @@ export class WorkoutScheduleService {
       useOrder: (index - nextIndex + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
     }));
 
+    await this.workoutScheduleRepository.save(workoutSchedule);
+
     return workoutSchedule;
   }
 
