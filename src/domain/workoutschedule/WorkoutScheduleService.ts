@@ -3,6 +3,7 @@ import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
 import { WorkoutRepository } from '../workout/WorkoutRepository.js';
+import { Workout } from '../workout/model/Workout.js';
 
 @injectable()
 export class WorkoutScheduleService {
@@ -29,41 +30,6 @@ export class WorkoutScheduleService {
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
     }
-
-    return workoutSchedule;
-  }
-
-  public async adjustPatternOrder(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule> {
-    const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
-    if (workoutSchedule === null || workoutSchedule.setActiveDate === null) {
-      throw new Error('Incorrect workout schedule');
-    }
-    const templateIdsInPattern = workoutSchedule.pattern
-      .filter((item) => item.type === 'workout' && item.workoutTemplateId !== null)
-      .map((item) => item.workoutTemplateId);
-
-    const lastDoneWorkoutTemplate = await this.workoutRepository.findLastFinishedFromTemplate(
-      userId,
-      templateIdsInPattern,
-      workoutSchedule.setActiveDate,
-    );
-
-    const lastDoneItem = workoutSchedule.pattern.find(
-      (item) => item.type === 'workout' && item.workoutTemplateId === lastDoneWorkoutTemplate,
-    );
-
-    if (!lastDoneItem) {
-      throw new Error('Last done workout template not found in pattern');
-    }
-
-    const shift = lastDoneItem.useOrder + 1;
-
-    workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
-      ...item,
-      useOrder: (item.useOrder - shift + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
-    }));
-
-    await this.workoutScheduleRepository.save(workoutSchedule);
 
     return workoutSchedule;
   }
@@ -161,6 +127,100 @@ export class WorkoutScheduleService {
 
     workoutSchedule.isActive = false;
     await this.workoutScheduleRepository.save(workoutSchedule);
+
+    return workoutSchedule;
+  }
+  /**
+   * Uses private functions adjustOrderForRest and adjustOrderForWorkout.
+   * Goal is to distinct time based order shift and event based order shift where the event
+   * determining the shift is workout from schedule being found finished.
+   *
+   * Workout schedule is designed to be flexible for the user, with focus on workouts in pattern.
+   * There could be some optimization to be done, for example hold original activateDate for the data
+   * and reference date for searching done workouts.
+   */
+  public async adjustPatternOrder(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule> {
+    const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+    let adjustedWorkoutSchedule: WorkoutSchedule;
+    if (workoutSchedule === null || workoutSchedule.setActiveDate === null) {
+      throw new Error('Incorrect workout schedule');
+    }
+    const templateIdsInPattern = workoutSchedule.pattern
+      .filter((item) => item.type === 'workout' && item.workoutTemplateId !== null)
+      .map((item) => item.workoutTemplateId);
+
+    const lastDonePatternWorkout = await this.workoutRepository.findLastFinishedFromPattern(
+      userId,
+      templateIdsInPattern,
+      workoutSchedule.setActiveDate,
+    );
+    if (lastDonePatternWorkout === null) {
+      throw new Error('Last done pattern workout not found');
+    }
+
+    const currentItemFromPattern = workoutSchedule.pattern.find((item) => item.useOrder == 0);
+    if (!currentItemFromPattern) {
+      throw new Error('Schedule items could not be found');
+    }
+
+    if (currentItemFromPattern.type === 'rest') {
+      adjustedWorkoutSchedule = this.adjustOrderForRest(workoutSchedule, lastDonePatternWorkout);
+    } else {
+      adjustedWorkoutSchedule = this.adjustOrderForWorkout(workoutSchedule, lastDonePatternWorkout);
+    }
+
+    await this.workoutScheduleRepository.save(adjustedWorkoutSchedule);
+
+    return adjustedWorkoutSchedule;
+  }
+
+  /**
+   * Adjusting order for rest is based on time that passed since last matching
+   * workout was done. In normal situation it should update useOrder every restDay
+   * that passess. In case where user has done a workout and made more restDays than planned
+   * scheduled is the next workout in pattern after restDays.
+   * No matter how much time passed as rest, workout can't pass.
+   */
+  private adjustOrderForRest(workoutSchedule: WorkoutSchedule, lastDonePatternWorkout: Workout): WorkoutSchedule {
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - lastDonePatternWorkout.endTime!.getTime()) / (1000 * 60 * 60 * 24));
+    const nextWorkoutInPattern = workoutSchedule.pattern.find((item) => item.type === 'workout' && item.useOrder > 0);
+    if (nextWorkoutInPattern === undefined) {
+      throw new Error('Error adjusting workout pattern with rest');
+    }
+
+    if (daysDiff > nextWorkoutInPattern.useOrder) {
+      workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
+        ...item,
+        useOrder:
+          (((item.useOrder - nextWorkoutInPattern.useOrder) % workoutSchedule.pattern.length) +
+            workoutSchedule.pattern.length) %
+          workoutSchedule.pattern.length,
+      }));
+    } else {
+      workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
+        ...item,
+        useOrder: (item.useOrder + daysDiff + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
+      }));
+    }
+
+    return workoutSchedule;
+  }
+
+  private adjustOrderForWorkout(workoutSchedule: WorkoutSchedule, lastDonePatternWorkout: Workout): WorkoutSchedule {
+    const lastDonePatternItem = workoutSchedule.pattern.find(
+      (item) => item.type === 'workout' && item.workoutTemplateId === lastDonePatternWorkout.usedWorkoutTemplate,
+    );
+
+    if (!lastDonePatternItem) {
+      throw new Error('Error adjusting schedule for workout');
+    }
+    const shift = lastDonePatternItem.useOrder + 1;
+
+    workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
+      ...item,
+      useOrder: (item.useOrder - shift + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
+    }));
 
     return workoutSchedule;
   }

@@ -5,11 +5,11 @@ import { UUID } from 'node:crypto';
 export abstract class WorkoutRepository {
   public abstract get(workoutId: string, userId: string): Promise<Workout | null>;
   public abstract getAllFinished(userId: string): Promise<Workout[] | null>;
-  public abstract findLastFinishedFromTemplate(
+  public abstract findLastFinishedFromPattern(
     userId: string,
     workoutTemplateIds: UUID[],
     scheduleStartDate: Date,
-  ): Promise<UUID | null>;
+  ): Promise<Workout | null>;
 
   public abstract save(workout: Workout): Promise<void>;
 }
@@ -33,11 +33,11 @@ export class InMemoWorkoutRepository extends WorkoutRepository {
    *
    * Used to determine the correct order in WorkoutSchedule.
    */
-  public async findLastFinishedFromTemplate(
+  public async findLastFinishedFromPattern(
     userId: UUID,
     workoutTemplateIds: UUID[],
     scheduleStartDate: Date,
-  ): Promise<UUID | null> {
+  ): Promise<Workout | null> {
     let lastFinishedWorkout: Workout | null = null;
 
     for (const workout of this.workouts.values()) {
@@ -52,7 +52,7 @@ export class InMemoWorkoutRepository extends WorkoutRepository {
       }
     }
 
-    return lastFinishedWorkout?.usedWorkoutTemplate ?? null;
+    return lastFinishedWorkout ?? null;
   }
 
   public async getAllFinished(userId: string): Promise<Workout[]> {
