@@ -4,6 +4,7 @@ import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
 import { WorkoutRepository } from '../workout/WorkoutRepository.js';
 import { Workout } from '../workout/model/Workout.js';
+import { WorkoutPatternItem } from './model/WorkoutSchedulePattern.js';
 
 @injectable()
 export class WorkoutScheduleService {
@@ -164,7 +165,11 @@ export class WorkoutScheduleService {
     }
 
     if (currentItemFromPattern.type === 'rest') {
-      adjustedWorkoutSchedule = this.adjustOrderForRest(workoutSchedule, lastDonePatternWorkout);
+      adjustedWorkoutSchedule = this.adjustOrderForRest(
+        workoutSchedule,
+        lastDonePatternWorkout,
+        currentItemFromPattern,
+      );
     } else {
       adjustedWorkoutSchedule = this.adjustOrderForWorkout(workoutSchedule, lastDonePatternWorkout);
     }
@@ -180,13 +185,66 @@ export class WorkoutScheduleService {
    * that passess. In case where user has done a workout and made more restDays than planned
    * scheduled is the next workout in pattern after restDays.
    * No matter how much time passed as rest, workout can't pass.
+   *
+   * TODO: count daysDiff for dase but both for hour 23:59:59
    */
-  private adjustOrderForRest(workoutSchedule: WorkoutSchedule, lastDonePatternWorkout: Workout): WorkoutSchedule {
+  private adjustOrderForRest(
+    workoutSchedule: WorkoutSchedule,
+    lastDonePatternWorkout: Workout,
+    currentItemFromPattern: WorkoutPatternItem,
+  ): WorkoutSchedule {
     const today = new Date();
-    const daysDiff = Math.floor((today.getTime() - lastDonePatternWorkout.endTime!.getTime()) / (1000 * 60 * 60 * 24));
-    const nextWorkoutInPattern = workoutSchedule.pattern.find((item) => item.type === 'workout' && item.useOrder > 0);
-    if (nextWorkoutInPattern === undefined) {
+    let daysDiff: number = Math.floor(
+      (today.getTime() - lastDonePatternWorkout.endTime!.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    /**
+     * next workout in pattern is item from pattern that is type workout and its workoutTemplate is diffrent than
+     * workoutTemplate used in lastDonePatternWorkout
+     */
+
+    const lastDonePatternWorkoutItem = workoutSchedule.pattern.find(
+      (item) => item.workoutTemplateId === lastDonePatternWorkout.usedWorkoutTemplate,
+    );
+
+    if (lastDonePatternWorkoutItem === undefined) {
       throw new Error('Error adjusting workout pattern with rest');
+    }
+    let nextWorkoutInPattern = workoutSchedule.pattern.find(
+      (item) => item.type === 'workout' && item.order > lastDonePatternWorkoutItem.order,
+    );
+
+    /**if there isn't workout with order > lastDonePatternWorkoutOrder
+     * that means that the next workout has to be searched from the start of the cycle
+     */
+
+    if (nextWorkoutInPattern === undefined) {
+      nextWorkoutInPattern = workoutSchedule.pattern.find((item) => item.type === 'workout');
+
+      if (nextWorkoutInPattern === undefined) {
+        throw new Error('Error adjusting workout pattern with rest');
+      }
+    }
+
+    /**check if lastDoneWorkout is the workout before restDay(s) if yes everything is correct,
+     *  and we shif normally for restDays,
+     *  if no that means pattern should be adjusted for the lastWorkoutDone as it is interfering correct order.
+     */
+    const lastDoneWorkoutBeforeRest = workoutSchedule.pattern.findLast(
+      (item) => item.type === 'workout' && item.order < currentItemFromPattern.order,
+    );
+
+    const isBeforeRestSameToLastDone = lastDoneWorkoutBeforeRest?.order === lastDonePatternWorkoutItem.order;
+
+    //pattern is adjusted to lastDone as 0 current order, and daysDiff += 1, it works correctly.
+    if (!isBeforeRestSameToLastDone) {
+      workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
+        ...item,
+        useOrder:
+          (((item.useOrder - lastDonePatternWorkoutItem.useOrder) % workoutSchedule.pattern.length) +
+            workoutSchedule.pattern.length) %
+          workoutSchedule.pattern.length,
+      }));
+      daysDiff += 1;
     }
 
     if (daysDiff > nextWorkoutInPattern.useOrder) {
@@ -200,7 +258,7 @@ export class WorkoutScheduleService {
     } else {
       workoutSchedule.pattern = workoutSchedule.pattern.map((item) => ({
         ...item,
-        useOrder: (item.useOrder + daysDiff + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
+        useOrder: (item.useOrder - daysDiff + workoutSchedule.pattern.length) % workoutSchedule.pattern.length,
       }));
     }
 
