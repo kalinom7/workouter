@@ -148,7 +148,7 @@ export class WorkoutScheduleController extends Controller {
     const { workoutTemplateId } = request.body;
     const { userId } = request.query;
     const { workoutScheduleId } = request.params;
-    const workoutSchedule = await this.workoutScheduleService.addWorkoutToBlock(
+    const workoutSchedule = await this.workoutScheduleService.addWorkoutToPattern(
       workoutTemplateId,
       userId,
       workoutScheduleId,
@@ -160,10 +160,9 @@ export class WorkoutScheduleController extends Controller {
     request: Request<AddRestToBlockParamsDto, unknown, AddRestToBlockBodyDto, AuthorizationDto>,
     response: Response,
   ): Promise<void> {
-    const { restPeriod } = request.body;
     const { userId } = request.query;
     const { workoutScheduleId } = request.params;
-    const workoutSchedule = await this.workoutScheduleService.addRestToBlock(restPeriod, userId, workoutScheduleId);
+    const workoutSchedule = await this.workoutScheduleService.addRestToPattern(userId, workoutScheduleId);
     response.status(201).json(workoutSchedule);
   }
 
@@ -173,7 +172,7 @@ export class WorkoutScheduleController extends Controller {
   ): Promise<void> {
     const { userId } = request.query;
     const { workoutScheduleId, blockItemId } = request.params;
-    const workoutSchedule = await this.workoutScheduleService.removeBlockItem(userId, workoutScheduleId, blockItemId);
+    const workoutSchedule = await this.workoutScheduleService.removePatternItem(userId, workoutScheduleId, blockItemId);
     response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleActive(

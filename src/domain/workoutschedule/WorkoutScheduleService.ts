@@ -27,9 +27,13 @@ export class WorkoutScheduleService {
     return workoutSchedule;
   }
   public async get(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule> {
-    const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+    let workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
+    }
+    if (workoutSchedule.isActive) {
+      workoutSchedule = await this.adjustPatternOrder(workoutScheduleId, userId);
     }
 
     return workoutSchedule;
@@ -185,8 +189,6 @@ export class WorkoutScheduleService {
    * that passess. In case where user has done a workout and made more restDays than planned
    * scheduled is the next workout in pattern after restDays.
    * No matter how much time passed as rest, workout can't pass.
-   *
-   * TODO: count daysDiff for dase but both for hour 23:59:59
    */
   private adjustOrderForRest(
     workoutSchedule: WorkoutSchedule,
@@ -194,9 +196,7 @@ export class WorkoutScheduleService {
     currentItemFromPattern: WorkoutPatternItem,
   ): WorkoutSchedule {
     const today = new Date();
-    let daysDiff: number = Math.floor(
-      (today.getTime() - lastDonePatternWorkout.endTime!.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    let daysDiff: number = dateDiffInDays(lastDonePatternWorkout.endTime!, today);
     /**
      * next workout in pattern is item from pattern that is type workout and its workoutTemplate is diffrent than
      * workoutTemplate used in lastDonePatternWorkout
@@ -282,4 +282,12 @@ export class WorkoutScheduleService {
 
     return workoutSchedule;
   }
+}
+
+function dateDiffInDays(a: Date, b: Date): number {
+  const _a = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const _b = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  const diffTime = _b.getTime() - _a.getTime();
+
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 }
