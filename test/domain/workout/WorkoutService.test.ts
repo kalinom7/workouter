@@ -43,6 +43,7 @@ describe('WorkoutService', () => {
     expect(workout.exercises).toHaveLength(2);
     expect(workout.exercises[0].sets).toHaveLength(3);
     expect(workout.exercises[1].sets).toHaveLength(4);
+    expect(workout.usedWorkoutTemplate).toEqual(workoutTemplateId);
     expect(repository.save).toHaveBeenCalledWith(workout);
   });
   test('should throw error when trying to start workout from non-existing template', async () => {
@@ -82,6 +83,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
@@ -126,6 +128,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
         { exerciseId: randomUUID(), sets: [], order: 0, isCompleted: false },
@@ -165,6 +168,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
@@ -183,6 +187,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [{ exerciseId: randomUUID(), sets: [], order: 0, isCompleted: false }],
     };
@@ -205,6 +210,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
@@ -235,6 +241,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
         {
@@ -268,6 +275,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
@@ -298,6 +306,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
         {
@@ -328,6 +337,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
@@ -360,6 +370,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
         {
@@ -389,6 +400,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
         {
@@ -418,6 +430,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
@@ -440,6 +453,7 @@ describe('WorkoutService', () => {
       id: workoutId,
       userId,
       startTime: new Date(),
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
         {

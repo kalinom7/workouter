@@ -2,14 +2,18 @@ import { randomUUID } from 'node:crypto';
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService.js';
 import { type WorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository.js';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
+import { type WorkoutRepository } from '../../../src/domain/workout/WorkoutRepository.js';
+import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule.js';
 
 describe('WorkoutScheduleService', () => {
   let workoutScheduleService: WorkoutScheduleService;
   let repository: DeepMocked<WorkoutScheduleRepository>;
+  let workoutRepository: DeepMocked<WorkoutRepository>;
 
   beforeEach(() => {
     repository = createMock<WorkoutScheduleRepository>();
-    workoutScheduleService = new WorkoutScheduleService(repository);
+    workoutRepository = createMock<WorkoutRepository>();
+    workoutScheduleService = new WorkoutScheduleService(repository, workoutRepository);
   });
   test('should create workout schedule', async () => {
     //given
@@ -24,7 +28,8 @@ describe('WorkoutScheduleService', () => {
         name: workoutScheduleName,
         userId: userId,
         isActive: false,
-        block: [],
+        setActiveDate: null,
+        pattern: [],
       }),
     );
     expect(repository.save).toHaveBeenCalledTimes(1);
@@ -32,18 +37,21 @@ describe('WorkoutScheduleService', () => {
     expect(createdWorkoutSchedule.name).toBe(workoutScheduleName);
     expect(createdWorkoutSchedule.userId).toBe(userId);
     expect(createdWorkoutSchedule.isActive).toBe(false);
-    expect(createdWorkoutSchedule.block).toEqual([]);
+    expect(createdWorkoutSchedule.setActiveDate).toBe(null);
+
+    expect(createdWorkoutSchedule.pattern).toEqual([]);
   });
   test('should get workout schedule if it exists', async () => {
     //given
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
-    const workoutSchedule = {
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
       isActive: false,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when
@@ -72,7 +80,8 @@ describe('WorkoutScheduleService', () => {
       name: 'test schedule',
       userId: userId,
       isActive: false,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when
@@ -96,7 +105,7 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.delete).not.toHaveBeenCalled();
   });
-  test('should add workout to block if workout schedule exists', async () => {
+  test('should add workout to pattern if workout schedule exists', async () => {
     //given
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
@@ -106,11 +115,12 @@ describe('WorkoutScheduleService', () => {
       name: 'test schedule',
       userId: userId,
       isActive: false,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when
-    const updatedWorkoutSchedule = await workoutScheduleService.addWorkoutToBlock(
+    const updatedWorkoutSchedule = await workoutScheduleService.addWorkoutToPattern(
       workoutTemplateId,
       userId,
       workoutScheduleId,
@@ -119,16 +129,18 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.block.length).toBe(1);
-    expect(updatedWorkoutSchedule.block[0]).toEqual(
+    expect(updatedWorkoutSchedule.pattern.length).toBe(1);
+    expect(updatedWorkoutSchedule.pattern[0]).toEqual(
       expect.objectContaining({
-        blockItemId: expect.any(String),
-        type: 'workouttemplate',
-        WorkoutTemplateId: workoutTemplateId,
+        patternItemId: expect.any(String),
+        order: 0,
+        useOrder: 0,
+        type: 'workout',
+        workoutTemplateId: workoutTemplateId,
       }),
     );
   });
-  test('should throw error when trying to add workout to block of a workout schedule that does not exist', async () => {
+  test('should throw error when trying to add workout to pattern of a workout schedule that does not exist', async () => {
     //given
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
@@ -136,102 +148,110 @@ describe('WorkoutScheduleService', () => {
     repository.get.mockResolvedValueOnce(null);
     //when & then
     await expect(
-      workoutScheduleService.addWorkoutToBlock(workoutTemplateId, userId, workoutScheduleId),
+      workoutScheduleService.addWorkoutToPattern(workoutTemplateId, userId, workoutScheduleId),
     ).rejects.toThrow('workout schedule not found');
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).not.toHaveBeenCalled();
   });
-  test('should add rest to block if workout schedule exists', async () => {
+  test('should add rest to pattern if workout schedule exists', async () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
-    const restPeriod = 24;
     const workoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
       isActive: false,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when
-    const updatedWorkoutSchedule = await workoutScheduleService.addRestToBlock(restPeriod, userId, workoutScheduleId);
+    const updatedWorkoutSchedule = await workoutScheduleService.addRestToPattern(userId, workoutScheduleId);
     //then
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.block.length).toBe(1);
-    expect(updatedWorkoutSchedule.block[0]).toEqual(
+    expect(updatedWorkoutSchedule.pattern.length).toBe(1);
+    expect(updatedWorkoutSchedule.pattern[0]).toEqual(
       expect.objectContaining({
-        blockItemId: expect.any(String),
+        patternItemId: expect.any(String),
+        order: 0,
+        useOrder: 0,
         type: 'rest',
-        period: restPeriod,
+        workoutTemplateId: null,
       }),
     );
   });
-  test('should throw error when trying to add rest to block of a workout schedule that does not exist', async () => {
+  test('should throw error when trying to add rest to pattern of a workout schedule that does not exist', async () => {
     //given
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
-    const restPeriod = 24;
     repository.get.mockResolvedValueOnce(null);
     //when & then
-    await expect(workoutScheduleService.addRestToBlock(restPeriod, userId, workoutScheduleId)).rejects.toThrow(
+    await expect(workoutScheduleService.addRestToPattern(userId, workoutScheduleId)).rejects.toThrow(
       'workout schedule not found',
     );
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).not.toHaveBeenCalled();
   });
-  test('should remove block item if workout schedule and block item exist', async () => {
+  test('should remove pattern item if workout schedule and pattern item exist', async () => {
     //given
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
-    const blockItemId = randomUUID();
+    const patternItemId = randomUUID();
     const workoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
       isActive: false,
-      block: [
+      setActiveDate: null,
+      pattern: [
         {
-          blockItemId: blockItemId,
+          patternItemId: patternItemId,
           order: 0,
+          useOrder: 0,
           type: 'rest' as const,
-          period: 20,
+          workoutTemplateId: null,
         },
         {
-          blockItemId: randomUUID(),
+          patternItemId: randomUUID(),
           order: 1,
+          useOrder: 1,
           type: 'rest' as const,
-          period: 25,
+          workoutTemplateId: null,
         },
       ],
     };
     repository.get.mockResolvedValue(workoutSchedule);
     //when
-    const updatedWorkoutSchedule = await workoutScheduleService.removeBlockItem(userId, workoutScheduleId, blockItemId);
+    const updatedWorkoutSchedule = await workoutScheduleService.removePatternItem(
+      userId,
+      workoutScheduleId,
+      patternItemId,
+    );
     //then
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.block.length).toBe(1);
+    expect(updatedWorkoutSchedule.pattern.length).toBe(1);
   });
-  test('should throw error when trying to remove block item from a workout schedule that does not exist', async () => {
+  test('should throw error when trying to remove pattern item from a workout schedule that does not exist', async () => {
     //given
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const itemId = randomUUID();
     repository.get.mockResolvedValueOnce(null);
     //when & then
-    await expect(workoutScheduleService.removeBlockItem(userId, workoutScheduleId, itemId)).rejects.toThrow(
+    await expect(workoutScheduleService.removePatternItem(userId, workoutScheduleId, itemId)).rejects.toThrow(
       'workout schedule not found',
     );
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).not.toHaveBeenCalled();
   });
-  test('should throw error when trying to remove block item that does not exist in the workout schedule', async () => {
+  test('should throw error when trying to remove pattern item that does not exist in the workout schedule', async () => {
     //given
     const mockItemId = randomUUID();
     const userId = randomUUID();
@@ -241,12 +261,13 @@ describe('WorkoutScheduleService', () => {
       name: 'test schedule',
       userId: userId,
       isActive: false,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when & then
-    await expect(workoutScheduleService.removeBlockItem(userId, workoutScheduleId, mockItemId)).rejects.toThrow(
-      'block item not found',
+    await expect(workoutScheduleService.removePatternItem(userId, workoutScheduleId, mockItemId)).rejects.toThrow(
+      'Pattern item not found',
     );
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
@@ -259,7 +280,8 @@ describe('WorkoutScheduleService', () => {
       name: 'test schedule',
       userId: randomUUID(),
       isActive: false,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when
@@ -290,7 +312,8 @@ describe('WorkoutScheduleService', () => {
       name: 'test schedule',
       userId: randomUUID(),
       isActive: true,
-      block: [],
+      setActiveDate: null,
+      pattern: [],
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when

@@ -22,6 +22,7 @@ export class WorkoutService {
       userId,
       startTime,
       endTime: null,
+      usedWorkoutTemplate: workoutTemplateId,
       exercises: workoutTemplate.exercises.map((exercise) => ({
         exerciseId: exercise.exercise,
         sets: Array.from({ length: exercise.sets }).map((_, index) => ({
@@ -47,6 +48,7 @@ export class WorkoutService {
       id: randomUUID(),
       userId,
       startTime,
+      usedWorkoutTemplate: null,
       endTime: null,
       exercises: [],
     };
