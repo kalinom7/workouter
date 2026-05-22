@@ -115,8 +115,12 @@ export class WorkoutScheduleService {
 
   public async setActive(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+    const activeWorkoutSchedule = await this.workoutScheduleRepository.getActive(userId);
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
+    }
+    if (activeWorkoutSchedule) {
+      activeWorkoutSchedule.isActive = false;
     }
 
     workoutSchedule.isActive = true;
