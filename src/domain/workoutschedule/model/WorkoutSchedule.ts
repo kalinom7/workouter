@@ -7,4 +7,6 @@ export type WorkoutSchedule = {
   name: string;
   userId: UUID;
   pattern: WorkoutPatternItem[];
+  lastOrder: number | null;
+  lastFinishedWorkoutDate: Date | null;
 };
