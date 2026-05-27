@@ -16,31 +16,32 @@ export const deleteWorkoutScheduleParamsDto = z.object({
 });
 export type DeleteWorkoutScheduleParamsDto = z.infer<typeof deleteWorkoutScheduleParamsDto>;
 
-export const addWorkoutToBlockBodyDto = z.object({
+export const addWorkoutToPatternBodyDto = z.object({
   workoutTemplateId: z.uuid().transform((str) => str as UUID),
 });
-export type AddWorkoutToBlockBodyDto = z.infer<typeof addWorkoutToBlockBodyDto>;
+export type AddWorkoutToPatternBodyDto = z.infer<typeof addWorkoutToPatternBodyDto>;
 
-export const addWorkoutToBlockParamsDto = z.object({
+export const addWorkoutToPatternParamsDto = z.object({
   workoutScheduleId: z.uuid().transform((str) => str as UUID),
 });
-export type AddWorkoutToBlockParamsDto = z.infer<typeof addWorkoutToBlockParamsDto>;
+export type AddWorkoutToPatternParamsDto = z.infer<typeof addWorkoutToPatternParamsDto>;
 
-export const addRestToBlockBodyDto = z.object({
-  restPeriod: z.number().min(1),
+export const addRestToPatternWorkoutBodyDto = z.object({
+  restDays: z.number().min(1),
 });
-export type AddRestToBlockBodyDto = z.infer<typeof addRestToBlockBodyDto>;
+export type AddRestToPatternWorkoutBodyDto = z.infer<typeof addRestToPatternWorkoutBodyDto>;
 
-export const addRestToBlockParamsDto = z.object({
+export const addRestToPatternWorkoutParamsDto = z.object({
   workoutScheduleId: z.uuid().transform((str) => str as UUID),
+  patternItemId: z.uuid().transform((str) => str as UUID),
 });
-export type AddRestToBlockParamsDto = z.infer<typeof addRestToBlockParamsDto>;
+export type AddRestToPatternWorkoutParamsDto = z.infer<typeof addRestToPatternWorkoutParamsDto>;
 
-export const removeBlockItemParamsDto = z.object({
+export const removePatternItemParamsDto = z.object({
   workoutScheduleId: z.uuid().transform((str) => str as UUID),
-  blockItemId: z.uuid().transform((str) => str as UUID),
+  patternItemId: z.uuid().transform((str) => str as UUID),
 });
-export type RemoveBlockItemParamsDto = z.infer<typeof removeBlockItemParamsDto>;
+export type RemovePatternItemParamsDto = z.infer<typeof removePatternItemParamsDto>;
 
 export const setWorkoutScheduleActiveParamsDto = z.object({
   workoutScheduleId: z.uuid().transform((str) => str as UUID),
