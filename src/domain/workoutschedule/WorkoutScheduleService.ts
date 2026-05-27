@@ -65,7 +65,7 @@ export class WorkoutScheduleService {
 
     return workoutSchedule;
   }
-  public async addRestToPattern(
+  public async addRestToPatternWorkout(
     userId: UUID,
     workoutScheduleId: UUID,
     patternItemId: UUID,
@@ -85,6 +85,7 @@ export class WorkoutScheduleService {
 
     return workoutSchedule;
   }
+
   public async removePatternItem(userId: UUID, workoutScheduleId: UUID, itemId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {

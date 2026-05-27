@@ -2,30 +2,30 @@ import { Router, type Request, type Response } from 'express';
 import { injectable } from 'inversify';
 import { WorkoutScheduleService } from '../../domain/workoutschedule/WorkoutScheduleService.js';
 import {
-  addRestToBlockBodyDto,
-  AddRestToBlockBodyDto,
-  addRestToBlockParamsDto,
-  AddRestToBlockParamsDto,
-  addWorkoutToBlockBodyDto,
-  AddWorkoutToBlockBodyDto,
-  addWorkoutToBlockParamsDto,
-  AddWorkoutToBlockParamsDto,
+  AddRestToPatternWorkoutBodyDto,
+  addWorkoutToPatternBodyDto,
+  addWorkoutToPatternParamsDto,
+  AddWorkoutToPatternParamsDto,
   createWorkoutScheduleBodyDto,
   CreateWorkoutScheduleBodyDto,
   deleteWorkoutScheduleParamsDto,
   DeleteWorkoutScheduleParamsDto,
   getWorkoutScheduleParamsDto,
+  RemovePatternItemParamsDto,
   GetWorkoutScheduleParamsDto,
-  removeBlockItemParamsDto,
-  RemoveBlockItemParamsDto,
+  removePatternItemParamsDto,
   setWorkoutScheduleActiveParamsDto,
   SetWorkoutScheduleActiveParamsDto,
   setWorkoutScheduleInactiveParamsDto,
   SetWorkoutScheduleInactiveParamsDto,
+  AddRestToPatternWorkoutParamsDto,
+  AddWorkoutToPatternBodyDto,
+  addRestToPatternWorkoutParamsDto,
+  addRestToPatternWorkoutBodyDto,
 } from '../dto/WorkoutScheduleControllerDto.js';
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
-import { Validator } from '../validation/Validator.js';
+import { ParsedData, Validator } from '../validation/Validator.js';
 
 @injectable()
 export class WorkoutScheduleController extends Controller {
@@ -62,30 +62,30 @@ export class WorkoutScheduleController extends Controller {
     router.post(
       '/workout-schedules/:workoutScheduleId/block/workout',
       this.validator.validate({
-        params: addWorkoutToBlockParamsDto,
-        body: addWorkoutToBlockBodyDto,
+        params: addWorkoutToPatternParamsDto,
+        body: addWorkoutToPatternBodyDto,
         query: authorizationDto,
       }),
-      (req, res) => this.addWorkoutToBlock(req, res),
+      (req, res) => this.addWorkoutToPattern(req, res),
     );
 
     router.post(
       '/workout-schedules/:workoutScheduleId/block/rest',
       this.validator.validate({
-        params: addRestToBlockParamsDto,
-        body: addRestToBlockBodyDto,
+        params: addRestToPatternWorkoutParamsDto,
+        body: addRestToPatternWorkoutBodyDto,
         query: authorizationDto,
       }),
-      (req, res) => this.addRestToBlock(req, res),
+      (req, res) => this.addRestToPatternWorkout(req, res),
     );
 
     router.delete(
       '/workout-schedules/:workoutScheduleId/block/:blockItemId',
       this.validator.validate({
-        params: removeBlockItemParamsDto,
+        params: removePatternItemParamsDto,
         query: authorizationDto,
       }),
-      (req, res) => this.removeBlockItem(req, res),
+      (req, res) => this.removePatternItem(req, res),
     );
 
     router.patch(
@@ -103,51 +103,51 @@ export class WorkoutScheduleController extends Controller {
     return router;
   }
   public async createWorkoutSchedule(
-    request: Request<unknown, unknown, CreateWorkoutScheduleBodyDto, AuthorizationDto>,
-    response: Response,
+    _request: Request<unknown, unknown, CreateWorkoutScheduleBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, CreateWorkoutScheduleBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { name } = request.body;
-    const { userId } = request.query;
+    const { name } = response.locals.body;
+    const { userId } = response.locals.query;
 
     const WorkoutSchedule = await this.workoutScheduleService.create(name, userId);
     response.status(201).json(WorkoutSchedule);
   }
 
   public async getWorkoutSchedule(
-    request: Request<GetWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<GetWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<GetWorkoutScheduleParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutScheduleId } = request.params;
-    const { userId } = request.query;
+    const { workoutScheduleId } = response.locals.params;
+    const { userId } = response.locals.query;
     const workoutSchedule = await this.workoutScheduleService.get(workoutScheduleId, userId);
     response.status(200).json(workoutSchedule);
   }
 
   public async getAllWorkoutSchedules(
-    request: Request<unknown, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
+    const { userId } = response.locals.query;
     const workoutSchedules = await this.workoutScheduleService.getAll(userId);
     response.status(200).json(workoutSchedules);
   }
   public async deleteWorkoutSchedule(
-    request: Request<DeleteWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<DeleteWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<DeleteWorkoutScheduleParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutScheduleId } = request.params;
-    const { userId } = request.query;
+    const { workoutScheduleId } = response.locals.params;
+    const { userId } = response.locals.query;
     await this.workoutScheduleService.delete(workoutScheduleId, userId);
     response.status(204).send();
   }
 
-  public async addWorkoutToBlock(
-    request: Request<AddWorkoutToBlockParamsDto, unknown, AddWorkoutToBlockBodyDto, AuthorizationDto>,
-    response: Response,
+  public async addWorkoutToPattern(
+    _request: Request<AddWorkoutToPatternParamsDto, unknown, AddWorkoutToPatternBodyDto, AuthorizationDto>,
+    response: Response<unknown, ParsedData<AddWorkoutToPatternParamsDto, AddWorkoutToPatternBodyDto, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutTemplateId } = request.body;
-    const { userId } = request.query;
-    const { workoutScheduleId } = request.params;
+    const { workoutTemplateId } = response.locals.body;
+    const { userId } = response.locals.query;
+    const { workoutScheduleId } = response.locals.params;
     const workoutSchedule = await this.workoutScheduleService.addWorkoutToPattern(
       workoutTemplateId,
       userId,
@@ -156,40 +156,53 @@ export class WorkoutScheduleController extends Controller {
     response.status(201).json(workoutSchedule);
   }
 
-  public async addRestToBlock(
-    request: Request<AddRestToBlockParamsDto, unknown, AddRestToBlockBodyDto, AuthorizationDto>,
-    response: Response,
+  public async addRestToPatternWorkout(
+    _request: Request<AddRestToPatternWorkoutParamsDto, unknown, AddRestToPatternWorkoutBodyDto, AuthorizationDto>,
+    response: Response<
+      unknown,
+      ParsedData<AddRestToPatternWorkoutParamsDto, AddRestToPatternWorkoutBodyDto, AuthorizationDto>
+    >,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutScheduleId } = request.params;
-    const workoutSchedule = await this.workoutScheduleService.addRestToPattern(userId, workoutScheduleId);
+    const { userId } = response.locals.query;
+    const { workoutScheduleId, patternItemId } = response.locals.params;
+    const { restDays } = response.locals.body;
+    const workoutSchedule = await this.workoutScheduleService.addRestToPatternWorkout(
+      userId,
+      workoutScheduleId,
+      patternItemId,
+      restDays,
+    );
     response.status(201).json(workoutSchedule);
   }
 
-  public async removeBlockItem(
-    request: Request<RemoveBlockItemParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+  public async removePatternItem(
+    _request: Request<RemovePatternItemParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<RemovePatternItemParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { userId } = request.query;
-    const { workoutScheduleId, blockItemId } = request.params;
-    const workoutSchedule = await this.workoutScheduleService.removePatternItem(userId, workoutScheduleId, blockItemId);
+    const { userId } = response.locals.query;
+    const { workoutScheduleId, patternItemId } = response.locals.params;
+    const workoutSchedule = await this.workoutScheduleService.removePatternItem(
+      userId,
+      workoutScheduleId,
+      patternItemId,
+    );
     response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleActive(
-    request: Request<SetWorkoutScheduleActiveParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<SetWorkoutScheduleActiveParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<SetWorkoutScheduleActiveParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutScheduleId } = request.params;
-    const { userId } = request.query;
+    const { workoutScheduleId } = response.locals.params;
+    const { userId } = response.locals.query;
     const workoutSchedule = await this.workoutScheduleService.setActive(workoutScheduleId, userId);
     response.status(200).json(workoutSchedule);
   }
   public async setWorkoutScheduleInActive(
-    request: Request<SetWorkoutScheduleInactiveParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response,
+    _request: Request<SetWorkoutScheduleInactiveParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<SetWorkoutScheduleInactiveParamsDto, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutScheduleId } = request.params;
-    const { userId } = request.query;
+    const { workoutScheduleId } = response.locals.params;
+    const { userId } = response.locals.query;
     const workoutSchedule = await this.workoutScheduleService.setInactive(workoutScheduleId, userId);
     response.status(200).json(workoutSchedule);
   }

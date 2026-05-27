@@ -172,7 +172,7 @@ describe('WorkoutScheduleService', () => {
     const restDays = 2;
     repository.get.mockResolvedValueOnce(workoutSchedule);
     //when
-    const updatedWorkoutSchedule = await workoutScheduleService.addRestToPattern(
+    const updatedWorkoutSchedule = await workoutScheduleService.addRestToPatternWorkout(
       userId,
       workoutScheduleId,
       patternItemId,
