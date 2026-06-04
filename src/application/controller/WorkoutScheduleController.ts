@@ -60,7 +60,7 @@ export class WorkoutScheduleController extends Controller {
     );
 
     router.post(
-      '/workout-schedules/:workoutScheduleId/block/workout',
+      '/workout-schedules/:workoutScheduleId/pattern/workout',
       this.validator.validate({
         params: addWorkoutToPatternParamsDto,
         body: addWorkoutToPatternBodyDto,
@@ -69,8 +69,8 @@ export class WorkoutScheduleController extends Controller {
       (req, res) => this.addWorkoutToPattern(req, res),
     );
 
-    router.post(
-      '/workout-schedules/:workoutScheduleId/block/rest',
+    router.patch(
+      '/workout-schedules/:workoutScheduleId/pattern/:patternItemId',
       this.validator.validate({
         params: addRestToPatternWorkoutParamsDto,
         body: addRestToPatternWorkoutBodyDto,
@@ -80,7 +80,7 @@ export class WorkoutScheduleController extends Controller {
     );
 
     router.delete(
-      '/workout-schedules/:workoutScheduleId/block/:blockItemId',
+      '/workout-schedules/:workoutScheduleId/pattern/:patternItemId',
       this.validator.validate({
         params: removePatternItemParamsDto,
         query: authorizationDto,
