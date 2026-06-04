@@ -27,7 +27,7 @@ export const addWorkoutToPatternParamsDto = z.object({
 export type AddWorkoutToPatternParamsDto = z.infer<typeof addWorkoutToPatternParamsDto>;
 
 export const addRestToPatternWorkoutBodyDto = z.object({
-  restDays: z.number().min(1),
+  restDays: z.number().min(0),
 });
 export type AddRestToPatternWorkoutBodyDto = z.infer<typeof addRestToPatternWorkoutBodyDto>;
 
