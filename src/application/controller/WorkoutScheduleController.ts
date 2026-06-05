@@ -22,6 +22,10 @@ import {
   AddWorkoutToPatternBodyDto,
   addRestToPatternWorkoutParamsDto,
   addRestToPatternWorkoutBodyDto,
+  RenameWorkoutScheduleBodyDto,
+  RenameWorkoutScheduleParamsDto,
+  renameWorkoutScheduleBodyDto,
+  renameWorkoutScheduleParamsDto,
 } from '../dto/WorkoutScheduleControllerDto.js';
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
@@ -98,6 +102,16 @@ export class WorkoutScheduleController extends Controller {
       '/workout-schedules/:workoutScheduleId/deactivate',
       this.validator.validate({ params: setWorkoutScheduleInactiveParamsDto, query: authorizationDto }),
       (req, res) => this.setWorkoutScheduleInActive(req, res),
+    );
+
+    router.patch(
+      '/workout-schedules/:workoutScheduleId/rename',
+      this.validator.validate({
+        params: renameWorkoutScheduleParamsDto,
+        body: renameWorkoutScheduleBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.renameWorkoutSchedule(req, res),
     );
 
     return router;
@@ -204,6 +218,20 @@ export class WorkoutScheduleController extends Controller {
     const { workoutScheduleId } = response.locals.params;
     const { userId } = response.locals.query;
     const workoutSchedule = await this.workoutScheduleService.setInactive(workoutScheduleId, userId);
+    response.status(200).json(workoutSchedule);
+  }
+
+  public async renameWorkoutSchedule(
+    _request: Request<RenameWorkoutScheduleParamsDto, unknown, RenameWorkoutScheduleBodyDto, AuthorizationDto>,
+    response: Response<
+      unknown,
+      ParsedData<RenameWorkoutScheduleParamsDto, RenameWorkoutScheduleBodyDto, AuthorizationDto>
+    >,
+  ): Promise<void> {
+    const { workoutScheduleId } = response.locals.params;
+    const { name } = response.locals.body;
+    const { userId } = response.locals.query;
+    const workoutSchedule = await this.workoutScheduleService.rename(workoutScheduleId, userId, name);
     response.status(200).json(workoutSchedule);
   }
 }

@@ -52,3 +52,13 @@ export const setWorkoutScheduleInactiveParamsDto = z.object({
   workoutScheduleId: z.uuid().transform((str) => str as UUID),
 });
 export type SetWorkoutScheduleInactiveParamsDto = z.infer<typeof setWorkoutScheduleInactiveParamsDto>;
+
+export const renameWorkoutScheduleBodyDto = z.object({
+  name: z.string().min(1),
+});
+export type RenameWorkoutScheduleBodyDto = z.infer<typeof renameWorkoutScheduleBodyDto>;
+
+export const renameWorkoutScheduleParamsDto = z.object({
+  workoutScheduleId: z.uuid().transform((str) => str as UUID),
+});
+export type RenameWorkoutScheduleParamsDto = z.infer<typeof renameWorkoutScheduleParamsDto>;

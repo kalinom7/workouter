@@ -138,6 +138,18 @@ export class WorkoutScheduleService {
     return workoutSchedule;
   }
 
+  public async rename(workoutScheduleId: UUID, userId: UUID, name: string): Promise<WorkoutSchedule> {
+    const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+    if (workoutSchedule == null) {
+      throw new Error('workout schedule not found');
+    }
+
+    workoutSchedule.name = name;
+    await this.workoutScheduleRepository.save(workoutSchedule);
+
+    return workoutSchedule;
+  }
+
   public async update(
     workoutScheduleId: UUID,
     userId: UUID,
