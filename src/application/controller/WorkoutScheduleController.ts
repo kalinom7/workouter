@@ -114,6 +114,15 @@ export class WorkoutScheduleController extends Controller {
       (req, res) => this.renameWorkoutSchedule(req, res),
     );
 
+    router.get(
+      '/workout-schedules/getScheduledActivity',
+      this.validator.validate({
+        params: getWorkoutScheduleParamsDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.getScheduledActivity(req, res),
+    );
+
     return router;
   }
   public async createWorkoutSchedule(
@@ -233,5 +242,21 @@ export class WorkoutScheduleController extends Controller {
     const { userId } = response.locals.query;
     const workoutSchedule = await this.workoutScheduleService.rename(workoutScheduleId, userId, name);
     response.status(200).json(workoutSchedule);
+  }
+
+  public async getScheduledActivity(
+    _request: Request<GetWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<GetWorkoutScheduleParamsDto, unknown, AuthorizationDto>>,
+  ): Promise<void> {
+    const { workoutScheduleId } = response.locals.params;
+    const { userId } = response.locals.query;
+    try {
+      const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(workoutScheduleId, userId);
+      response.status(200).json(scheduledActivity);
+    } catch (error) {
+      if (error instanceof Error && error.message == 'scheduled activity was skipped') {
+        response.status(404).json('scheduled activity was skipped');
+      }
+    }
   }
 }
