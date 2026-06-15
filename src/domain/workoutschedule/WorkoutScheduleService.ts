@@ -173,13 +173,13 @@ export class WorkoutScheduleService {
     return workoutSchedule;
   }
 
-  public async getScheduledActivity(workoutScheduleId: UUID, userId: UUID): Promise<UUID | null> {
-    const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
+  public async getScheduledActivity(userId: UUID): Promise<UUID | null> {
+    const workoutSchedule = await this.workoutScheduleRepository.getActive(userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      return null;
     }
-    if (!workoutSchedule.isActive || workoutSchedule.setActiveDate == null) {
-      throw new Error('workout schedule is not active');
+    if (workoutSchedule.setActiveDate == null) {
+      throw new Error('workout schedule is in invalid state');
     }
     const setActiveDate = workoutSchedule.setActiveDate;
     const today = new Date();

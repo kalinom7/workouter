@@ -104,13 +104,13 @@ describe('WorkoutScheduleService order', () => {
       lastOrder: 0,
       lastFinishedWorkoutDate: new Date('2026-05-26T09:00:00Z'),
     };
-    workoutScheduleRepository.get.mockResolvedValueOnce(workoutSchedule);
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
     //when
-    const workoutTemplate = await workoutScheduleService.getScheduledActivity(workoutScheduleId, userId);
+    const workoutTemplate = await workoutScheduleService.getScheduledActivity(userId);
 
     //then
     expect(workoutTemplate).toBeNull();
-    expect(workoutScheduleRepository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should get scheduled workoutTemplate as scheduled activity, current is workout, activity wasnt skipped', async () => {
     //given
@@ -145,13 +145,13 @@ describe('WorkoutScheduleService order', () => {
       lastOrder: 0,
       lastFinishedWorkoutDate: new Date('2026-05-25T10:00:00Z'),
     };
-    workoutScheduleRepository.get.mockResolvedValueOnce(workoutSchedule);
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
     //when
-    const workoutTemplate = await workoutScheduleService.getScheduledActivity(workoutScheduleId, userId);
+    const workoutTemplate = await workoutScheduleService.getScheduledActivity(userId);
 
     //then
     expect(workoutTemplate).toEqual(workoutTemplateId2);
-    expect(workoutScheduleRepository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should throw error as scheduled activity, current is restDay, activity was skipped', async () => {
     //given
@@ -186,13 +186,11 @@ describe('WorkoutScheduleService order', () => {
       lastOrder: 0,
       lastFinishedWorkoutDate: new Date('2026-05-23T10:00:00Z'),
     };
-    workoutScheduleRepository.get.mockResolvedValueOnce(workoutSchedule);
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
 
     //when && then
-    await expect(workoutScheduleService.getScheduledActivity(workoutScheduleId, userId)).rejects.toThrow(
-      'scheduled activity was skipped',
-    );
-    expect(workoutScheduleRepository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow('scheduled activity was skipped');
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should throw error as scheduled activity, current is workout, activity was skipped', async () => {
     //given
@@ -236,13 +234,11 @@ describe('WorkoutScheduleService order', () => {
       lastOrder: 0,
       lastFinishedWorkoutDate: new Date('2026-05-22T10:00:00Z'),
     };
-    workoutScheduleRepository.get.mockResolvedValueOnce(workoutSchedule);
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
 
     //when && then
-    await expect(workoutScheduleService.getScheduledActivity(workoutScheduleId, userId)).rejects.toThrow(
-      'scheduled activity was skipped',
-    );
-    expect(workoutScheduleRepository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow('scheduled activity was skipped');
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should update lastFinishedDate and lastFinishedOrder after workout was finished, activity was skipped', async () => {
     //given

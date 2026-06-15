@@ -117,7 +117,6 @@ export class WorkoutScheduleController extends Controller {
     router.get(
       '/workout-schedules/getScheduledActivity',
       this.validator.validate({
-        params: getWorkoutScheduleParamsDto,
         query: authorizationDto,
       }),
       (req, res) => this.getScheduledActivity(req, res),
@@ -245,13 +244,12 @@ export class WorkoutScheduleController extends Controller {
   }
 
   public async getScheduledActivity(
-    _request: Request<GetWorkoutScheduleParamsDto, unknown, unknown, AuthorizationDto>,
-    response: Response<unknown, ParsedData<GetWorkoutScheduleParamsDto, unknown, AuthorizationDto>>,
+    _request: Request<unknown, unknown, unknown, AuthorizationDto>,
+    response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
   ): Promise<void> {
-    const { workoutScheduleId } = response.locals.params;
     const { userId } = response.locals.query;
     try {
-      const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(workoutScheduleId, userId);
+      const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(userId);
       response.status(200).json(scheduledActivity);
     } catch (error) {
       if (error instanceof Error && error.message == 'scheduled activity was skipped') {
