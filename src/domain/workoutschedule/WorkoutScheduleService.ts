@@ -119,9 +119,12 @@ export class WorkoutScheduleService {
     }
     if (activeWorkoutSchedule) {
       activeWorkoutSchedule.isActive = false;
+      activeWorkoutSchedule.setActiveDate = null;
+      await this.workoutScheduleRepository.save(activeWorkoutSchedule);
     }
 
     workoutSchedule.isActive = true;
+    workoutSchedule.setActiveDate = new Date();
     await this.workoutScheduleRepository.save(workoutSchedule);
 
     return workoutSchedule;
@@ -179,7 +182,7 @@ export class WorkoutScheduleService {
       return null;
     }
     if (workoutSchedule.setActiveDate == null) {
-      throw new Error('workout schedule is in invalid state');
+      throw new Error('workout schedule is in invalid state: setActiveDate is null');
     }
     const setActiveDate = workoutSchedule.setActiveDate;
     const today = new Date();
@@ -193,13 +196,13 @@ export class WorkoutScheduleService {
       return workoutSchedule.pattern[0]?.workoutTemplateId ?? null;
     }
     if (workoutSchedule.lastFinishedWorkoutDate === null || workoutSchedule.lastOrder === null) {
-      throw new Error('workout schedule is in invalid state');
+      throw new Error('workout schedule is in invalid state: lastFinishedWorkoutDate or lastOrder is null');
     }
 
     const daysFromLastFinished = dateDiffInDays(workoutSchedule.lastFinishedWorkoutDate, today);
     const lastFinishedPatternItem = workoutSchedule.pattern.find((item) => item.order === workoutSchedule.lastOrder);
     if (!lastFinishedPatternItem) {
-      throw new Error('workout schedule is in invalid state');
+      throw new Error('workout schedule is in invalid state: last finished pattern item not found');
     }
 
     if (daysFromLastFinished > lastFinishedPatternItem.restDays) {

@@ -48,13 +48,21 @@ export class WorkoutScheduleController extends Controller {
     );
 
     router.get(
-      '/workout-schedules/:workoutScheduleId',
-      this.validator.validate({ params: getWorkoutScheduleParamsDto, query: authorizationDto }),
-      (req, res) => this.getWorkoutSchedule(req, res),
+      '/workout-schedules/getScheduledActivity',
+      this.validator.validate({
+        query: authorizationDto,
+      }),
+      (req, res) => this.getScheduledActivity(req, res),
     );
 
     router.get('/workout-schedules', this.validator.validate({ query: authorizationDto }), (req, res) =>
       this.getAllWorkoutSchedules(req, res),
+    );
+
+    router.get(
+      '/workout-schedules/:workoutScheduleId',
+      this.validator.validate({ params: getWorkoutScheduleParamsDto, query: authorizationDto }),
+      (req, res) => this.getWorkoutSchedule(req, res),
     );
 
     router.delete(
@@ -112,14 +120,6 @@ export class WorkoutScheduleController extends Controller {
         query: authorizationDto,
       }),
       (req, res) => this.renameWorkoutSchedule(req, res),
-    );
-
-    router.get(
-      '/workout-schedules/getScheduledActivity',
-      this.validator.validate({
-        query: authorizationDto,
-      }),
-      (req, res) => this.getScheduledActivity(req, res),
     );
 
     return router;
@@ -254,6 +254,8 @@ export class WorkoutScheduleController extends Controller {
     } catch (error) {
       if (error instanceof Error && error.message == 'scheduled activity was skipped') {
         response.status(404).json('scheduled activity was skipped');
+      } else {
+        response.status(500).json(error instanceof Error ? error.message : 'Internal Server Error');
       }
     }
   }
