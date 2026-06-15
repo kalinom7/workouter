@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
+import { ConflictError } from '../../errors/ConflictError.js';
 
 @injectable()
 export class WorkoutScheduleService {
@@ -187,7 +188,7 @@ export class WorkoutScheduleService {
     if (workoutSchedule.lastFinishedWorkoutDate === null && workoutSchedule.lastOrder === null) {
       const daysFromActiveDate = dateDiffInDays(setActiveDate, today);
       if (daysFromActiveDate > 1) {
-        throw new Error('scheduled activity was skipped');
+        throw new ConflictError('scheduled activity was skipped', 'SCHEDULED_ACTIVITY_SKIPPED');
       }
 
       return workoutSchedule.pattern[0]?.workoutTemplateId ?? null;
@@ -203,7 +204,7 @@ export class WorkoutScheduleService {
     }
 
     if (daysFromLastFinished > lastFinishedPatternItem.restDays) {
-      throw new Error('scheduled activity was skipped');
+      throw new ConflictError('scheduled activity was skipped', 'SCHEDULED_ACTIVITY_SKIPPED');
     }
     if (daysFromLastFinished < lastFinishedPatternItem.restDays) {
       return null;

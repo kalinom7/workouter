@@ -1,9 +1,10 @@
-import express, { type Application as EA, type NextFunction, type Request, type Response } from 'express';
+import express, { type Application as EA } from 'express';
 import { injectable, multiInject } from 'inversify';
 
 import { Controller } from './controller/Controller.js';
 
 import cors from 'cors';
+import { errorHandler } from './errorHandler/errorHandler.js';
 
 @injectable()
 export class Application {
@@ -19,19 +20,11 @@ export class Application {
     for (const controller of this.controllers) {
       this.app.use(controller.getRoutes());
     }
+    this.app.use(errorHandler);
   }
 
   public async start(): Promise<void> {
     console.log('Starting application...');
-
-    //GLOBAL
-
-    //global error handler
-
-    this.app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-      console.error(err.stack);
-      res.status(500).json({ error: err.name, message: err.message });
-    });
     this.app.listen(3000, (error) => {
       if (error) {
         console.error('Error starting server:', error);

@@ -26,16 +26,11 @@ export class Validator {
         if (schema.params) {
           res.locals.params = schema.params.parse(req.params);
         }
+
+        return next();
       } catch (error) {
-        console.error('Validation error:', error);
-
-        return res.status(400).json({
-          error: 'Validation failed',
-          details: error,
-        });
+        return next(error);
       }
-
-      return next();
     };
   }
 }
