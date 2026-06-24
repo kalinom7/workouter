@@ -222,12 +222,48 @@ describe('WorkoutScheduleService', () => {
       lastFinishedWorkoutDate: null,
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
+    repository.getActive.mockResolvedValueOnce(null);
     //when
     const updatedWorkoutSchedule = await workoutScheduleService.setActive(workoutSchedule.id, workoutSchedule.userId);
     //then
     expect(repository.get).toHaveBeenCalledWith(workoutSchedule.id, workoutSchedule.userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedWorkoutSchedule.isActive).toBe(true);
+  });
+
+  test('should set workout schedule as active and set previous active as inactive', async () => {
+    //given
+    const workoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: randomUUID(),
+      isActive: false,
+      setActiveDate: null,
+      pattern: [],
+      lastOrder: null,
+      lastFinishedWorkoutDate: null,
+    };
+    const previousActiveWorkoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: randomUUID(),
+      isActive: true,
+      setActiveDate: new Date(),
+      pattern: [],
+      lastOrder: null,
+      lastFinishedWorkoutDate: null,
+    };
+
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    repository.getActive.mockResolvedValueOnce(previousActiveWorkoutSchedule);
+    //when
+    const updatedWorkoutSchedule = await workoutScheduleService.setActive(workoutSchedule.id, workoutSchedule.userId);
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutSchedule.id, workoutSchedule.userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.getActive).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(2);
     expect(updatedWorkoutSchedule.isActive).toBe(true);
   });
   test('should throw error when trying to set workout schedule as active if it does not exist', async () => {
