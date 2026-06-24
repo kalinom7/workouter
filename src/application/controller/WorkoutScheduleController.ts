@@ -252,8 +252,12 @@ export class WorkoutScheduleController extends Controller {
       const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(userId);
       response.status(200).json(scheduledActivity);
     } catch (error) {
-      if (error instanceof Error && error.message == 'scheduled activity was skipped') {
-        response.status(404).json('scheduled activity was skipped');
+      if (error instanceof Error) {
+        if (error.message == 'scheduled activity was skipped') {
+          response.status(409).json('scheduled activity was skipped');
+        } else if (error.message == 'active workout schedule not found') {
+          response.status(404).json('active workout schedule not found');
+        }
       } else {
         response.status(500).json(error instanceof Error ? error.message : 'Internal Server Error');
       }

@@ -179,7 +179,7 @@ export class WorkoutScheduleService {
   public async getScheduledActivity(userId: UUID): Promise<UUID | null> {
     const workoutSchedule = await this.workoutScheduleRepository.getActive(userId);
     if (workoutSchedule == null) {
-      return null;
+      throw new Error('active workout schedule not found');
     }
     if (workoutSchedule.setActiveDate == null) {
       throw new Error('workout schedule is in invalid state: setActiveDate is null');
