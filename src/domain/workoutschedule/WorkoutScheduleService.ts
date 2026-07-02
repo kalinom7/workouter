@@ -97,14 +97,25 @@ export class WorkoutScheduleService {
       throw new Error('Pattern item not found');
     }
 
-    workoutSchedule.pattern = workoutSchedule.pattern.filter((b) => b.patternItemId !== itemId);
+    const filtered = workoutSchedule.pattern.filter((b) => b.patternItemId !== itemId);
 
-    workoutSchedule.pattern = workoutSchedule.pattern
+    const reorderedByOrder = filtered
       .toSorted((a, b) => a.order - b.order)
-      .map((pattern, index) => ({
-        ...pattern,
-        order: index,
-      }));
+      .map((patternItem, index) => ({ ...patternItem, order: index }));
+
+    const useOrderByItemId = new Map(
+      filtered
+        .toSorted((a, b) => a.useOrder - b.useOrder)
+        .map((patternItem, index) => [patternItem.patternItemId, index]),
+    );
+
+    workoutSchedule.pattern = reorderedByOrder.map((patternItem) => {
+      if (useOrderByItemId.get(patternItem.patternItemId) === undefined) {
+        throw new Error('Pattern item not found in useOrderByItemId map');
+      }
+
+      return { ...patternItem, useOrder: useOrderByItemId.get(patternItem.patternItemId)! };
+    });
 
     await this.workoutScheduleRepository.save(workoutSchedule);
 

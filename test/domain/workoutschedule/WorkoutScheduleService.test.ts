@@ -300,4 +300,149 @@ describe('WorkoutScheduleService', () => {
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(updatedWorkoutSchedule.isActive).toBe(false);
   });
+
+  test('should remove pattern item from workout schedule if it exists', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const patternItemId = randomUUID();
+    const workoutSchedule = {
+      id: workoutScheduleId,
+      name: 'test schedule',
+      userId: userId,
+      isActive: false,
+      setActiveDate: null,
+      pattern: [
+        {
+          patternItemId: patternItemId,
+          order: 0,
+          useOrder: 0,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+      ],
+      lastOrder: null,
+      lastFinishedWorkoutDate: null,
+    };
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    //when
+    const updatedWorkoutSchedule = await workoutScheduleService.removePatternItem(
+      userId,
+      workoutScheduleId,
+      patternItemId,
+    );
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedWorkoutSchedule.pattern.length).toBe(0);
+  });
+  test('should remove pattern item and reoder the remaining items order and useOrder', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const patternItemIdToRemove = randomUUID();
+    const workoutSchedule = {
+      id: workoutScheduleId,
+      name: 'test schedule',
+      userId: userId,
+      isActive: false,
+      setActiveDate: null,
+      pattern: [
+        {
+          patternItemId: patternItemIdToRemove,
+          order: 0,
+          useOrder: 0,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+        {
+          patternItemId: randomUUID(),
+          order: 1,
+          useOrder: 1,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+        {
+          patternItemId: randomUUID(),
+          order: 2,
+          useOrder: 2,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+      ],
+      lastOrder: null,
+      lastFinishedWorkoutDate: null,
+    };
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    //when
+    const updatedWorkoutSchedule = await workoutScheduleService.removePatternItem(
+      userId,
+      workoutScheduleId,
+      patternItemIdToRemove,
+    );
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedWorkoutSchedule.pattern.length).toBe(2);
+    expect(updatedWorkoutSchedule.pattern[0].order).toBe(0);
+    expect(updatedWorkoutSchedule.pattern[0].useOrder).toBe(0);
+    expect(updatedWorkoutSchedule.pattern[1].order).toBe(1);
+    expect(updatedWorkoutSchedule.pattern[1].useOrder).toBe(1);
+  });
+  test('should remove pattern item and reoder the remaining items order and useOrder when useOrder was different', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const patternItemIdToRemove = randomUUID();
+    const workoutSchedule = {
+      id: workoutScheduleId,
+      name: 'test schedule',
+      userId: userId,
+      isActive: false,
+      setActiveDate: null,
+      pattern: [
+        {
+          patternItemId: patternItemIdToRemove,
+          order: 0,
+          useOrder: 1,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+        {
+          patternItemId: randomUUID(),
+          order: 1,
+          useOrder: 2,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+        {
+          patternItemId: randomUUID(),
+          order: 2,
+          useOrder: 0,
+          workoutTemplateId: randomUUID(),
+          restDays: 0,
+        },
+      ],
+      lastOrder: null,
+      lastFinishedWorkoutDate: null,
+    };
+    repository.get.mockResolvedValueOnce(workoutSchedule);
+    //when
+    const updatedWorkoutSchedule = await workoutScheduleService.removePatternItem(
+      userId,
+      workoutScheduleId,
+      patternItemIdToRemove,
+    );
+    //then
+    expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedWorkoutSchedule.pattern.length).toBe(2);
+    expect(updatedWorkoutSchedule.pattern[0].order).toBe(0);
+    expect(updatedWorkoutSchedule.pattern[0].useOrder).toBe(1);
+    expect(updatedWorkoutSchedule.pattern[1].order).toBe(1);
+    expect(updatedWorkoutSchedule.pattern[1].useOrder).toBe(0);
+  });
 });
