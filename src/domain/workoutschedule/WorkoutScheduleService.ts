@@ -2,6 +2,11 @@ import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutSchedule } from './model/WorkoutSchedule.js';
 import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
+import {
+  WorkoutScheduleInvalidStateException,
+  WorkoutScheduleNotFoundException,
+  WorkoutScheduleScheduledActivitySkippedException,
+} from './WorkoutScheduleExceptions.js';
 
 @injectable()
 export class WorkoutScheduleService {
@@ -190,10 +195,10 @@ export class WorkoutScheduleService {
   public async getScheduledActivity(userId: UUID): Promise<UUID | null> {
     const workoutSchedule = await this.workoutScheduleRepository.getActive(userId);
     if (workoutSchedule == null) {
-      throw new Error('active workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
     if (workoutSchedule.setActiveDate == null) {
-      throw new Error('workout schedule is in invalid state: setActiveDate is null');
+      throw new WorkoutScheduleInvalidStateException('Workout schedule is in invalid state: setActiveDate is null');
     }
     const setActiveDate = workoutSchedule.setActiveDate;
     const today = new Date();
@@ -201,23 +206,27 @@ export class WorkoutScheduleService {
     if (workoutSchedule.lastFinishedWorkoutDate === null && workoutSchedule.lastOrder === null) {
       const daysFromActiveDate = dateDiffInDays(setActiveDate, today);
       if (daysFromActiveDate > 1) {
-        throw new Error('scheduled activity was skipped');
+        throw new WorkoutScheduleScheduledActivitySkippedException('scheduled activity was skipped');
       }
 
       return workoutSchedule.pattern[0]?.workoutTemplateId ?? null;
     }
     if (workoutSchedule.lastFinishedWorkoutDate === null || workoutSchedule.lastOrder === null) {
-      throw new Error('workout schedule is in invalid state: lastFinishedWorkoutDate or lastOrder is null');
+      throw new WorkoutScheduleInvalidStateException(
+        'Workout schedule is in invalid state: lastFinishedWorkoutDate or lastOrder is null',
+      );
     }
 
     const daysFromLastFinished = dateDiffInDays(workoutSchedule.lastFinishedWorkoutDate, today);
     const lastFinishedPatternItem = workoutSchedule.pattern.find((item) => item.order === workoutSchedule.lastOrder);
     if (!lastFinishedPatternItem) {
-      throw new Error('workout schedule is in invalid state: last finished pattern item not found');
+      throw new WorkoutScheduleInvalidStateException(
+        'Workout schedule is in invalid state: last finished pattern item not found',
+      );
     }
 
     if (daysFromLastFinished > lastFinishedPatternItem.restDays) {
-      throw new Error('scheduled activity was skipped');
+      throw new WorkoutScheduleScheduledActivitySkippedException('scheduled activity was skipped');
     }
     if (daysFromLastFinished < lastFinishedPatternItem.restDays) {
       return null;

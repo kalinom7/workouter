@@ -30,17 +30,20 @@ import {
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
 import { ParsedData, Validator } from '../validation/Validator.js';
+import { WorkoutScheduleErrorHandler } from '../error-handler/WorkoutScheduleErrorHandler.js';
 
 @injectable()
 export class WorkoutScheduleController extends Controller {
   constructor(
     private readonly workoutScheduleService: WorkoutScheduleService,
     private readonly validator: Validator,
+    private readonly workoutScheduleErrorHandler: WorkoutScheduleErrorHandler,
   ) {
     super();
   }
   public getRoutes(): Router {
     const router = Router();
+
     router.post(
       '/workout-schedules',
       this.validator.validate({ body: createWorkoutScheduleBodyDto, query: authorizationDto }),
@@ -48,7 +51,7 @@ export class WorkoutScheduleController extends Controller {
     );
 
     router.get(
-      '/workout-schedules/getScheduledActivity',
+      '/workout-schedules/active/scheduled-activity',
       this.validator.validate({
         query: authorizationDto,
       }),
@@ -121,6 +124,8 @@ export class WorkoutScheduleController extends Controller {
       }),
       (req, res) => this.renameWorkoutSchedule(req, res),
     );
+
+    router.use(this.workoutScheduleErrorHandler.getErrorHandler().bind(this));
 
     return router;
   }
@@ -248,19 +253,7 @@ export class WorkoutScheduleController extends Controller {
     response: Response<unknown, ParsedData<unknown, unknown, AuthorizationDto>>,
   ): Promise<void> {
     const { userId } = response.locals.query;
-    try {
-      const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(userId);
-      response.status(200).json(scheduledActivity);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message == 'scheduled activity was skipped') {
-          response.status(409).json('scheduled activity was skipped');
-        } else if (error.message == 'active workout schedule not found') {
-          response.status(404).json('active workout schedule not found');
-        }
-      } else {
-        response.status(500).json(error instanceof Error ? error.message : 'Internal Server Error');
-      }
-    }
+    const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(userId);
+    response.status(200).json({ scheduledActivity });
   }
 }
