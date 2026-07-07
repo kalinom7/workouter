@@ -5,4 +5,4 @@ dist
 coverage
 tsconfig.tsbuildinfo
 junit*.xml
-.env
+.git
