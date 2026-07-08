@@ -38,7 +38,7 @@ export class Application {
       }
     });
 
-    this.app.listen(3000, (error) => {
+    this.app.listen(process.env['EXPRESS_PORT'], (error) => {
       if (error) {
         console.error('Error starting server:', error);
 

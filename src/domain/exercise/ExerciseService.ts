@@ -52,7 +52,7 @@ export class ExerciseService {
     return updated;
   }
 
-  public async delete(exerciseId: string, userId: string): Promise<void> {
+  public async delete(exerciseId: UUID, userId: UUID): Promise<void> {
     const exercise = await this.exerciseRepository.get(exerciseId, userId);
     if (exercise == null) {
       throw new Error('exercise not found');

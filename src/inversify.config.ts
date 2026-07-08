@@ -1,6 +1,6 @@
 import { Container } from 'inversify';
 import { Validator } from './application/validation/Validator.js';
-import { ExerciseRepository, InMemoExerciseRepository } from './domain/exercise/ExerciseRepository.js';
+import { ExerciseRepository, MongoExerciseRepository } from './domain/exercise/ExerciseRepository.js';
 import { InMemoWorkoutRepository, WorkoutRepository } from './domain/workout/WorkoutRepository.js';
 import {
   InMemoWorkoutTemplateRepository,
@@ -15,6 +15,7 @@ import { Controller } from './application/controller/Controller.js';
 import { ExerciseController } from './application/controller/ExerciseController.js';
 import { WorkoutTemplateController } from './application/controller/WorkoutTemplateController.js';
 import { WorkoutScheduleController } from './application/controller/WorkoutScheduleController.js';
+import { MongoConnection } from './application/MongoConnection.js';
 
 const container = new Container({
   autobind: true,
@@ -26,7 +27,8 @@ container.bind(Controller).to(WorkoutTemplateController);
 container.bind(Controller).to(WorkoutScheduleController);
 container.bind(WorkoutRepository).to(InMemoWorkoutRepository).inSingletonScope();
 container.bind(WorkoutTemplateRepository).to(InMemoWorkoutTemplateRepository).inSingletonScope();
-container.bind(ExerciseRepository).to(InMemoExerciseRepository).inSingletonScope();
+container.bind(ExerciseRepository).to(MongoExerciseRepository).inSingletonScope();
 container.bind(WorkoutScheduleRepository).to(InMemoWorkoutScheduleRepository).inSingletonScope();
 container.bind(Validator).to(Validator);
+container.bind(MongoConnection).toSelf().inSingletonScope();
 export { container };
