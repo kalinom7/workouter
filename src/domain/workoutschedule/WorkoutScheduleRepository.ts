@@ -23,7 +23,7 @@ export class MongoWorkoutScheduleRepository extends WorkoutScheduleRepository {
   }
 
   public override async save(workoutSchedule: WorkoutSchedule): Promise<void> {
-    await this.collection.updateOne({ id: workoutSchedule.id }, { $set: { workoutSchedule } }, { upsert: true });
+    await this.collection.updateOne({ id: workoutSchedule.id }, { $set: workoutSchedule }, { upsert: true });
   }
   public override get(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule | null> {
     return this.collection.findOne({ id: workoutScheduleId, userId: userId }, { projection: { _id: 0 } });
