@@ -1,16 +1,9 @@
 import { injectable } from 'inversify';
 import { type Workout } from './model/Workout.js';
-import { UUID } from 'node:crypto';
 
 export abstract class WorkoutRepository {
   public abstract get(workoutId: string, userId: string): Promise<Workout | null>;
   public abstract getAllFinished(userId: string): Promise<Workout[] | null>;
-  public abstract findLastFinishedFromPattern(
-    userId: string,
-    workoutTemplateIds: UUID[],
-    scheduleStartDate: Date,
-  ): Promise<Workout | null>;
-
   public abstract save(workout: Workout): Promise<void>;
 }
 
@@ -25,34 +18,6 @@ export class InMemoWorkoutRepository extends WorkoutRepository {
     }
 
     return null;
-  }
-
-  /**
-   * Returns the most recently completed workout for the given user
-   * that matches any of the provided workout template IDs.
-   *
-   * Used to determine the correct order in WorkoutSchedule.
-   */
-  public async findLastFinishedFromPattern(
-    userId: UUID,
-    workoutTemplateIds: UUID[],
-    scheduleStartDate: Date,
-  ): Promise<Workout | null> {
-    let lastFinishedWorkout: Workout | null = null;
-
-    for (const workout of this.workouts.values()) {
-      if (workout.userId !== userId) continue;
-
-      if (!workout.endTime || workout.endTime < scheduleStartDate) continue;
-
-      if (workout.usedWorkoutTemplate !== null && !workoutTemplateIds.includes(workout.usedWorkoutTemplate)) continue;
-
-      if (!lastFinishedWorkout || workout.endTime > lastFinishedWorkout.endTime!) {
-        lastFinishedWorkout = workout;
-      }
-    }
-
-    return lastFinishedWorkout ?? null;
   }
 
   public async getAllFinished(userId: string): Promise<Workout[]> {
