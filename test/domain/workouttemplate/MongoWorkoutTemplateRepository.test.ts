@@ -6,7 +6,6 @@ import { MongoConnection } from '../../../src/application/MongoConnection';
 import process from 'node:process';
 import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
 import { type WorkoutTemplateExercise } from '../../../src/domain/workouttemplate/model/WorkoutTemplateExercise';
-import { array } from 'zod';
 
 describe('MongoWorkoutTemplateRepository', () => {
   let mongod: MongoMemoryServer;
@@ -46,7 +45,10 @@ describe('MongoWorkoutTemplateRepository', () => {
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await mongoConnection
+      .getDb()
+      .collection('workoutTemplates')
+      .insertOne({ ...workoutTemplate });
 
     //when
     const returnedWorkoutTemplate = await repository.get(workoutTemplateId, userId);

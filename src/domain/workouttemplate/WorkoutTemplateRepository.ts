@@ -54,7 +54,7 @@ export class MongoWorkoutTemplateRepository extends WorkoutTemplateRepository {
     }
   }
   public async get(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate | null> {
-    return this.collection.findOne({ id: workoutTemplateId, userId: userId });
+    return this.collection.findOne({ id: workoutTemplateId, userId: userId }, { projection: { _id: 0 } });
   }
   public async getAll(userId: UUID): Promise<WorkoutTemplate[]> {
     return await this.collection.find({ userId }, { projection: { _id: 0 } }).toArray();
