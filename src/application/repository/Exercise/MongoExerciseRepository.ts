@@ -1,17 +1,16 @@
-import { Collection } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import { ExerciseRepository } from '../../../domain/exercise/ExerciseRepository.js';
 import { Exercise } from '../../../domain/exercise/model/Exercise.js';
-import { MongoConnection } from '../../MongoConnection.js';
 import { UUID } from 'node:crypto';
 import { injectable } from 'inversify';
 
 @injectable()
 export class MongoExerciseRepository extends ExerciseRepository {
-  constructor(private readonly mongoConnection: MongoConnection) {
+  constructor(private readonly db: Db) {
     super();
   }
   private get collection(): Collection<Exercise> {
-    return this.mongoConnection.getDb().collection<Exercise>('exercises');
+    return this.db.collection<Exercise>('exercises');
   }
 
   public async save(exercise: Exercise): Promise<void> {

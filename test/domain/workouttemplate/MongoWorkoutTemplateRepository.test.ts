@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import {} from '@golevelup/ts-jest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongoWorkoutTemplateRepository } from '../../../src/domain/workouttemplate/WorkoutTemplateRepository';
+import { MongoWorkoutTemplateRepository } from '../../../src/application/repository/WorkoutTemplate/MongoWorkoutTemplateRepository';
 import { MongoConnection } from '../../../src/application/MongoConnection';
 import process from 'node:process';
 import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
@@ -19,8 +19,7 @@ describe('MongoWorkoutTemplateRepository', () => {
     process.env['MONGO_URL'] = mongod.getUri();
     process.env['MONGO_DATABASE'] = 'test-workout-template-repository';
 
-    mongoConnection = new MongoConnection();
-    await mongoConnection.connect();
+    mongoConnection = await MongoConnection.create();
   });
 
   afterAll(async () => {
@@ -32,7 +31,7 @@ describe('MongoWorkoutTemplateRepository', () => {
 
   beforeEach(async () => {
     await mongoConnection.getDb().collection('workoutTemplates').deleteMany({});
-    repository = new MongoWorkoutTemplateRepository(mongoConnection);
+    repository = new MongoWorkoutTemplateRepository(mongoConnection.getDb());
   });
 
   test('should get existing workoutTemplate', async () => {

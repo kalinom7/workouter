@@ -1,7 +1,7 @@
 import {} from '@golevelup/ts-jest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoConnection } from '../../../src/application/MongoConnection';
-import { MongoExerciseRepository } from '../../../src/domain/exercise/ExerciseRepository';
+import { MongoExerciseRepository } from '../../../src/application/repository/Exercise/MongoExerciseRepository';
 import process from 'process';
 import { type Exercise } from '../../../src/domain/exercise/model/Exercise';
 import { randomUUID } from 'crypto';
@@ -21,8 +21,7 @@ describe('MongoExerciseRepository', () => {
     process.env['MONGO_URL'] = mongod.getUri();
     process.env['MONGO_DATABASE'] = 'test-exercise-repository';
 
-    mongoConnection = new MongoConnection();
-    await mongoConnection.connect();
+    mongoConnection = await MongoConnection.create();
   });
 
   afterAll(async () => {
@@ -35,7 +34,7 @@ describe('MongoExerciseRepository', () => {
 
   beforeEach(async () => {
     await mongoConnection.getDb().collection<Exercise>('exercises').deleteMany({});
-    repository = new MongoExerciseRepository(mongoConnection);
+    repository = new MongoExerciseRepository(mongoConnection.getDb());
     collection = mongoConnection.getDb().collection<Exercise>('exercises');
   });
 

@@ -1,19 +1,18 @@
 import { injectable } from 'inversify';
 import { WorkoutTemplateRepository } from '../../../domain/workouttemplate/WorkoutTemplateRepository.js';
-import { MongoConnection } from '../../MongoConnection.js';
 import { WorkoutTemplate } from '../../../domain/workouttemplate/model/WorkoutTemplate.js';
-import { Collection } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import { UUID } from 'node:crypto';
 import { WorkoutTemplateExercise } from '../../../domain/workouttemplate/model/WorkoutTemplateExercise.js';
 
 @injectable()
 export class MongoWorkoutTemplateRepository extends WorkoutTemplateRepository {
-  constructor(private readonly mongoConnection: MongoConnection) {
+  constructor(private readonly db: Db) {
     super();
   }
 
   private get collection(): Collection<WorkoutTemplate> {
-    return this.mongoConnection.getDb().collection<WorkoutTemplate>('workoutTemplates');
+    return this.db.collection<WorkoutTemplate>('workoutTemplates');
   }
 
   public async save(workoutTemplate: WorkoutTemplate): Promise<void> {

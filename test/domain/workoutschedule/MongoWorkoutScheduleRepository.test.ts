@@ -2,11 +2,10 @@ import {} from '@golevelup/ts-jest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoConnection } from '../../../src/application/MongoConnection';
 import process from 'process';
-import { MongoWorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository';
+import { MongoWorkoutScheduleRepository } from '../../../src/application/repository/WorkoutSchedule/MongoWorkoutScheduleRepository';
 import { type Collection } from 'mongodb';
 import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule';
 import { randomUUID } from 'crypto';
-import { date } from 'zod';
 
 describe('MongoWorkoutScheduleRepository', () => {
   let mongod: MongoMemoryServer;
@@ -20,8 +19,7 @@ describe('MongoWorkoutScheduleRepository', () => {
     mongod = await MongoMemoryServer.create();
     process.env['MONGO_URL'] = mongod.getUri();
     process.env['MONGO_DATABASE'] = 'test-workout-schedule-repository';
-    mongoConnection = new MongoConnection();
-    await mongoConnection.connect();
+    mongoConnection = await MongoConnection.create();
   });
   afterAll(async () => {
     process.env['MONGO_URL'] = originalUrl;
@@ -32,7 +30,7 @@ describe('MongoWorkoutScheduleRepository', () => {
   beforeEach(async () => {
     collection = mongoConnection.getDb().collection<WorkoutSchedule>('workoutSchedules');
     await collection.deleteMany({});
-    repository = new MongoWorkoutScheduleRepository(mongoConnection);
+    repository = new MongoWorkoutScheduleRepository(mongoConnection.getDb());
   });
 
   test('should add workout schedule by save', async () => {

@@ -1,7 +1,7 @@
 import {} from '@golevelup/ts-jest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoConnection } from '../../../src/application/MongoConnection';
-import { MongoWorkoutRepository } from '../../../src/domain/workout/WorkoutRepository';
+import { MongoWorkoutRepository } from '../../../src/application/repository/Workout/MongoWorkoutRepository';
 import process from 'process';
 import { type Collection } from 'mongodb';
 import { type Workout } from '../../../src/domain/workout/model/Workout';
@@ -17,10 +17,9 @@ describe('MongoWorkoutRepository', () => {
 
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
-    mongoConnection = new MongoConnection();
     process.env['MONGO_URL'] = mongod.getUri();
     process.env['MONGO_DATABASE'] = 'test-workout-repository';
-    await mongoConnection.connect();
+    mongoConnection = await MongoConnection.create();
   });
   afterAll(async () => {
     await mongoConnection.disconnect();
@@ -31,7 +30,7 @@ describe('MongoWorkoutRepository', () => {
   beforeEach(async () => {
     collection = mongoConnection.getDb().collection<Workout>('workouts');
     await collection.deleteMany({});
-    repository = new MongoWorkoutRepository(mongoConnection);
+    repository = new MongoWorkoutRepository(mongoConnection.getDb());
   });
 
   test('should save workout', async () => {

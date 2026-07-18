@@ -1,18 +1,17 @@
 import { injectable } from 'inversify';
 import { WorkoutScheduleRepository } from '../../../domain/workoutschedule/WorkoutScheduleRepository.js';
-import { MongoConnection } from '../../MongoConnection.js';
 import { WorkoutSchedule } from '../../../domain/workoutschedule/model/WorkoutSchedule.js';
-import { Collection } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import { UUID } from 'node:crypto';
 
 @injectable()
 export class MongoWorkoutScheduleRepository extends WorkoutScheduleRepository {
-  constructor(private readonly mongoConnection: MongoConnection) {
+  constructor(private readonly db: Db) {
     super();
   }
 
   private get collection(): Collection<WorkoutSchedule> {
-    return this.mongoConnection.getDb().collection<WorkoutSchedule>('workoutSchedules');
+    return this.db.collection<WorkoutSchedule>('workoutSchedules');
   }
 
   public override async save(workoutSchedule: WorkoutSchedule): Promise<void> {

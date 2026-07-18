@@ -1,17 +1,16 @@
 import { injectable } from 'inversify';
 import { WorkoutRepository } from '../../../domain/workout/WorkoutRepository.js';
-import { MongoConnection } from '../../MongoConnection.js';
 import { Workout } from '../../../domain/workout/model/Workout.js';
-import { Collection } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import { UUID } from 'node:crypto';
 
 @injectable()
 export class MongoWorkoutRepository extends WorkoutRepository {
-  constructor(private readonly mongoConnection: MongoConnection) {
+  constructor(private readonly db: Db) {
     super();
   }
   private get collection(): Collection<Workout> {
-    return this.mongoConnection.getDb().collection<Workout>('workouts');
+    return this.db.collection<Workout>('workouts');
   }
   public async get(workoutId: UUID, userId: UUID): Promise<Workout | null> {
     return this.collection.findOne({ id: workoutId, userId: userId }, { projection: { _id: 0 } });
