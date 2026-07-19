@@ -1,7 +1,10 @@
 import {} from '@golevelup/ts-jest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoConnection } from '../../../src/application/MongoConnection';
-import { MongoExerciseRepository } from '../../../src/application/repository/Exercise/MongoExerciseRepository';
+import {
+  type MongoExercise,
+  MongoExerciseRepository,
+} from '../../../src/application/repository/Exercise/MongoExerciseRepository';
 import process from 'process';
 import { type Exercise } from '../../../src/domain/exercise/model/Exercise';
 import { randomUUID } from 'crypto';
@@ -11,7 +14,7 @@ describe('MongoExerciseRepository', () => {
   let mongod: MongoMemoryServer;
   let mongoConnection: MongoConnection;
   let repository: MongoExerciseRepository;
-  let collection: Collection<Exercise>;
+  let collection: Collection<MongoExercise>;
 
   const originalMongoUrl = process.env['MONGO_URL'];
   const originalMongoDatabase = process.env['MONGO_DATABASE'];
@@ -33,9 +36,9 @@ describe('MongoExerciseRepository', () => {
   });
 
   beforeEach(async () => {
-    await mongoConnection.getDb().collection<Exercise>('exercises').deleteMany({});
+    await mongoConnection.getDb().collection<MongoExercise>('exercises').deleteMany({});
     repository = new MongoExerciseRepository(mongoConnection.getDb());
-    collection = mongoConnection.getDb().collection<Exercise>('exercises');
+    collection = mongoConnection.getDb().collection<MongoExercise>('exercises');
   });
 
   test('should add exercise by save', async () => {
@@ -53,8 +56,12 @@ describe('MongoExerciseRepository', () => {
     await repository.save(exercise);
 
     //then
-    const savedExercise = await collection.findOne(exercise, { projection: { _id: 0 } });
-    expect(savedExercise).toEqual(exercise);
+    const savedExercise = await collection.findOne({ _id: exerciseId, userId: userId });
+    expect(savedExercise).toEqual({
+      _id: exerciseId,
+      userId: userId,
+      name: 'test exercise',
+    });
   });
 
   test('should save changes to exercise', async () => {
@@ -62,8 +69,8 @@ describe('MongoExerciseRepository', () => {
     const exerciseId = randomUUID();
     const userId = randomUUID();
 
-    const exercise: Exercise = {
-      id: exerciseId,
+    const exercise: MongoExercise = {
+      _id: exerciseId,
       userId: userId,
       name: 'test exercise',
     };
@@ -78,16 +85,20 @@ describe('MongoExerciseRepository', () => {
     await repository.save(changedExercise);
 
     //then
-    const savedExercise = await collection.findOne({ id: exerciseId, userId: userId }, { projection: { _id: 0 } });
-    expect(savedExercise).toEqual(changedExercise);
+    const savedExercise = await collection.findOne({ _id: exerciseId, userId: userId });
+    expect(savedExercise).toEqual({
+      _id: exerciseId,
+      userId: userId,
+      name: 'changed exercise',
+    });
   });
   test('should get existing exercise', async () => {
     //given
     const exerciseId = randomUUID();
     const userId = randomUUID();
 
-    const exercise: Exercise = {
-      id: exerciseId,
+    const exercise: MongoExercise = {
+      _id: exerciseId,
       userId: userId,
       name: 'test exercise',
     };
@@ -98,15 +109,15 @@ describe('MongoExerciseRepository', () => {
     const returnedExercise = await repository.get(exerciseId, userId);
 
     //then
-    expect(returnedExercise).toEqual(exercise);
+    expect(returnedExercise).toEqual({ id: exerciseId, userId: userId, name: 'test exercise' });
   });
   test('should delete exercise', async () => {
     //given
     const exerciseId = randomUUID();
     const userId = randomUUID();
 
-    const exercise: Exercise = {
-      id: exerciseId,
+    const exercise: MongoExercise = {
+      _id: exerciseId,
       userId: userId,
       name: 'test exercise',
     };
@@ -122,31 +133,33 @@ describe('MongoExerciseRepository', () => {
   });
   test('should get all user exercises', async () => {
     //given
-    const exerciseId = randomUUID();
+    const exerciseId1 = randomUUID();
+    const exerciseId2 = randomUUID();
+    const exerciseId3 = randomUUID();
     const userId = randomUUID();
 
-    const exercise1: Exercise = {
-      id: exerciseId,
+    const exercise1: MongoExercise = {
+      _id: exerciseId1,
       userId: userId,
       name: 'test exercise1',
     };
-    const exercise2: Exercise = {
-      id: exerciseId,
+    const exercise2: MongoExercise = {
+      _id: exerciseId2,
       userId: userId,
       name: 'test exercise2',
     };
-    const exercise3: Exercise = {
-      id: exerciseId,
+    const exercise3: MongoExercise = {
+      _id: exerciseId3,
       userId: userId,
       name: 'test exercise3',
     };
-    const exercises: Exercise[] = [exercise1, exercise2, exercise3];
+    const exercises: MongoExercise[] = [exercise1, exercise2, exercise3];
     await collection.insertMany(exercises.map((ex) => ({ ...ex })));
 
     //when
     const returnedExercises: Exercise[] = await repository.getAll(userId);
 
     //then
-    expect(returnedExercises).toEqual(exercises);
+    expect(returnedExercises).toEqual(exercises.map((ex) => ({ id: ex._id, userId: ex.userId, name: ex.name })));
   });
 });
