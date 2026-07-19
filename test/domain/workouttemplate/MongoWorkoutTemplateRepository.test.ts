@@ -1,16 +1,21 @@
 import { randomUUID } from 'node:crypto';
 import {} from '@golevelup/ts-jest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongoWorkoutTemplateRepository } from '../../../src/application/repository/WorkoutTemplate/MongoWorkoutTemplateRepository';
+import {
+  type MongoWorkoutTemplate,
+  MongoWorkoutTemplateRepository,
+} from '../../../src/application/repository/WorkoutTemplate/MongoWorkoutTemplateRepository';
 import { MongoConnection } from '../../../src/application/MongoConnection';
 import process from 'node:process';
 import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
 import { type WorkoutTemplateExercise } from '../../../src/domain/workouttemplate/model/WorkoutTemplateExercise';
+import { type Collection } from 'mongodb';
 
 describe('MongoWorkoutTemplateRepository', () => {
   let mongod: MongoMemoryServer;
   let mongoConnection: MongoConnection;
   let repository: MongoWorkoutTemplateRepository;
+  let collection: Collection<MongoWorkoutTemplate>;
   const originalMongoUrl = process.env['MONGO_URL'];
   const originalMongoDatabase = process.env['MONGO_DATABASE'];
 
@@ -30,7 +35,8 @@ describe('MongoWorkoutTemplateRepository', () => {
   });
 
   beforeEach(async () => {
-    await mongoConnection.getDb().collection('workoutTemplates').deleteMany({});
+    collection = mongoConnection.getDb().collection<MongoWorkoutTemplate>('workoutTemplates');
+    await collection.deleteMany({});
     repository = new MongoWorkoutTemplateRepository(mongoConnection.getDb());
   });
 
@@ -38,22 +44,24 @@ describe('MongoWorkoutTemplateRepository', () => {
     //given
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection
-      .getDb()
-      .collection('workoutTemplates')
-      .insertOne({ ...workoutTemplate });
+    await collection.insertOne({ ...workoutTemplate });
 
     //when
     const returnedWorkoutTemplate = await repository.get(workoutTemplateId, userId);
 
     //then
-    expect(returnedWorkoutTemplate).toEqual(workoutTemplate);
+    expect(returnedWorkoutTemplate).toEqual({
+      id: workoutTemplateId,
+      name: 'test workoutTemplate',
+      userId: userId,
+      exercises: [],
+    });
   });
 
   test('should add workoutTemplate with save', async () => {
@@ -71,36 +79,26 @@ describe('MongoWorkoutTemplateRepository', () => {
     await repository.save(workoutTemplate);
 
     //then
-    const result = await mongoConnection
-      .getDb()
-      .collection<WorkoutTemplate>('workoutTemplates')
-      .findOne(
-        {
-          id: workoutTemplateId,
-          name: 'test workoutTemplate',
-          userId: userId,
-          exercises: [],
-        },
-        { projection: { _id: 0 } },
-      );
+    const result = await collection.findOne({
+      _id: workoutTemplateId,
+      userId: userId,
+    });
 
-    expect(result).toEqual(workoutTemplate);
+    expect(result).toEqual({ _id: workoutTemplateId, name: 'test workoutTemplate', userId: userId, exercises: [] });
   });
 
   test('should save changes to workout template', async () => {
     //given
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
-    const numberOfDocumentsBefore = await (
-      await mongoConnection.getDb().collection<WorkoutTemplate>('workoutTemplates').find().toArray()
-    ).length;
+    await collection.insertOne(workoutTemplate);
+    const numberOfDocumentsBefore = await (await collection.find().toArray()).length;
     const changedWorkoutTemplate: WorkoutTemplate = {
       id: workoutTemplateId,
       name: 'changed test workoutTemplate',
@@ -112,20 +110,17 @@ describe('MongoWorkoutTemplateRepository', () => {
     await repository.save(changedWorkoutTemplate);
 
     //then
-    const numberOfDocumentsAfter = await (
-      await mongoConnection.getDb().collection<WorkoutTemplate>('workoutTemplates').find().toArray()
-    ).length;
-    const result = await mongoConnection
-      .getDb()
-      .collection<WorkoutTemplate>('workoutTemplates')
-      .findOne(
-        {
-          id: workoutTemplateId,
-        },
-        { projection: { _id: 0 } },
-      );
+    const numberOfDocumentsAfter = await (await collection.find().toArray()).length;
+    const result = await collection.findOne({
+      _id: workoutTemplateId,
+    });
 
-    expect(result).toEqual(changedWorkoutTemplate);
+    expect(result).toEqual({
+      _id: workoutTemplateId,
+      name: 'changed test workoutTemplate',
+      userId: userId,
+      exercises: [],
+    });
     expect(numberOfDocumentsBefore).toEqual(numberOfDocumentsAfter);
   });
 
@@ -135,8 +130,8 @@ describe('MongoWorkoutTemplateRepository', () => {
     const workoutTemplateId = randomUUID();
     const exerciseId = randomUUID();
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [
@@ -148,10 +143,8 @@ describe('MongoWorkoutTemplateRepository', () => {
         },
       ],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
-    const numberOfDocumentsBefore = await (
-      await mongoConnection.getDb().collection<WorkoutTemplate>('workoutTemplates').find().toArray()
-    ).length;
+    await collection.insertOne(workoutTemplate);
+    const numberOfDocumentsBefore = await (await collection.find().toArray()).length;
     const changedWorkoutTemplateExercise: WorkoutTemplateExercise = {
       exercise: exerciseId,
       sets: 3,
@@ -163,17 +156,12 @@ describe('MongoWorkoutTemplateRepository', () => {
     await repository.saveWorkoutTemplateExercise(workoutTemplateId, userId, changedWorkoutTemplateExercise);
 
     //then
-    const result = await mongoConnection
-      .getDb()
-      .collection<WorkoutTemplate>('workoutTemplates')
-      .findOne(
-        { id: workoutTemplateId, userId: userId, 'exercises.order': 0 },
-        { projection: { _id: 0, 'exercises.$': 1 } },
-      );
+    const result = await collection.findOne(
+      { _id: workoutTemplateId, userId: userId, 'exercises.order': 0 },
+      { projection: { _id: 0, 'exercises.$': 1 } },
+    );
     const exerciseAfterChanges = result?.exercises[0];
-    const numberOfDocumentsAfter = await (
-      await mongoConnection.getDb().collection<WorkoutTemplate>('workoutTemplates').find().toArray()
-    ).length;
+    const numberOfDocumentsAfter = await (await collection.find().toArray()).length;
 
     expect(exerciseAfterChanges).toEqual(changedWorkoutTemplateExercise);
     expect(numberOfDocumentsAfter).toEqual(numberOfDocumentsBefore);
@@ -195,13 +183,13 @@ describe('MongoWorkoutTemplateRepository', () => {
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
     const otherUserId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
 
     //when
     const returnedWorkoutTemplate = await repository.get(workoutTemplateId, otherUserId);
@@ -214,34 +202,34 @@ describe('MongoWorkoutTemplateRepository', () => {
     //given
     const userId = randomUUID();
     const otherUserId = randomUUID();
-    const workoutTemplate1: WorkoutTemplate = {
-      id: randomUUID(),
+    const workoutTemplate1: MongoWorkoutTemplate = {
+      _id: randomUUID(),
       name: 'first workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    const workoutTemplate2: WorkoutTemplate = {
-      id: randomUUID(),
+    const workoutTemplate2: MongoWorkoutTemplate = {
+      _id: randomUUID(),
       name: 'second workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    const otherUsersWorkoutTemplate: WorkoutTemplate = {
-      id: randomUUID(),
+    const otherUsersWorkoutTemplate: MongoWorkoutTemplate = {
+      _id: randomUUID(),
       name: 'other users workoutTemplate',
       userId: otherUserId,
       exercises: [],
     };
-    await mongoConnection
-      .getDb()
-      .collection('workoutTemplates')
-      .insertMany([{ ...workoutTemplate1 }, { ...workoutTemplate2 }, { ...otherUsersWorkoutTemplate }]);
+    await collection.insertMany([{ ...workoutTemplate1 }, { ...workoutTemplate2 }, { ...otherUsersWorkoutTemplate }]);
 
     //when
     const returnedWorkoutTemplates = await repository.getAll(userId);
 
     //then
-    expect(returnedWorkoutTemplates).toEqual(expect.arrayContaining([workoutTemplate1, workoutTemplate2]));
+    expect(returnedWorkoutTemplates).toEqual([
+      { id: workoutTemplate1._id, name: 'first workoutTemplate', userId: userId, exercises: [] },
+      { id: workoutTemplate2._id, name: 'second workoutTemplate', userId: userId, exercises: [] },
+    ]);
     expect(returnedWorkoutTemplates).toHaveLength(2);
   });
 
@@ -267,13 +255,13 @@ describe('MongoWorkoutTemplateRepository', () => {
       restPeriod: 90,
       order: 1,
     };
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [workoutTemplateExercise],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
 
     //when
     const returnedExercise = await repository.getByOrder(workoutTemplateId, userId, 1);
@@ -286,13 +274,13 @@ describe('MongoWorkoutTemplateRepository', () => {
     //given
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
 
     //when
     const returnedExercise = await repository.getByOrder(workoutTemplateId, userId, 0);
@@ -305,13 +293,13 @@ describe('MongoWorkoutTemplateRepository', () => {
     //given
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
     const workoutTemplateExercise: WorkoutTemplateExercise = {
       exercise: randomUUID(),
       sets: 3,
@@ -330,22 +318,19 @@ describe('MongoWorkoutTemplateRepository', () => {
     //given
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
 
     //when
     await repository.delete(workoutTemplateId, userId);
 
     //then
-    const result = await mongoConnection
-      .getDb()
-      .collection<WorkoutTemplate>('workoutTemplates')
-      .findOne({ id: workoutTemplateId });
+    const result = await collection.findOne({ _id: workoutTemplateId, userId: userId });
 
     expect(result).toBeNull();
   });
@@ -355,22 +340,19 @@ describe('MongoWorkoutTemplateRepository', () => {
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
     const otherUserId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
 
     //when
     await repository.delete(workoutTemplateId, otherUserId);
 
     //then
-    const result = await mongoConnection
-      .getDb()
-      .collection<WorkoutTemplate>('workoutTemplates')
-      .findOne({ id: workoutTemplateId });
+    const result = await collection.findOne({ _id: workoutTemplateId });
 
     expect(result).not.toBeNull();
   });
@@ -391,22 +373,19 @@ describe('MongoWorkoutTemplateRepository', () => {
       restPeriod: 120,
       order: 0,
     };
-    const workoutTemplate: WorkoutTemplate = {
-      id: workoutTemplateId,
+    const workoutTemplate: MongoWorkoutTemplate = {
+      _id: workoutTemplateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [exerciseToRemove, remainingExercise],
     };
-    await mongoConnection.getDb().collection('workoutTemplates').insertOne(workoutTemplate);
+    await collection.insertOne(workoutTemplate);
 
     //when
     await repository.removeWorkoutTemplateExercise(workoutTemplateId, userId, 0);
 
     //then
-    const result = await mongoConnection
-      .getDb()
-      .collection<WorkoutTemplate>('workoutTemplates')
-      .findOne({ id: workoutTemplateId }, { projection: { _id: 0 } });
+    const result = await collection.findOne({ _id: workoutTemplateId, userId: userId });
 
     expect(result?.exercises).toEqual([remainingExercise]);
   });
