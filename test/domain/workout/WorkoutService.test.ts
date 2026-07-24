@@ -103,7 +103,7 @@ describe('WorkoutService', () => {
     expect(exerciseService.get).toHaveBeenCalledWith(exerciseId, userId);
     expect(repository.save).toHaveBeenCalled();
     expect(savedWorkout.exercises).toHaveLength(1);
-    expect(savedWorkout.exercises[0].exerciseId).toBe(exerciseId);
+    expect(savedWorkout.exercises[0].exercise.id).toBe(exerciseId);
   });
   test('should throw error when adding exercise to non-existing workout', async () => {
     //given
@@ -131,8 +131,8 @@ describe('WorkoutService', () => {
       usedWorkoutTemplate: null,
       endTime: null,
       exercises: [
-        { exerciseId: randomUUID(), sets: [], order: 0, isCompleted: false },
-        { exerciseId: randomUUID(), sets: [], order: 1, isCompleted: false },
+        { exercise: { id: randomUUID(), name: 'Test Exercise 1' }, sets: [], order: 0, isCompleted: false },
+        { exercise: { id: randomUUID(), name: 'Test Exercise 2' }, sets: [], order: 1, isCompleted: false },
       ],
     };
     repository.get.mockResolvedValue(existingWorkout);
@@ -189,7 +189,7 @@ describe('WorkoutService', () => {
       startTime: new Date(),
       usedWorkoutTemplate: null,
       endTime: null,
-      exercises: [{ exerciseId: randomUUID(), sets: [], order: 0, isCompleted: false }],
+      exercises: [{ exercise: { id: randomUUID(), name: 'Test Exercise 1' }, sets: [], order: 0, isCompleted: false }],
     };
     repository.get.mockResolvedValue(existingWorkout);
 
@@ -245,7 +245,7 @@ describe('WorkoutService', () => {
       endTime: null,
       exercises: [
         {
-          exerciseId: randomUUID(),
+          exercise: { id: randomUUID(), name: 'Test Exercise 1' },
           sets: [
             { weight: 70, order: 0, reps: 10, isCompleted: false },
             { weight: 50, order: 1, reps: 12, isCompleted: false },
@@ -310,7 +310,7 @@ describe('WorkoutService', () => {
       endTime: null,
       exercises: [
         {
-          exerciseId: randomUUID(),
+          exercise: { id: randomUUID(), name: 'Test Exercise 1' },
           sets: [{ weight: null, reps: null, order: 0, isCompleted: false }],
           order: 0,
           isCompleted: false,
@@ -374,7 +374,7 @@ describe('WorkoutService', () => {
       endTime: null,
       exercises: [
         {
-          exerciseId: randomUUID(),
+          exercise: { id: randomUUID(), name: 'Test Exercise 1' },
           sets: [{ weight: null, reps: null, order: 0, isCompleted: false }],
           order: 0,
           isCompleted: false,
@@ -404,7 +404,7 @@ describe('WorkoutService', () => {
       endTime: null,
       exercises: [
         {
-          exerciseId: randomUUID(),
+          exercise: { id: randomUUID(), name: 'Test Exercise 1' },
           sets: [{ weight: null, reps: null, order: 0, isCompleted: true }],
           order: 0,
           isCompleted: false,
@@ -457,7 +457,7 @@ describe('WorkoutService', () => {
       endTime: null,
       exercises: [
         {
-          exerciseId: randomUUID(),
+          exercise: { id: randomUUID(), name: 'Test Exercise 1' },
           sets: [{ weight: 80, reps: 10, order: 0, isCompleted: true }],
           order: 0,
           isCompleted: true,

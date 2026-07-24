@@ -24,7 +24,10 @@ export class WorkoutService {
       endTime: null,
       usedWorkoutTemplate: workoutTemplateId,
       exercises: workoutTemplate.exercises.map((exercise) => ({
-        exerciseId: exercise.exercise,
+        exercise: {
+          id: exercise.exercise.id,
+          name: exercise.exercise.name,
+        },
         sets: Array.from({ length: exercise.sets }).map((_, index) => ({
           weight: null,
           reps: null,
@@ -67,7 +70,10 @@ export class WorkoutService {
     const order = workout.exercises.length;
 
     const workoutExercise: WorkoutExercise = {
-      exerciseId: exercise.id,
+      exercise: {
+        id: exercise.id,
+        name: exercise.name,
+      },
       sets: [],
       restPeriod: 0,
       order,
