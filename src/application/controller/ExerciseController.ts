@@ -93,7 +93,7 @@ export class ExerciseController extends Controller {
     const { name, description } = request.body;
     const { exerciseId } = request.params;
     const { userId } = request.query;
-    const exercise = await this.exerciseService.update(exerciseId, name, userId, description);
+    const exercise = await this.exerciseService.update(exerciseId, userId, name, description);
     response.status(200).json(exercise);
   }
   public async delete(

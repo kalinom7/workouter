@@ -35,7 +35,7 @@ export class ExerciseService {
     return exercises;
   }
 
-  public async update(exerciseId: UUID, name: string, userId: UUID, description?: string): Promise<Exercise> {
+  public async update(exerciseId: UUID, userId: UUID, name?: string, description?: string): Promise<Exercise> {
     const existing = await this.exerciseRepository.get(exerciseId, userId);
     if (existing == null) {
       throw new Error('exercise not found');
@@ -43,8 +43,8 @@ export class ExerciseService {
 
     const updated: Exercise = {
       ...existing,
-      name,
-      ...(description === undefined ? {} : { description }),
+      name: name ?? existing.name,
+      description: description ?? existing.description,
     };
 
     await this.exerciseRepository.save(updated);

@@ -83,8 +83,8 @@ describe('ExerciseService', () => {
     //when
     const updatedExercise: Exercise = await exerciseService.update(
       exercise.id,
-      'Updated exercise',
       exercise.userId,
+      'Updated exercise',
       'updated description',
     );
     //then
@@ -120,5 +120,88 @@ describe('ExerciseService', () => {
 
     //then
     expect(repository.get).toHaveBeenCalledTimes(1);
+  });
+  test('should update exercise name only when updating description is undefined', async () => {
+    //given
+    const userId = randomUUID();
+    const exerciseId = randomUUID();
+    const exercise: Exercise = {
+      id: exerciseId,
+      name: 'Test exercise',
+      description: 'test description',
+      userId: userId,
+    };
+    repository.get.mockResolvedValue(exercise);
+    //when
+    const updatedExercise: Exercise = await exerciseService.update(exercise.id, exercise.userId, 'Updated exercise');
+    //then
+    expect(repository.save).toHaveBeenCalledWith({
+      id: exercise.id,
+      name: 'Updated exercise',
+      userId: exercise.userId,
+      description: 'test description',
+    });
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedExercise).toEqual({
+      id: exercise.id,
+      name: 'Updated exercise',
+      userId: exercise.userId,
+      description: 'test description',
+    });
+  });
+  test('should update exercise description only when updating name is undefined', async () => {
+    //given
+    const userId = randomUUID();
+    const exerciseId = randomUUID();
+    const exercise: Exercise = {
+      id: exerciseId,
+      name: 'Test exercise',
+      description: 'test description',
+      userId: userId,
+    };
+    repository.get.mockResolvedValue(exercise);
+    //when
+    const updatedExercise: Exercise = await exerciseService.update(
+      exercise.id,
+      exercise.userId,
+      undefined,
+      'updated description',
+    );
+    //then
+    expect(repository.save).toHaveBeenCalledWith({
+      id: exercise.id,
+      userId: exercise.userId,
+      name: 'Test exercise',
+      description: 'updated description',
+    });
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(updatedExercise).toEqual({
+      id: exercise.id,
+      name: 'Test exercise',
+      userId: exercise.userId,
+      description: 'updated description',
+    });
+  });
+  test('should update name leaving description undefined', async () => {
+    //given
+    const exerciseId = randomUUID();
+    const userId = randomUUID();
+    const exercise: Exercise = {
+      id: exerciseId,
+      userId: userId,
+      name: 'test exercise',
+      description: undefined,
+    };
+    repository.get.mockResolvedValue(exercise);
+
+    //when
+    const result = await exerciseService.update(exerciseId, userId, 'updated exercise name');
+
+    //then
+    expect(result).toEqual({
+      ...exercise,
+      name: 'updated exercise name',
+      description: undefined,
+    });
   });
 });
