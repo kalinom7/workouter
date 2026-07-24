@@ -3,14 +3,18 @@ import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/
 import { WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService.js';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutTemplateRepository } from '../../../src/domain/workouttemplate/WorkoutTemplateRepository.js';
+import { type Exercise } from '../../../src/domain/exercise/model/Exercise.js';
+import { type ExerciseService } from '../../../src/domain/exercise/ExerciseService.js';
 
 describe('WorkoutTemplateService', () => {
   let workoutTemplateService: WorkoutTemplateService;
+  let exerciseService: DeepMocked<ExerciseService>;
   let repository: DeepMocked<WorkoutTemplateRepository>;
 
   beforeEach(() => {
     repository = createMock<WorkoutTemplateRepository>();
-    workoutTemplateService = new WorkoutTemplateService(repository);
+    exerciseService = createMock<ExerciseService>();
+    workoutTemplateService = new WorkoutTemplateService(repository, exerciseService);
   });
 
   test('should create workoutTemplate', async () => {
@@ -77,15 +81,21 @@ describe('WorkoutTemplateService', () => {
       exercises: [],
     };
     repository.get.mockResolvedValue(workoutTemplate);
-    const exercise = randomUUID();
+    const exercise: Exercise = {
+      id: randomUUID(),
+      userId: userId,
+      name: 'test exercise',
+      description: 'test description',
+    };
     const sets = 0;
     const restPeriod = 0;
+    exerciseService.get.mockResolvedValue(exercise);
 
     //when
     await workoutTemplateService.addWorkoutTemplateExercise(exercise, workoutTemplate.id, userId, sets, restPeriod);
 
     //then
-    expect(workoutTemplate.exercises.length).toBe(1);
+    expect(workoutTemplate.exercises).toHaveLength(1);
   });
   test('should add workoutTemplateExercise with sets and restPeriod to workoutTemplate', async () => {
     //given
@@ -98,15 +108,21 @@ describe('WorkoutTemplateService', () => {
       exercises: [],
     };
     repository.get.mockResolvedValue(workoutTemplate);
-    const exercise = randomUUID();
+    const exercise: Exercise = {
+      id: randomUUID(),
+      userId: userId,
+      name: 'test exercise',
+      description: 'test description',
+    };
     const sets = 3;
     const restPeriod = 180;
 
+    exerciseService.get.mockResolvedValue(exercise);
     //when
     await workoutTemplateService.addWorkoutTemplateExercise(exercise, workoutTemplate.id, userId, sets, restPeriod);
 
     //then
-    expect(workoutTemplate.exercises.length).toBe(1);
+    expect(workoutTemplate.exercises).toHaveLength(1);
     expect(workoutTemplate.exercises[0].sets).toBe(sets);
     expect(workoutTemplate.exercises[0].restPeriod).toBe(restPeriod);
   });
@@ -169,7 +185,12 @@ describe('WorkoutTemplateService', () => {
       ],
     };
     repository.getByOrder.mockResolvedValue(workoutTemplate.exercises[0]);
-    const newExercise = randomUUID();
+    const newExercise: Exercise = {
+      id: randomUUID(),
+      userId: userId,
+      name: 'test exercise',
+      description: 'test description',
+    };
     const newSets = 4;
     const newRestPeriod = 360;
     const editedExercise = {
@@ -179,6 +200,7 @@ describe('WorkoutTemplateService', () => {
       order: 0,
     };
 
+    exerciseService.get.mockResolvedValue(newExercise);
     //when
     await workoutTemplateService.editWorkoutTemplateExercise(
       templateId,
@@ -226,7 +248,7 @@ describe('WorkoutTemplateService', () => {
     //then
     expect(repository.get).toHaveBeenCalledWith(workoutTemplate.id, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
-    expect(workoutTemplate.exercises.length).toBe(1);
+    expect(workoutTemplate.exercises).toHaveLength(1);
     expect(repository.save).toHaveBeenCalledWith(workoutTemplate);
     expect(repository.save).toHaveBeenCalledTimes(1);
   });

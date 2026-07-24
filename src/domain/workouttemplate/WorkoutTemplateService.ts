@@ -3,10 +3,14 @@ import { randomUUID, type UUID } from 'node:crypto';
 import { type WorkoutTemplate } from './model/WorkoutTemplate.js';
 import { type WorkoutTemplateExercise } from './model/WorkoutTemplateExercise.js';
 import { WorkoutTemplateRepository } from './WorkoutTemplateRepository.js';
+import { ExerciseService } from '../exercise/ExerciseService.js';
 
 @injectable()
 export class WorkoutTemplateService {
-  constructor(private readonly workoutTemplateRepository: WorkoutTemplateRepository) {}
+  constructor(
+    private readonly workoutTemplateRepository: WorkoutTemplateRepository,
+    private readonly exerciseService: ExerciseService,
+  ) {}
 
   //workoutTemplate creation
   public async createWorkoutTemplate(name: string, userId: UUID): Promise<WorkoutTemplate> {
@@ -56,8 +60,10 @@ export class WorkoutTemplateService {
 
     const order = workoutTemplate.exercises.length;
 
+    const exercise = await this.exerciseService.get(exerciseId, userId);
+
     const workoutTemplateExercise: WorkoutTemplateExercise = {
-      exercise: exerciseId,
+      exercise,
       order,
       sets,
       restPeriod,
@@ -103,8 +109,10 @@ export class WorkoutTemplateService {
       throw new Error('WorkoutTemplateExercise not found');
     }
 
+    const resultExercise = await this.exerciseService.get(exerciseId, userId);
+
     const updatedExercise: WorkoutTemplateExercise = {
-      exercise: exerciseId,
+      exercise: resultExercise,
       order,
       sets,
       restPeriod,
