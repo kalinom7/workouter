@@ -3,7 +3,7 @@ import { type UUID } from 'node:crypto';
 
 export const createExerciseBodyDto = z.object({
   name: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().max(256).optional(),
 });
 export type CreateExerciseBodyDto = z.infer<typeof createExerciseBodyDto>;
 
@@ -14,7 +14,7 @@ export type GetExerciseParamsDto = z.infer<typeof getExerciseParamsDto>;
 
 export const updateExerciseBodyDto = z.object({
   name: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().max(256).optional(),
 });
 export type UpdateExerciseBodyDto = z.infer<typeof updateExerciseBodyDto>;
 
