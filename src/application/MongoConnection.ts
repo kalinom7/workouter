@@ -1,5 +1,6 @@
 import { injectable } from 'inversify';
 import { Db, MongoClient } from 'mongodb';
+import { Config } from './config/config.js';
 
 @injectable()
 export class MongoConnection {
@@ -7,17 +8,15 @@ export class MongoConnection {
     private readonly client: MongoClient,
     private readonly db: Db,
   ) {}
-  public static async create(): Promise<MongoConnection> {
-    const mongoUrl = process.env['MONGO_URL'];
-    const dbName = process.env['MONGO_DATABASE'];
 
-    if (typeof mongoUrl !== 'string' || mongoUrl.length === 0) {
-      throw new Error('MONGO_URL is not defined.');
-    }
-
-    const client = new MongoClient(mongoUrl);
+  public static async create(config: Config): Promise<MongoConnection> {
+    console.log(config.getMongoUrl());
+    const client = new MongoClient(config.getMongoUrl());
+    console.log('Connecting to MongoDB...');
     await client.connect();
-    const db = client.db(dbName);
+    console.log('Connected to MongoDB');
+    const db = client.db(config.getDbName());
+    console.log(`Connected to MongoDB database: ${config.getDbName()}`);
 
     return new MongoConnection(client, db);
   }

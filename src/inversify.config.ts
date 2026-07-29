@@ -19,6 +19,7 @@ import { InMemoExerciseRepository } from './application/repository/Exercise/InMe
 import { InMemoWorkoutRepository } from './application/repository/Workout/InMemoWorkoutRepository.js';
 import { InMemoWorkoutTemplateRepository } from './application/repository/WorkoutTemplate/InMemoWorkoutTemplateRepository.js';
 import { InMemoWorkoutScheduleRepository } from './application/repository/WorkoutSchedule/InMemoWorkoutScheduleRepository.js';
+import { Config } from './application/config/config.js';
 
 const container = new Container({
   autobind: true,
@@ -36,8 +37,10 @@ container.bind(Controller).to(WorkoutScheduleController);
  */
 container
   .bind(MongoConnection)
-  .toDynamicValue(async (_context) => {
-    return MongoConnection.create();
+  .toDynamicValue(async (context) => {
+    const config = context.get(Config);
+
+    return MongoConnection.create(config);
   })
   .inSingletonScope()
   .onDeactivation(async (mongoConnection) => {

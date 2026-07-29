@@ -5,15 +5,20 @@ import { Controller } from './controller/Controller.js';
 
 import cors from 'cors';
 import { HttpException, UnknownException } from './HttpException.js';
+import { Server } from 'http';
+import { MongoConnection } from './MongoConnection.js';
 
 @injectable()
 export class Application {
   private readonly app: EA;
+  private server: Server | undefined;
 
   constructor(
     @multiInject(Controller)
     private readonly controllers: Controller[],
+    private readonly mongoConnection: MongoConnection,
   ) {
+    console.log('Initializing application...');
     this.app = express();
     this.app.use(cors());
     this.app.use(express.json());
@@ -21,6 +26,10 @@ export class Application {
     for (const controller of this.controllers) {
       this.app.use(controller.getRoutes());
     }
+  }
+
+  public getApp(): EA {
+    return this.app;
   }
 
   public async start(): Promise<void> {
@@ -38,7 +47,7 @@ export class Application {
       }
     });
 
-    this.app.listen(process.env['EXPRESS_PORT'], (error) => {
+    this.server = this.app.listen(3000, (error) => {
       if (error) {
         console.error('Error starting server:', error);
 
@@ -48,8 +57,10 @@ export class Application {
     });
   }
 
-  public stop(): void {
+  public async stop(): Promise<void> {
     console.log('Stopping application...');
     // Implement stop logic if needed
+    this.server?.close();
+    await this.mongoConnection.disconnect();
   }
 }
