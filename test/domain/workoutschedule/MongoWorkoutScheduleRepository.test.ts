@@ -9,6 +9,7 @@ import {
 import { type Collection } from 'mongodb';
 import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule';
 import { randomUUID } from 'node:crypto';
+import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
 
 describe('MongoWorkoutScheduleRepository', () => {
   let mongod: MongoMemoryServer;
@@ -73,13 +74,21 @@ describe('MongoWorkoutScheduleRepository', () => {
       lastFinishedWorkoutDate: null,
       lastOrder: null,
     };
+
+    const testWorkoutTemplate: WorkoutTemplate = {
+      id: randomUUID(),
+      name: 'test workout template',
+      userId: userId,
+      exercises: [],
+    };
+
     const changedWorkoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       userId: userId,
       name: 'changed workout schedule',
       isActive: true,
       setActiveDate: new Date(),
-      pattern: [{ patternItemId: randomUUID(), order: 0, useOrder: 0, workoutTemplateId: randomUUID(), restDays: 2 }],
+      pattern: [{ id: randomUUID(), order: 0, useOrder: 0, workoutTemplate: testWorkoutTemplate, restDays: 2 }],
       lastFinishedWorkoutDate: null,
       lastOrder: null,
     };

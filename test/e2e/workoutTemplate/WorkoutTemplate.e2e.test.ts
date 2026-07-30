@@ -2,10 +2,9 @@ import request from 'supertest';
 import { container } from '../../../src/inversify.config';
 import { Application } from '../../../src/application/Application';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
-import { Config } from '../../../src/application/config/config';
+import { Config } from '../../../src/application/config/Config';
 import { MongoDBContainer, type StartedMongoDBContainer } from '@testcontainers/mongodb';
 import { randomUUID } from 'crypto';
-import { MongoClient } from 'mongodb';
 
 describe('Workout Template E2E', () => {
   let app: Application;
@@ -13,10 +12,10 @@ describe('Workout Template E2E', () => {
   let config: DeepMocked<Config>;
 
   beforeAll(async () => {
-    mongod = await new MongoDBContainer('mongo:8.3.7').withUsername('dupa').withPassword('dupa').start();
+    mongod = await new MongoDBContainer('mongo:8.3.7').withUsername('admin').withPassword('password').start();
     config = createMock<Config>();
     config.getMongoUrl.mockReturnValue(`${mongod.getConnectionString()}&directConnection=true`);
-    config.getDbName.mockReturnValue('workout_test');
+    config.getDbName.mockReturnValue('workouter_test');
     (await container.rebind<Config>(Config)).toConstantValue(config);
     app = await container.getAsync(Application);
 

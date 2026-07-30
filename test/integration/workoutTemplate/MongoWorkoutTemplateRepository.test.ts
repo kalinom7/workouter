@@ -1,37 +1,35 @@
 import { randomUUID } from 'node:crypto';
 import {} from '@golevelup/ts-jest';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   type MongoWorkoutTemplate,
   MongoWorkoutTemplateRepository,
 } from '../../../src/application/repository/WorkoutTemplate/MongoWorkoutTemplateRepository';
 import { MongoConnection } from '../../../src/application/MongoConnection';
-import process from 'node:process';
 import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
 import { type WorkoutTemplateExercise } from '../../../src/domain/workouttemplate/model/WorkoutTemplateExercise';
 import { type Collection } from 'mongodb';
+import { type Config } from '../../../src/application/config/Config';
+import { createMock, type DeepMocked } from '@golevelup/ts-jest';
+import { MongoDBContainer, type StartedMongoDBContainer } from '@testcontainers/mongodb';
 
 describe('MongoWorkoutTemplateRepository', () => {
-  let mongod: MongoMemoryServer;
-  let mongoConnection: MongoConnection;
+  let mongod: StartedMongoDBContainer;
   let repository: MongoWorkoutTemplateRepository;
+  let mongoConnection: MongoConnection;
   let collection: Collection<MongoWorkoutTemplate>;
-  const originalMongoUrl = process.env['MONGO_URL'];
-  const originalMongoDatabase = process.env['MONGO_DATABASE'];
+  let config: DeepMocked<Config>;
 
   beforeAll(async () => {
-    mongod = await MongoMemoryServer.create();
-    process.env['MONGO_URL'] = mongod.getUri();
-    process.env['MONGO_DATABASE'] = 'test-workout-template-repository';
-
-    mongoConnection = await MongoConnection.create();
+    mongod = await new MongoDBContainer('mongo:8.3.7').withUsername('admin').withPassword('password').start();
+    config = createMock<Config>();
+    config.getMongoUrl.mockReturnValue(`${mongod.getConnectionString()}&directConnection=true`);
+    config.getDbName.mockReturnValue('workouter_test');
+    mongoConnection = await MongoConnection.create(config);
   });
 
   afterAll(async () => {
     await mongoConnection.disconnect();
     await mongod.stop();
-    process.env['MONGO_URL'] = originalMongoUrl;
-    process.env['MONGO_DATABASE'] = originalMongoDatabase;
   });
 
   beforeEach(async () => {
