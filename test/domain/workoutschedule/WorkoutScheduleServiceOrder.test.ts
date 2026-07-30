@@ -1,7 +1,11 @@
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository';
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService';
-import { WorkoutScheduleScheduledActivitySkippedException } from '../../../src/domain/workoutschedule/WorkoutScheduleExceptions';
+import {
+  WorkoutScheduleInvalidStateException,
+  WorkoutScheduleNotFoundException,
+  WorkoutScheduleScheduledActivitySkippedException,
+} from '../../../src/domain/workoutschedule/WorkoutScheduleExceptions';
 import { randomUUID } from 'node:crypto';
 import { jest } from '@jest/globals';
 import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService';
@@ -126,6 +130,34 @@ describe('WorkoutScheduleService order', () => {
     expect(workoutTemplate).toBeNull();
     expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
+
+  test('should throw error when no active workout schedule exists for scheduled activity', async () => {
+    const userId = randomUUID();
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(null);
+
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(WorkoutScheduleNotFoundException);
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
+  });
+
+  test('should throw invalid state when active schedule has null setActiveDate', async () => {
+    const userId = randomUUID();
+    const workoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: userId,
+      isActive: true,
+      setActiveDate: null,
+      pattern: [],
+      lastOrder: null,
+      lastFinishedWorkoutDate: null,
+    };
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
+
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(
+      WorkoutScheduleInvalidStateException,
+    );
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
+  });
   test('should get scheduled workoutTemplate as scheduled activity, current is workout, activity wasnt skipped', async () => {
     //given
     const userId = randomUUID();
@@ -228,6 +260,38 @@ describe('WorkoutScheduleService order', () => {
     );
     expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
+  test('should throw invalid state when active schedule has missing lastOrder but non-null lastFinishedWorkoutDate', async () => {
+    const userId = randomUUID();
+    const workoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: userId,
+      isActive: true,
+      setActiveDate: new Date('2026-05-20T10:00:00Z'),
+      pattern: [
+        {
+          id: randomUUID(),
+          order: 0,
+          useOrder: 0,
+          workoutTemplate: {
+            id: randomUUID(),
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
+          restDays: 1,
+        },
+      ],
+      lastOrder: null,
+      lastFinishedWorkoutDate: new Date('2026-05-26T10:00:00Z'),
+    };
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
+
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(
+      WorkoutScheduleInvalidStateException,
+    );
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
+  });
   test('should throw error as scheduled activity, current is workout, activity was skipped', async () => {
     //given
     const userId = randomUUID();
@@ -290,6 +354,38 @@ describe('WorkoutScheduleService order', () => {
     //when && then
     await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(
       WorkoutScheduleScheduledActivitySkippedException,
+    );
+    expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
+  });
+  test('should throw invalid state when active schedule has no matching last finished pattern item', async () => {
+    const userId = randomUUID();
+    const workoutSchedule = {
+      id: randomUUID(),
+      name: 'test schedule',
+      userId: userId,
+      isActive: true,
+      setActiveDate: new Date('2026-05-20T10:00:00Z'),
+      pattern: [
+        {
+          id: randomUUID(),
+          order: 1,
+          useOrder: 0,
+          workoutTemplate: {
+            id: randomUUID(),
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
+          restDays: 1,
+        },
+      ],
+      lastOrder: 0,
+      lastFinishedWorkoutDate: new Date('2026-05-20T10:00:00Z'),
+    };
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
+
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(
+      WorkoutScheduleInvalidStateException,
     );
     expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
