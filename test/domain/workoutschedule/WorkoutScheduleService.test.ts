@@ -3,14 +3,18 @@ import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/Work
 import { type WorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository.js';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule.js';
+import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService.js';
+import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate.js';
 
 describe('WorkoutScheduleService', () => {
   let workoutScheduleService: WorkoutScheduleService;
+  let workoutTemplateService: DeepMocked<WorkoutTemplateService>;
   let repository: DeepMocked<WorkoutScheduleRepository>;
 
   beforeEach(() => {
     repository = createMock<WorkoutScheduleRepository>();
-    workoutScheduleService = new WorkoutScheduleService(repository);
+    workoutTemplateService = createMock<WorkoutTemplateService>();
+    workoutScheduleService = new WorkoutScheduleService(repository, workoutTemplateService);
   });
   test('should create workout schedule', async () => {
     //given
@@ -124,6 +128,15 @@ describe('WorkoutScheduleService', () => {
       lastFinishedWorkoutDate: null,
     };
     repository.get.mockResolvedValueOnce(workoutSchedule);
+
+    const workoutTemplate: WorkoutTemplate = {
+      id: workoutTemplateId,
+      name: 'test template',
+      userId: userId,
+      exercises: [],
+    };
+    workoutTemplateService.getWorkoutTemplate.mockResolvedValueOnce(workoutTemplate);
+
     //when
     const updatedWorkoutSchedule = await workoutScheduleService.addWorkoutToPattern(
       workoutTemplateId,
@@ -134,16 +147,15 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.pattern.length).toBe(1);
-    expect(updatedWorkoutSchedule.pattern[0]).toEqual(
-      expect.objectContaining({
-        patternItemId: expect.any(String),
-        order: 0,
-        useOrder: 0,
-        workoutTemplateId: workoutTemplateId,
-        restDays: 0,
-      }),
-    );
+    expect(workoutTemplateService.getWorkoutTemplate).toHaveBeenCalledWith(workoutTemplateId, userId);
+    expect(updatedWorkoutSchedule.pattern).toHaveLength(1);
+    expect(updatedWorkoutSchedule.pattern[0]).toEqual({
+      id: expect.any(String),
+      order: 0,
+      useOrder: 0,
+      workoutTemplate: workoutTemplate,
+      restDays: 0,
+    });
   });
 
   test('should add rest to workout in pattern if they exist', async () => {
@@ -151,7 +163,14 @@ describe('WorkoutScheduleService', () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const patternItemId = randomUUID();
-    const workoutSchedule = {
+    const workoutTemplateId = randomUUID();
+    const workoutTemplate: WorkoutTemplate = {
+      id: workoutTemplateId,
+      userId: userId,
+      name: 'test workoutTemplate',
+      exercises: [],
+    };
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
@@ -159,10 +178,10 @@ describe('WorkoutScheduleService', () => {
       setActiveDate: null,
       pattern: [
         {
-          patternItemId: patternItemId,
+          id: patternItemId,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: workoutTemplate,
           restDays: 0,
         },
       ],
@@ -182,13 +201,13 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.pattern.length).toBe(1);
+    expect(updatedWorkoutSchedule.pattern).toHaveLength(1);
     expect(updatedWorkoutSchedule.pattern[0]).toEqual(
       expect.objectContaining({
-        patternItemId: workoutSchedule.pattern[0].patternItemId,
+        id: workoutSchedule.pattern[0].id,
         order: 0,
         useOrder: 0,
-        workoutTemplateId: workoutSchedule.pattern[0].workoutTemplateId,
+        workoutTemplate: workoutTemplate,
         restDays: restDays,
       }),
     );
@@ -306,7 +325,14 @@ describe('WorkoutScheduleService', () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const patternItemId = randomUUID();
-    const workoutSchedule = {
+    const workoutTemplateId = randomUUID();
+    const workoutTemplate: WorkoutTemplate = {
+      id: workoutTemplateId,
+      userId: userId,
+      name: 'test workoutTemplate',
+      exercises: [],
+    };
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
@@ -314,10 +340,10 @@ describe('WorkoutScheduleService', () => {
       setActiveDate: null,
       pattern: [
         {
-          patternItemId: patternItemId,
+          id: patternItemId,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: workoutTemplate,
           restDays: 0,
         },
       ],
@@ -335,7 +361,7 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.pattern.length).toBe(0);
+    expect(updatedWorkoutSchedule.pattern).toHaveLength(0);
   });
   test('should remove pattern item and reoder the remaining items order and useOrder', async () => {
     //given
@@ -350,24 +376,39 @@ describe('WorkoutScheduleService', () => {
       setActiveDate: null,
       pattern: [
         {
-          patternItemId: patternItemIdToRemove,
+          id: patternItemIdToRemove,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
           restDays: 0,
         },
         {
-          patternItemId: randomUUID(),
+          id: randomUUID(),
           order: 1,
           useOrder: 1,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template2',
+            exercises: [],
+          },
           restDays: 0,
         },
         {
-          patternItemId: randomUUID(),
+          id: randomUUID(),
           order: 2,
           useOrder: 2,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template3',
+            exercises: [],
+          },
           restDays: 0,
         },
       ],
@@ -385,7 +426,7 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.pattern.length).toBe(2);
+    expect(updatedWorkoutSchedule.pattern).toHaveLength(2);
     expect(updatedWorkoutSchedule.pattern[0].order).toBe(0);
     expect(updatedWorkoutSchedule.pattern[0].useOrder).toBe(0);
     expect(updatedWorkoutSchedule.pattern[1].order).toBe(1);
@@ -404,24 +445,39 @@ describe('WorkoutScheduleService', () => {
       setActiveDate: null,
       pattern: [
         {
-          patternItemId: patternItemIdToRemove,
+          id: patternItemIdToRemove,
           order: 0,
           useOrder: 1,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
           restDays: 0,
         },
         {
-          patternItemId: randomUUID(),
+          id: randomUUID(),
           order: 1,
           useOrder: 2,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template2',
+            exercises: [],
+          },
           restDays: 0,
         },
         {
-          patternItemId: randomUUID(),
+          id: randomUUID(),
           order: 2,
           useOrder: 0,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template3',
+            exercises: [],
+          },
           restDays: 0,
         },
       ],
@@ -439,7 +495,7 @@ describe('WorkoutScheduleService', () => {
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    expect(updatedWorkoutSchedule.pattern.length).toBe(2);
+    expect(updatedWorkoutSchedule.pattern).toHaveLength(2);
     expect(updatedWorkoutSchedule.pattern[0].order).toBe(0);
     expect(updatedWorkoutSchedule.pattern[0].useOrder).toBe(1);
     expect(updatedWorkoutSchedule.pattern[1].order).toBe(1);

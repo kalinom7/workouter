@@ -19,7 +19,7 @@ import { InMemoExerciseRepository } from './application/repository/Exercise/InMe
 import { InMemoWorkoutRepository } from './application/repository/Workout/InMemoWorkoutRepository.js';
 import { InMemoWorkoutTemplateRepository } from './application/repository/WorkoutTemplate/InMemoWorkoutTemplateRepository.js';
 import { InMemoWorkoutScheduleRepository } from './application/repository/WorkoutSchedule/InMemoWorkoutScheduleRepository.js';
-import { Config } from './application/config/config.js';
+import { Config } from './application/config/Config.js';
 
 const container = new Container({
   autobind: true,

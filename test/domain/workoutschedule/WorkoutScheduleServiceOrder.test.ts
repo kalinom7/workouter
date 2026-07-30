@@ -3,17 +3,20 @@ import { type WorkoutScheduleRepository } from '../../../src/domain/workoutsched
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService';
 import { randomUUID } from 'node:crypto';
 import { jest } from '@jest/globals';
+import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService';
 
 describe('WorkoutScheduleService order', () => {
   let workoutScheduleService: WorkoutScheduleService;
   let workoutScheduleRepository: DeepMocked<WorkoutScheduleRepository>;
+  let workoutTemplateService: DeepMocked<WorkoutTemplateService>;
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-05-26T10:00:01Z'));
 
     workoutScheduleRepository = createMock<WorkoutScheduleRepository>();
-    workoutScheduleService = new WorkoutScheduleService(workoutScheduleRepository);
+    workoutTemplateService = createMock<WorkoutTemplateService>();
+    workoutScheduleService = new WorkoutScheduleService(workoutScheduleRepository, workoutTemplateService);
   });
 
   afterEach(() => {
@@ -33,10 +36,15 @@ describe('WorkoutScheduleService order', () => {
       setActiveDate: new Date('2026-05-20T10:00:00Z'),
       pattern: [
         {
-          patternItemId: patternItemId,
+          id: patternItemId,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
           restDays: 1,
         },
       ],
@@ -44,7 +52,7 @@ describe('WorkoutScheduleService order', () => {
       lastFinishedWorkoutDate: null,
     };
     const finishedTime = new Date('2026-05-26T10:00:00Z');
-    const finishedWorkoutTemplateId = workoutSchedule.pattern[0].workoutTemplateId;
+    const finishedWorkoutTemplate = workoutSchedule.pattern[0].workoutTemplate;
 
     //when
     workoutScheduleRepository.get.mockResolvedValueOnce(workoutSchedule);
@@ -52,7 +60,7 @@ describe('WorkoutScheduleService order', () => {
       workoutScheduleId,
       userId,
       finishedTime,
-      finishedWorkoutTemplateId,
+      finishedWorkoutTemplate.id,
     );
 
     //then
@@ -66,10 +74,10 @@ describe('WorkoutScheduleService order', () => {
         setActiveDate: new Date('2026-05-20T10:00:00Z'),
         pattern: [
           {
-            patternItemId: patternItemId,
+            id: patternItemId,
             order: 0,
             useOrder: 0,
-            workoutTemplateId: finishedWorkoutTemplateId,
+            workoutTemplate: finishedWorkoutTemplate,
             restDays: 1,
           },
         ],
@@ -94,10 +102,15 @@ describe('WorkoutScheduleService order', () => {
       setActiveDate: new Date('2026-05-20T10:00:00Z'),
       pattern: [
         {
-          patternItemId: patternItemId,
+          id: patternItemId,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: randomUUID(),
+          workoutTemplate: {
+            id: randomUUID,
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
           restDays: 1,
         },
       ],
@@ -128,17 +141,27 @@ describe('WorkoutScheduleService order', () => {
       setActiveDate: new Date('2026-05-20T10:00:00Z'),
       pattern: [
         {
-          patternItemId: patternItemId1,
+          id: patternItemId1,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: workoutTemplateId1,
+          workoutTemplate: {
+            id: workoutTemplateId1,
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
           restDays: 1,
         },
         {
-          patternItemId: patternItemId2,
+          id: patternItemId2,
           order: 1,
           useOrder: 1,
-          workoutTemplateId: workoutTemplateId2,
+          workoutTemplate: {
+            id: workoutTemplateId2,
+            userId: userId,
+            name: 'template2',
+            exercises: [],
+          },
           restDays: 1,
         },
       ],
@@ -150,7 +173,7 @@ describe('WorkoutScheduleService order', () => {
     const workoutTemplate = await workoutScheduleService.getScheduledActivity(userId);
 
     //then
-    expect(workoutTemplate).toEqual(workoutTemplateId2);
+    expect(workoutTemplate).toEqual(workoutSchedule.pattern[1].workoutTemplate);
     expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should throw error as scheduled activity, current is restDay, activity was skipped', async () => {
@@ -210,24 +233,39 @@ describe('WorkoutScheduleService order', () => {
       setActiveDate: new Date('2026-05-20T10:00:00Z'),
       pattern: [
         {
-          patternItemId: patternItemId1,
+          id: patternItemId1,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: workoutTemplateId1,
+          workoutTemplate: {
+            id: workoutTemplateId1,
+            userId: userId,
+            name: 'template2',
+            exercises: [],
+          },
           restDays: 1,
         },
         {
-          patternItemId: patternItemId2,
+          id: patternItemId2,
           order: 1,
           useOrder: 1,
-          workoutTemplateId: workoutTemplateId2,
+          workoutTemplate: {
+            id: workoutTemplateId2,
+            userId: userId,
+            name: 'template2',
+            exercises: [],
+          },
           restDays: 1,
         },
         {
-          patternItemId: patternItemId3,
+          id: patternItemId3,
           order: 2,
           useOrder: 2,
-          workoutTemplateId: workoutTemplateId3,
+          workoutTemplate: {
+            id: workoutTemplateId3,
+            userId: userId,
+            name: 'template3',
+            exercises: [],
+          },
           restDays: 1,
         },
       ],
@@ -258,24 +296,39 @@ describe('WorkoutScheduleService order', () => {
       setActiveDate: new Date('2026-05-20T10:00:00Z'),
       pattern: [
         {
-          patternItemId: patternItemId1,
+          id: patternItemId1,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: workoutTemplateId1,
+          workoutTemplate: {
+            id: workoutTemplateId1,
+            userId: userId,
+            name: 'template1',
+            exercises: [],
+          },
           restDays: 1,
         },
         {
-          patternItemId: patternItemId2,
+          id: patternItemId2,
           order: 1,
           useOrder: 1,
-          workoutTemplateId: workoutTemplateId2,
+          workoutTemplate: {
+            id: workoutTemplateId2,
+            userId: userId,
+            name: 'template2',
+            exercises: [],
+          },
           restDays: 1,
         },
         {
-          patternItemId: patternItemId3,
+          id: patternItemId3,
           order: 2,
           useOrder: 2,
-          workoutTemplateId: workoutTemplateId3,
+          workoutTemplate: {
+            id: workoutTemplateId3,
+            userId: userId,
+            name: 'template3',
+            exercises: [],
+          },
           restDays: 1,
         },
       ],
@@ -284,13 +337,13 @@ describe('WorkoutScheduleService order', () => {
     };
     workoutScheduleRepository.get.mockResolvedValueOnce(workoutSchedule);
     const finishedTime = new Date('2026-05-26T10:00:01Z');
-    const finishedWorkoutTemplateId = workoutSchedule.pattern[2].workoutTemplateId;
+    const finishedWorkoutTemplate = workoutSchedule.pattern[2].workoutTemplate;
     //when
     const recalculatedWorkoutSchedule = await workoutScheduleService.update(
       workoutScheduleId,
       userId,
       finishedTime,
-      finishedWorkoutTemplateId,
+      finishedWorkoutTemplate.id,
     );
 
     //then
@@ -304,24 +357,34 @@ describe('WorkoutScheduleService order', () => {
         setActiveDate: new Date('2026-05-20T10:00:00Z'),
         pattern: [
           {
-            patternItemId: patternItemId1,
+            id: patternItemId1,
             order: 0,
             useOrder: 0,
-            workoutTemplateId: workoutTemplateId1,
+            workoutTemplate: {
+              id: workoutTemplateId1,
+              userId: userId,
+              name: 'template1',
+              exercises: [],
+            },
             restDays: 1,
           },
           {
-            patternItemId: patternItemId2,
+            id: patternItemId2,
             order: 1,
             useOrder: 1,
-            workoutTemplateId: workoutTemplateId2,
+            workoutTemplate: {
+              id: workoutTemplateId2,
+              userId: userId,
+              name: 'template2',
+              exercises: [],
+            },
             restDays: 1,
           },
           {
-            patternItemId: patternItemId3,
+            id: patternItemId3,
             order: 2,
             useOrder: 2,
-            workoutTemplateId: finishedWorkoutTemplateId,
+            workoutTemplate: finishedWorkoutTemplate,
             restDays: 1,
           },
         ],

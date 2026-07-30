@@ -1,8 +1,9 @@
 import { type UUID } from 'node:crypto';
+import { type WorkoutTemplate } from '../../workouttemplate/model/WorkoutTemplate.js';
 export type WorkoutPatternItem = {
-  patternItemId: UUID;
+  id: UUID;
   order: number;
   useOrder: number;
-  workoutTemplateId: UUID;
+  workoutTemplate: WorkoutTemplate;
   restDays: number;
 };

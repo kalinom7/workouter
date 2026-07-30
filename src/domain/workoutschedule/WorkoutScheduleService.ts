@@ -7,10 +7,15 @@ import {
   WorkoutScheduleNotFoundException,
   WorkoutScheduleScheduledActivitySkippedException,
 } from './WorkoutScheduleExceptions.js';
+import { WorkoutTemplateService } from '../workouttemplate/WorkoutTemplateService.js';
+import { WorkoutTemplate } from '../workouttemplate/model/WorkoutTemplate.js';
 
 @injectable()
 export class WorkoutScheduleService {
-  constructor(private readonly workoutScheduleRepository: WorkoutScheduleRepository) {}
+  constructor(
+    private readonly workoutScheduleRepository: WorkoutScheduleRepository,
+    private readonly workoutTemplateService: WorkoutTemplateService,
+  ) {}
   public async create(name: string, userId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule: WorkoutSchedule = {
       isActive: false,
@@ -60,10 +65,10 @@ export class WorkoutScheduleService {
       throw new Error('workout schedule not found');
     }
     workoutSchedule.pattern.push({
-      patternItemId: randomUUID(),
+      id: randomUUID(),
       order: workoutSchedule.pattern.length,
       useOrder: workoutSchedule.pattern.length,
-      workoutTemplateId: workoutTemplateId,
+      workoutTemplate: await this.workoutTemplateService.getWorkoutTemplate(workoutTemplateId, userId),
       restDays: 0,
     });
     await this.workoutScheduleRepository.save(workoutSchedule);
@@ -80,7 +85,7 @@ export class WorkoutScheduleService {
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
     }
-    const patternItem = workoutSchedule.pattern.find((b) => b.patternItemId === patternItemId);
+    const patternItem = workoutSchedule.pattern.find((patternItem) => patternItem.id === patternItemId);
     if (!patternItem) {
       throw new Error('Pattern item not found');
     }
@@ -97,29 +102,27 @@ export class WorkoutScheduleService {
       throw new Error('workout schedule not found');
     }
 
-    const found = workoutSchedule.pattern.some((b) => b.patternItemId === itemId);
+    const found = workoutSchedule.pattern.some((patternItem) => patternItem.id === itemId);
     if (!found) {
       throw new Error('Pattern item not found');
     }
 
-    const filtered = workoutSchedule.pattern.filter((b) => b.patternItemId !== itemId);
+    const filtered = workoutSchedule.pattern.filter((patternItem) => patternItem.id !== itemId);
 
     const reorderedByOrder = filtered
       .toSorted((a, b) => a.order - b.order)
       .map((patternItem, index) => ({ ...patternItem, order: index }));
 
     const useOrderByItemId = new Map(
-      filtered
-        .toSorted((a, b) => a.useOrder - b.useOrder)
-        .map((patternItem, index) => [patternItem.patternItemId, index]),
+      filtered.toSorted((a, b) => a.useOrder - b.useOrder).map((patternItem, index) => [patternItem.id, index]),
     );
 
     workoutSchedule.pattern = reorderedByOrder.map((patternItem) => {
-      if (useOrderByItemId.get(patternItem.patternItemId) === undefined) {
+      if (useOrderByItemId.get(patternItem.id) === undefined) {
         throw new Error('Pattern item not found in useOrderByItemId map');
       }
 
-      return { ...patternItem, useOrder: useOrderByItemId.get(patternItem.patternItemId)! };
+      return { ...patternItem, useOrder: useOrderByItemId.get(patternItem.id)! };
     });
 
     await this.workoutScheduleRepository.save(workoutSchedule);
@@ -179,7 +182,9 @@ export class WorkoutScheduleService {
     if (workoutSchedule == null) {
       throw new Error('workout schedule not found');
     }
-    const patternItem = workoutSchedule.pattern.find((b) => b.workoutTemplateId === finishedWorkoutTemplateId);
+    const patternItem = workoutSchedule.pattern.find(
+      (patternItem) => patternItem.workoutTemplate.id === finishedWorkoutTemplateId,
+    );
     if (!patternItem) {
       throw new Error('Pattern item not found');
     }
@@ -192,7 +197,7 @@ export class WorkoutScheduleService {
     return workoutSchedule;
   }
 
-  public async getScheduledActivity(userId: UUID): Promise<UUID | null> {
+  public async getScheduledActivity(userId: UUID): Promise<WorkoutTemplate | null> {
     const workoutSchedule = await this.workoutScheduleRepository.getActive(userId);
     if (workoutSchedule == null) {
       throw new WorkoutScheduleNotFoundException();
@@ -209,7 +214,7 @@ export class WorkoutScheduleService {
         throw new WorkoutScheduleScheduledActivitySkippedException('scheduled activity was skipped');
       }
 
-      return workoutSchedule.pattern[0]?.workoutTemplateId ?? null;
+      return workoutSchedule.pattern[0]?.workoutTemplate ?? null;
     }
     if (workoutSchedule.lastFinishedWorkoutDate === null || workoutSchedule.lastOrder === null) {
       throw new WorkoutScheduleInvalidStateException(
@@ -240,7 +245,7 @@ export class WorkoutScheduleService {
       return null;
     }
 
-    return nextPatternItem.workoutTemplateId;
+    return nextPatternItem.workoutTemplate;
   }
 }
 

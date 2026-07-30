@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { Db, MongoClient } from 'mongodb';
-import { Config } from './config/config.js';
+import { Config } from './config/Config.js';
 
 @injectable()
 export class MongoConnection {
