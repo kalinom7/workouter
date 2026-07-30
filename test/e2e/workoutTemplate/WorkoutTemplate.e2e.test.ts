@@ -51,8 +51,18 @@ describe('Workout Template E2E', () => {
       const response = await request(app.getApp()).get(`/workout-templates?userId=${userId}`).expect(200);
       expect(response.body).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ name: 'Workout Template 1', _id: createResponse1.body._id }),
-          expect.objectContaining({ name: 'Workout Template 2', _id: createResponse2.body._id }),
+          expect.objectContaining({
+            name: 'Workout Template 1',
+            id: createResponse1.body.id,
+            userId: userId,
+            exercises: [],
+          }),
+          expect.objectContaining({
+            name: 'Workout Template 2',
+            id: createResponse2.body.id,
+            userId: userId,
+            exercises: [],
+          }),
         ]),
       );
     });
