@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import { randomUUID, type UUID } from 'node:crypto';
 import { ExerciseRepository } from './ExerciseRepository.js';
 import { type Exercise } from './model/Exercise.js';
+import { ExerciseNotFoundException } from './ExerciseException.js';
 
 @injectable()
 export class ExerciseService {
@@ -23,7 +24,7 @@ export class ExerciseService {
   public async get(exerciseId: UUID, userId: UUID): Promise<Exercise> {
     const exercise = await this.exerciseRepository.get(exerciseId, userId);
     if (exercise == null) {
-      throw new Error('exercise not found');
+      throw new ExerciseNotFoundException();
     }
 
     return exercise;
@@ -38,7 +39,7 @@ export class ExerciseService {
   public async update(exerciseId: UUID, userId: UUID, name?: string, description?: string): Promise<Exercise> {
     const existing = await this.exerciseRepository.get(exerciseId, userId);
     if (existing == null) {
-      throw new Error('exercise not found');
+      throw new ExerciseNotFoundException();
     }
 
     const updated: Exercise = {
@@ -55,7 +56,7 @@ export class ExerciseService {
   public async delete(exerciseId: UUID, userId: UUID): Promise<void> {
     const exercise = await this.exerciseRepository.get(exerciseId, userId);
     if (exercise == null) {
-      throw new Error('exercise not found');
+      throw new ExerciseNotFoundException();
     }
     await this.exerciseRepository.delete(exerciseId, userId);
   }

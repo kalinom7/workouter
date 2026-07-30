@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { type ExerciseRepository } from '../../../src/domain/exercise/ExerciseRepository.js';
 import { ExerciseService } from '../../../src/domain/exercise/ExerciseService.js';
 import { type Exercise } from '../../../src/domain/exercise/model/Exercise.js';
+import { ExerciseNotFoundException } from '../../../src/domain/exercise/ExerciseException.js';
 
 describe('ExerciseService', () => {
   let exerciseService: ExerciseService;
@@ -116,10 +117,29 @@ describe('ExerciseService', () => {
     //given
     //when
     repository.get.mockResolvedValue(null);
-    await expect(exerciseService.get(randomUUID(), randomUUID())).rejects.toThrow();
+    await expect(exerciseService.get(randomUUID(), randomUUID())).rejects.toThrow(ExerciseNotFoundException);
 
     //then
     expect(repository.get).toHaveBeenCalledTimes(1);
+  });
+  test('should throw error when trying to update non existing exercise', async () => {
+    //given
+    repository.get.mockResolvedValue(null);
+
+    //when / then
+    await expect(
+      exerciseService.update(randomUUID(), randomUUID(), 'Updated exercise', 'updated description'),
+    ).rejects.toThrow(ExerciseNotFoundException);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+  });
+  test('should throw error when trying to delete non existing exercise', async () => {
+    //given
+    repository.get.mockResolvedValue(null);
+
+    //when / then
+    await expect(exerciseService.delete(randomUUID(), randomUUID())).rejects.toThrow(ExerciseNotFoundException);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.delete).not.toHaveBeenCalled();
   });
   test('should update exercise name only when updating description is undefined', async () => {
     //given

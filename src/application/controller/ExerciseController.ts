@@ -13,12 +13,14 @@ import {
 } from '../dto/ExerciseControllerDto.js';
 import { Controller } from './Controller.js';
 import { Validator } from '../validation/Validator.js';
+import { ExerciseErrorHandler } from '../error-handler/ExerciseErrorHandler.js';
 
 @injectable()
 export class ExerciseController extends Controller {
   constructor(
     private readonly exerciseService: ExerciseService,
     private readonly validator: Validator,
+    private readonly exerciseErrorHandler: ExerciseErrorHandler,
   ) {
     super();
   }
@@ -53,6 +55,8 @@ export class ExerciseController extends Controller {
       this.validator.validate({ params: getExerciseParamsDto, query: authorizationDto }),
       (req, res) => this.delete(req, res),
     );
+
+    router.use(this.exerciseErrorHandler.getErrorHandler().bind(this));
 
     return router;
   }
