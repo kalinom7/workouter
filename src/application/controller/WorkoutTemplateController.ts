@@ -26,12 +26,14 @@ import {
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
 import { ParsedData, Validator } from '../validation/Validator.js';
+import { WorkoutTemplateErrorHandler } from '../error-handler/WorkoutTemplateErrorHandler.js';
 
 @injectable()
 export class WorkoutTemplateController extends Controller {
   constructor(
     private readonly workoutTemplateService: WorkoutTemplateService,
     private readonly validator: Validator,
+    private readonly workoutTemplateErrorHandler: WorkoutTemplateErrorHandler,
   ) {
     super();
   }
@@ -98,6 +100,8 @@ export class WorkoutTemplateController extends Controller {
       this.validator.validate({ params: deleteWorkoutTemplateParamsDto, query: authorizationDto }),
       (req, res) => this.deleteWorkoutTemplate(req, res),
     );
+
+    router.use(this.workoutTemplateErrorHandler.getErrorHandler().bind(this));
 
     return router;
   }

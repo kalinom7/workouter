@@ -4,6 +4,10 @@ import { type WorkoutTemplate } from './model/WorkoutTemplate.js';
 import { type WorkoutTemplateExercise } from './model/WorkoutTemplateExercise.js';
 import { WorkoutTemplateRepository } from './WorkoutTemplateRepository.js';
 import { ExerciseService } from '../exercise/ExerciseService.js';
+import {
+  WorkoutTemplateExerciseNotFoundException,
+  WorkoutTemplateNotFoundException,
+} from './WorkoutTemplateException.js';
 
 @injectable()
 export class WorkoutTemplateService {
@@ -34,7 +38,7 @@ export class WorkoutTemplateService {
     const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
 
     if (workoutTemplate == null) {
-      throw new Error('WorkoutTemplate not found');
+      throw new WorkoutTemplateNotFoundException();
     }
 
     workoutTemplate.name = newName;
@@ -55,7 +59,7 @@ export class WorkoutTemplateService {
     const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
 
     if (workoutTemplate == null) {
-      throw new Error('WorkoutTemplate not found');
+      throw new WorkoutTemplateNotFoundException();
     }
 
     const order = workoutTemplate.exercises.length;
@@ -79,11 +83,11 @@ export class WorkoutTemplateService {
     const workoutTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
 
     if (workoutTemplate == null) {
-      throw new Error('WorkoutTemplate not found');
+      throw new WorkoutTemplateNotFoundException();
     }
     const exerciseToRemove = workoutTemplate.exercises.find((e) => e.order === order);
     if (exerciseToRemove == null) {
-      throw new Error(`WorkoutTemplateExercise with order ${order} not found`);
+      throw new WorkoutTemplateExerciseNotFoundException();
     }
     workoutTemplate.exercises = workoutTemplate.exercises.filter((e) => e.order !== order);
     // adjust orders of remaining exercises
@@ -106,7 +110,7 @@ export class WorkoutTemplateService {
   ): Promise<void> {
     const exercise = await this.workoutTemplateRepository.getByOrder(workoutTemplateId, userId, order);
     if (exercise == null) {
-      throw new Error('WorkoutTemplateExercise not found');
+      throw new WorkoutTemplateExerciseNotFoundException();
     }
 
     const resultExercise = await this.exerciseService.get(exerciseId, userId);
@@ -124,7 +128,7 @@ export class WorkoutTemplateService {
   public async getWorkoutTemplate(workoutTemplateId: UUID, userId: UUID): Promise<WorkoutTemplate> {
     const returnedTemplate = await this.workoutTemplateRepository.get(workoutTemplateId, userId);
     if (returnedTemplate == null) {
-      throw new Error('WorkoutTemplate not found');
+      throw new WorkoutTemplateNotFoundException();
     }
 
     return returnedTemplate;
@@ -132,10 +136,6 @@ export class WorkoutTemplateService {
 
   public async getAllWorkoutTemplates(userId: UUID): Promise<WorkoutTemplate[]> {
     const returnedTemplates = await this.workoutTemplateRepository.getAll(userId);
-
-    if (returnedTemplates == null) {
-      throw new Error('No WorkoutTemplates found for user');
-    }
 
     return returnedTemplates;
   }

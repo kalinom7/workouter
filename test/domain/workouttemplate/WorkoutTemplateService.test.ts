@@ -5,6 +5,10 @@ import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutTemplateRepository } from '../../../src/domain/workouttemplate/WorkoutTemplateRepository.js';
 import { type Exercise } from '../../../src/domain/exercise/model/Exercise.js';
 import { type ExerciseService } from '../../../src/domain/exercise/ExerciseService.js';
+import {
+  WorkoutTemplateExerciseNotFoundException,
+  WorkoutTemplateNotFoundException,
+} from '../../../src/domain/workouttemplate/WorkoutTemplateException.js';
 
 describe('WorkoutTemplateService', () => {
   let workoutTemplateService: WorkoutTemplateService;
@@ -139,7 +143,7 @@ describe('WorkoutTemplateService', () => {
     //when
     await expect(
       workoutTemplateService.addWorkoutTemplateExercise(exercise, templateId, userId, sets, restPeriod),
-    ).rejects.toThrow();
+    ).rejects.toThrow(WorkoutTemplateNotFoundException);
 
     //then
     expect(repository.get).toHaveBeenCalledWith(templateId, userId);
@@ -159,11 +163,83 @@ describe('WorkoutTemplateService', () => {
     //when
     await expect(
       workoutTemplateService.addWorkoutTemplateExercise(exercise, templateId, userId, sets, restPeriod),
-    ).rejects.toThrow();
+    ).rejects.toThrow(WorkoutTemplateNotFoundException);
 
     //then
     expect(repository.get).toHaveBeenCalledWith(templateId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(repository.saveWorkoutTemplateExercise).not.toHaveBeenCalled();
+  });
+
+  test('should throw error when trying to edit workoutTemplateName for non existing workoutTemplate', async () => {
+    //given
+    const userId = randomUUID();
+    const templateId = randomUUID();
+    repository.get.mockResolvedValue(null);
+    const newName = 'updated workoutTemplate';
+
+    //when
+    await expect(workoutTemplateService.editWorkoutTemplateName(templateId, userId, newName)).rejects.toThrow(
+      WorkoutTemplateNotFoundException,
+    );
+
+    //then
+    expect(repository.get).toHaveBeenCalledWith(templateId, userId);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  test('should throw error when trying to get a workoutTemplate that does not exist', async () => {
+    //given
+    const userId = randomUUID();
+    const templateId = randomUUID();
+    repository.get.mockResolvedValue(null);
+
+    //when
+    await expect(workoutTemplateService.getWorkoutTemplate(templateId, userId)).rejects.toThrow(
+      WorkoutTemplateNotFoundException,
+    );
+
+    //then
+    expect(repository.get).toHaveBeenCalledWith(templateId, userId);
+    expect(repository.get).toHaveBeenCalledTimes(1);
+  });
+
+  test('should throw error when trying to remove a workoutTemplateExercise that does not exist in workoutTemplate', async () => {
+    //given
+    const userId = randomUUID();
+    const templateId = randomUUID();
+    const workoutTemplate: WorkoutTemplate = {
+      id: templateId,
+      name: 'test workoutTemplate',
+      userId,
+      exercises: [],
+    };
+    repository.get.mockResolvedValue(workoutTemplate);
+
+    //when
+    await expect(workoutTemplateService.removeWorkoutTemplateExercise(templateId, userId, 0)).rejects.toThrow(
+      WorkoutTemplateExerciseNotFoundException,
+    );
+
+    //then
+    expect(repository.get).toHaveBeenCalledWith(templateId, userId);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  test('should throw error when trying to edit a workoutTemplateExercise that does not exist', async () => {
+    //given
+    const userId = randomUUID();
+    const templateId = randomUUID();
+    const exerciseId = randomUUID();
+    repository.getByOrder.mockResolvedValue(null);
+
+    //when
+    await expect(
+      workoutTemplateService.editWorkoutTemplateExercise(templateId, userId, 0, exerciseId, 3, 180),
+    ).rejects.toThrow(WorkoutTemplateExerciseNotFoundException);
+
+    //then
+    expect(repository.getByOrder).toHaveBeenCalledWith(templateId, userId, 0);
     expect(repository.saveWorkoutTemplateExercise).not.toHaveBeenCalled();
   });
 
@@ -257,7 +333,9 @@ describe('WorkoutTemplateService', () => {
     const userId = randomUUID();
     //when
     repository.get.mockResolvedValue(null);
-    await expect(workoutTemplateService.removeWorkoutTemplateExercise(randomUUID(), userId, 0)).rejects.toThrow();
+    await expect(workoutTemplateService.removeWorkoutTemplateExercise(randomUUID(), userId, 0)).rejects.toThrow(
+      WorkoutTemplateNotFoundException,
+    );
     //then
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.saveWorkoutTemplateExercise).not.toHaveBeenCalled();
