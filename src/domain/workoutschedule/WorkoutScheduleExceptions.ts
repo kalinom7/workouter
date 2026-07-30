@@ -1,9 +1,5 @@
-export class DomainException extends Error {
-  constructor(description: string) {
-    super(description);
-    this.name = 'DomainException';
-  }
-}
+import { DomainException } from '../DomainException.js';
+
 export class WorkoutScheduleNotFoundException extends DomainException {
   constructor() {
     super('Workout schedule not found');
@@ -11,14 +7,21 @@ export class WorkoutScheduleNotFoundException extends DomainException {
   }
 }
 export class WorkoutScheduleInvalidStateException extends DomainException {
-  constructor(description: string) {
-    super(description);
+  constructor(message: string) {
+    super(message);
     this.name = 'WorkoutScheduleInvalidStateException';
   }
 }
 export class WorkoutScheduleScheduledActivitySkippedException extends DomainException {
-  constructor(description: string) {
-    super(description);
+  constructor(message: string) {
+    super(message);
     this.name = 'WorkoutScheduleScheduledActivitySkippedException';
+  }
+}
+
+export class WorkoutSchedulePatternItemNotFoundException extends DomainException {
+  constructor() {
+    super('Workout schedule pattern item not found');
+    this.name = 'WorkoutSchedulePatternItemNotFoundException';
   }
 }

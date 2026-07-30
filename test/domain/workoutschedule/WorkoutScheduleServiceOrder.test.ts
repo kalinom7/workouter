@@ -1,6 +1,7 @@
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository';
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService';
+import { WorkoutScheduleScheduledActivitySkippedException } from '../../../src/domain/workoutschedule/WorkoutScheduleExceptions';
 import { randomUUID } from 'node:crypto';
 import { jest } from '@jest/globals';
 import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService';
@@ -192,17 +193,27 @@ describe('WorkoutScheduleService order', () => {
       setActiveDate: new Date('2026-05-20T10:00:00Z'),
       pattern: [
         {
-          patternItemId: patternItemId1,
+          id: patternItemId1,
           order: 0,
           useOrder: 0,
-          workoutTemplateId: workoutTemplateId1,
+          workoutTemplate: {
+            id: workoutTemplateId1,
+            userId: userId,
+            name: 'template 1',
+            exercises: [],
+          },
           restDays: 1,
         },
         {
-          patternItemId: patternItemId2,
+          id: patternItemId2,
           order: 1,
           useOrder: 1,
-          workoutTemplateId: workoutTemplateId2,
+          workoutTemplate: {
+            id: workoutTemplateId2,
+            userId: userId,
+            name: 'template 2',
+            exercises: [],
+          },
           restDays: 1,
         },
       ],
@@ -212,7 +223,9 @@ describe('WorkoutScheduleService order', () => {
     workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
 
     //when && then
-    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow('scheduled activity was skipped');
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(
+      WorkoutScheduleScheduledActivitySkippedException,
+    );
     expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should throw error as scheduled activity, current is workout, activity was skipped', async () => {
@@ -275,7 +288,9 @@ describe('WorkoutScheduleService order', () => {
     workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
 
     //when && then
-    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow('scheduled activity was skipped');
+    await expect(workoutScheduleService.getScheduledActivity(userId)).rejects.toThrow(
+      WorkoutScheduleScheduledActivitySkippedException,
+    );
     expect(workoutScheduleRepository.getActive).toHaveBeenCalledWith(userId);
   });
   test('should update lastFinishedDate and lastFinishedOrder after workout was finished, activity was skipped', async () => {

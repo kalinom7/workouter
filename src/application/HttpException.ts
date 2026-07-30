@@ -37,3 +37,24 @@ export class NotFoundException extends HttpException {
     this.name = 'NotFoundException';
   }
 }
+
+export class BadRequestException extends HttpException {
+  constructor(message: string) {
+    super(message, 400);
+    this.name = 'BadRequestException';
+  }
+}
+
+export class UnauthorizedException extends HttpException {
+  constructor(message: string) {
+    super(message, 401);
+    this.name = 'UnauthorizedException';
+  }
+}
+
+export class ForbiddenException extends HttpException {
+  constructor(message: string) {
+    super(message, 403);
+    this.name = 'ForbiddenException';
+  }
+}

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService.js';
+import { WorkoutScheduleNotFoundException } from '../../../src/domain/workoutschedule/WorkoutScheduleExceptions.js';
 import { type WorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository.js';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule.js';
@@ -40,7 +41,7 @@ describe('WorkoutScheduleService', () => {
     expect(createdWorkoutSchedule.name).toBe(workoutScheduleName);
     expect(createdWorkoutSchedule.userId).toBe(userId);
     expect(createdWorkoutSchedule.isActive).toBe(false);
-    expect(createdWorkoutSchedule.setActiveDate).toBe(null);
+    expect(createdWorkoutSchedule.setActiveDate).toBeNull();
 
     expect(createdWorkoutSchedule.pattern).toEqual([]);
   });
@@ -72,7 +73,9 @@ describe('WorkoutScheduleService', () => {
     const workoutScheduleId = randomUUID();
     repository.get.mockResolvedValueOnce(null);
     //when & then
-    await expect(workoutScheduleService.get(workoutScheduleId, userId)).rejects.toThrow('workout schedule not found');
+    await expect(workoutScheduleService.get(workoutScheduleId, userId)).rejects.toThrow(
+      WorkoutScheduleNotFoundException,
+    );
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
   });
@@ -106,7 +109,7 @@ describe('WorkoutScheduleService', () => {
     repository.get.mockResolvedValueOnce(null);
     //when & then
     await expect(workoutScheduleService.delete(workoutScheduleId, userId)).rejects.toThrow(
-      'workout schedule not found',
+      WorkoutScheduleNotFoundException,
     );
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
@@ -222,7 +225,7 @@ describe('WorkoutScheduleService', () => {
     //when & then
     await expect(
       workoutScheduleService.addWorkoutToPattern(workoutTemplateId, userId, workoutScheduleId),
-    ).rejects.toThrow('workout schedule not found');
+    ).rejects.toThrow(WorkoutScheduleNotFoundException);
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);
     expect(repository.save).not.toHaveBeenCalled();
@@ -292,7 +295,7 @@ describe('WorkoutScheduleService', () => {
     repository.get.mockResolvedValueOnce(null);
     //when & then
     await expect(workoutScheduleService.setActive(workoutScheduleId, userId)).rejects.toThrow(
-      'workout schedule not found',
+      WorkoutScheduleNotFoundException,
     );
     expect(repository.get).toHaveBeenCalledWith(workoutScheduleId, userId);
     expect(repository.get).toHaveBeenCalledTimes(1);

@@ -31,7 +31,7 @@ export class Validator {
 
         return res.status(400).json({
           error: 'Validation failed',
-          details: error,
+          message: error,
         });
       }
 

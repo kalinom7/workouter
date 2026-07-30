@@ -5,6 +5,7 @@ import { WorkoutScheduleRepository } from './WorkoutScheduleRepository.js';
 import {
   WorkoutScheduleInvalidStateException,
   WorkoutScheduleNotFoundException,
+  WorkoutSchedulePatternItemNotFoundException,
   WorkoutScheduleScheduledActivitySkippedException,
 } from './WorkoutScheduleExceptions.js';
 import { WorkoutTemplateService } from '../workouttemplate/WorkoutTemplateService.js';
@@ -36,7 +37,7 @@ export class WorkoutScheduleService {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
 
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
 
     return workoutSchedule;
@@ -51,7 +52,7 @@ export class WorkoutScheduleService {
   public async delete(workoutScheduleId: UUID, userId: UUID): Promise<void> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
     await this.workoutScheduleRepository.delete(workoutScheduleId, userId);
   }
@@ -62,7 +63,7 @@ export class WorkoutScheduleService {
   ): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
     workoutSchedule.pattern.push({
       id: randomUUID(),
@@ -83,11 +84,11 @@ export class WorkoutScheduleService {
   ): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
     const patternItem = workoutSchedule.pattern.find((patternItem) => patternItem.id === patternItemId);
     if (!patternItem) {
-      throw new Error('Pattern item not found');
+      throw new WorkoutSchedulePatternItemNotFoundException();
     }
 
     patternItem.restDays = restDays;
@@ -99,12 +100,12 @@ export class WorkoutScheduleService {
   public async removePatternItem(userId: UUID, workoutScheduleId: UUID, itemId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
 
     const found = workoutSchedule.pattern.some((patternItem) => patternItem.id === itemId);
     if (!found) {
-      throw new Error('Pattern item not found');
+      throw new WorkoutSchedulePatternItemNotFoundException();
     }
 
     const filtered = workoutSchedule.pattern.filter((patternItem) => patternItem.id !== itemId);
@@ -119,7 +120,7 @@ export class WorkoutScheduleService {
 
     workoutSchedule.pattern = reorderedByOrder.map((patternItem) => {
       if (useOrderByItemId.get(patternItem.id) === undefined) {
-        throw new Error('Pattern item not found in useOrderByItemId map');
+        throw new WorkoutSchedulePatternItemNotFoundException();
       }
 
       return { ...patternItem, useOrder: useOrderByItemId.get(patternItem.id)! };
@@ -134,7 +135,7 @@ export class WorkoutScheduleService {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     const activeWorkoutSchedule = await this.workoutScheduleRepository.getActive(userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
     if (activeWorkoutSchedule) {
       activeWorkoutSchedule.isActive = false;
@@ -151,7 +152,7 @@ export class WorkoutScheduleService {
   public async setInactive(workoutScheduleId: UUID, userId: UUID): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
 
     workoutSchedule.isActive = false;
@@ -163,7 +164,7 @@ export class WorkoutScheduleService {
   public async rename(workoutScheduleId: UUID, userId: UUID, name: string): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
 
     workoutSchedule.name = name;
@@ -180,13 +181,13 @@ export class WorkoutScheduleService {
   ): Promise<WorkoutSchedule> {
     const workoutSchedule = await this.workoutScheduleRepository.get(workoutScheduleId, userId);
     if (workoutSchedule == null) {
-      throw new Error('workout schedule not found');
+      throw new WorkoutScheduleNotFoundException();
     }
     const patternItem = workoutSchedule.pattern.find(
       (patternItem) => patternItem.workoutTemplate.id === finishedWorkoutTemplateId,
     );
     if (!patternItem) {
-      throw new Error('Pattern item not found');
+      throw new WorkoutSchedulePatternItemNotFoundException();
     }
 
     workoutSchedule.lastOrder = patternItem.order;
@@ -211,7 +212,7 @@ export class WorkoutScheduleService {
     if (workoutSchedule.lastFinishedWorkoutDate === null && workoutSchedule.lastOrder === null) {
       const daysFromActiveDate = dateDiffInDays(setActiveDate, today);
       if (daysFromActiveDate > 1) {
-        throw new WorkoutScheduleScheduledActivitySkippedException('scheduled activity was skipped');
+        throw new WorkoutScheduleScheduledActivitySkippedException('Scheduled activity was skipped');
       }
 
       return workoutSchedule.pattern[0]?.workoutTemplate ?? null;
@@ -231,7 +232,7 @@ export class WorkoutScheduleService {
     }
 
     if (daysFromLastFinished > lastFinishedPatternItem.restDays) {
-      throw new WorkoutScheduleScheduledActivitySkippedException('scheduled activity was skipped');
+      throw new WorkoutScheduleScheduledActivitySkippedException('Scheduled activity was skipped');
     }
     if (daysFromLastFinished < lastFinishedPatternItem.restDays) {
       return null;
