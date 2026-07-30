@@ -32,12 +32,14 @@ import {
 } from '../dto/WorkoutControllerDto.js';
 import { ParsedData, Validator } from '../validation/Validator.js';
 import { Controller } from './Controller.js';
+import { WorkoutErrorHandler } from '../error-handler/WorkoutErrorHandler.js';
 
 @injectable()
 export class WorkoutController extends Controller {
   constructor(
     private readonly workoutService: WorkoutService,
     private readonly validator: Validator,
+    private readonly workoutErrorHandler: WorkoutErrorHandler,
   ) {
     super();
   }
@@ -116,6 +118,8 @@ export class WorkoutController extends Controller {
       this.validator.validate({ body: setRestPeriodBodyDto, params: setRestPeriodParamsDto, query: authorizationDto }),
       (req, res) => this.setRestPeriod(req, res),
     );
+
+    router.use(this.workoutErrorHandler.getErrorHandler().bind(this));
 
     return router;
   }

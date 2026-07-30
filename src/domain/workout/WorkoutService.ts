@@ -6,6 +6,11 @@ import { type Workout } from './model/Workout.js';
 import { type WorkoutExercise } from './model/WorkoutExercise.js';
 import { type WorkoutExerciseSet } from './model/WorkoutExerciseSet.js';
 import { WorkoutRepository } from './WorkoutRepository.js';
+import {
+  ExerciseNotFoundInWorkoutException,
+  SetNotFoundInWorkoutExercise,
+  WorkoutNotFoundException,
+} from './WorkoutException.js';
 
 @injectable()
 export class WorkoutService {
@@ -90,7 +95,7 @@ export class WorkoutService {
     const workout = await this.getWorkout(workoutId, userId);
     const exerciseIndex = workout.exercises.findIndex((e) => e.order === exerciseOrder);
     if (exerciseIndex === -1) {
-      throw new Error('Exercise not found in workout');
+      throw new ExerciseNotFoundInWorkoutException();
     }
     workout.exercises.splice(exerciseIndex, 1);
     let index = 0;
@@ -122,7 +127,7 @@ export class WorkoutService {
     const exercise = this.getOrderedExercise(workout, exerciseOrder);
     const setIndex = exercise.sets.findIndex((s) => s.order === setOrder);
     if (setIndex === -1) {
-      throw new Error('Set not found in exercise');
+      throw new SetNotFoundInWorkoutExercise();
     }
     exercise.sets.splice(setIndex, 1);
     let index = 0;
@@ -145,7 +150,7 @@ export class WorkoutService {
 
     const set = exercise.sets.find((s) => s.order === setOrder);
     if (!set) {
-      throw new Error('Set not found in exercise');
+      throw new SetNotFoundInWorkoutExercise();
     }
 
     set.weight = weight;
@@ -169,7 +174,7 @@ export class WorkoutService {
     const exercise = this.getOrderedExercise(workout, exerciseOrder);
     const set = exercise.sets.find((s) => s.order === setOrder);
     if (set == null) {
-      throw new Error('Set not found in exercise');
+      throw new SetNotFoundInWorkoutExercise();
     }
     set.isCompleted = false;
     exercise.isCompleted = false;
@@ -187,7 +192,7 @@ export class WorkoutService {
   public async getWorkout(workoutId: UUID, userId: UUID): Promise<Workout> {
     const workout = await this.workoutRepository.get(workoutId, userId);
     if (workout == null) {
-      throw new Error('Workout not found');
+      throw new WorkoutNotFoundException();
     }
 
     return workout;
@@ -195,9 +200,6 @@ export class WorkoutService {
 
   public async getAllFinishedWorkouts(userId: string): Promise<Workout[]> {
     const workouts = await this.workoutRepository.getAllFinished(userId);
-    if (!workouts) {
-      return [];
-    }
 
     return workouts;
   }
@@ -212,7 +214,7 @@ export class WorkoutService {
   private getOrderedExercise(workout: Workout, exerciseOrder: number): WorkoutExercise {
     const exercise = workout.exercises.find((e) => e.order === exerciseOrder);
     if (exercise == null) {
-      throw new Error('Exercise not found in workout');
+      throw new ExerciseNotFoundInWorkoutException();
     }
 
     return exercise;

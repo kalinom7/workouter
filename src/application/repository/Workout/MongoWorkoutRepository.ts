@@ -18,7 +18,7 @@ export class MongoWorkoutRepository extends WorkoutRepository {
 
     return mongoWorkout ? this.toDomainWorkout(mongoWorkout) : null;
   }
-  public async getAllFinished(userId: UUID): Promise<Workout[] | null> {
+  public async getAllFinished(userId: UUID): Promise<Workout[]> {
     const mongoWorkouts = await this.collection.find({ userId: userId }).toArray();
     const domainWorkouts = mongoWorkouts.map((mongoWorkout) => this.toDomainWorkout(mongoWorkout));
 

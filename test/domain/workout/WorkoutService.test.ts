@@ -5,6 +5,11 @@ import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate
 import { type ExerciseService } from '../../../src/domain/exercise/ExerciseService.js';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { WorkoutService } from '../../../src/domain/workout/WorkoutService.js';
+import {
+  ExerciseNotFoundInWorkoutException,
+  SetNotFoundInWorkoutExercise,
+  WorkoutNotFoundException,
+} from '../../../src/domain/workout/WorkoutException.js';
 
 describe('WorkoutService', () => {
   let workoutService: WorkoutService;
@@ -114,7 +119,7 @@ describe('WorkoutService', () => {
     repository.get.mockResolvedValue(null);
 
     //when & then
-    await expect(workoutService.addExercise(userId, workoutId, exerciseId)).rejects.toThrow('Workout not found');
+    await expect(workoutService.addExercise(userId, workoutId, exerciseId)).rejects.toThrow(WorkoutNotFoundException);
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(exerciseService.get).not.toHaveBeenCalled();
     expect(repository.save).not.toHaveBeenCalled();
@@ -174,7 +179,9 @@ describe('WorkoutService', () => {
     };
     repository.get.mockResolvedValue(existingWorkout);
     //when & then
-    await expect(workoutService.removeExercise(userId, workoutId, 0)).rejects.toThrow('Exercise not found in workout');
+    await expect(workoutService.removeExercise(userId, workoutId, 0)).rejects.toThrow(
+      ExerciseNotFoundInWorkoutException,
+    );
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -216,7 +223,7 @@ describe('WorkoutService', () => {
     };
     repository.get.mockResolvedValue(existingWorkout);
     //when & then
-    await expect(workoutService.addSet(userId, workoutId, 0)).rejects.toThrow('Exercise not found in workout');
+    await expect(workoutService.addSet(userId, workoutId, 0)).rejects.toThrow(ExerciseNotFoundInWorkoutException);
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -281,7 +288,27 @@ describe('WorkoutService', () => {
     };
     repository.get.mockResolvedValue(existingWorkout);
     //when & then
-    await expect(workoutService.removeSet(userId, workoutId, 0, 0)).rejects.toThrow('Exercise not found in workout');
+    await expect(workoutService.removeSet(userId, workoutId, 0, 0)).rejects.toThrow(ExerciseNotFoundInWorkoutException);
+    expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+  test('should throw error when removing non-existing set from exercise in workout', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutId = randomUUID();
+
+    const existingWorkout: Workout = {
+      id: workoutId,
+      userId,
+      startTime: new Date(),
+      usedWorkoutTemplate: null,
+      endTime: null,
+      exercises: [{ exercise: { id: randomUUID(), name: 'Test Exercise 1' }, sets: [], order: 0, isCompleted: false }],
+    };
+    repository.get.mockResolvedValue(existingWorkout);
+
+    //when & then
+    await expect(workoutService.removeSet(userId, workoutId, 0, 0)).rejects.toThrow(SetNotFoundInWorkoutExercise);
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -293,7 +320,7 @@ describe('WorkoutService', () => {
     repository.get.mockResolvedValue(null);
 
     //when & then
-    await expect(workoutService.removeSet(userId, workoutId, 0, 0)).rejects.toThrow('Workout not found');
+    await expect(workoutService.removeSet(userId, workoutId, 0, 0)).rejects.toThrow(WorkoutNotFoundException);
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -344,8 +371,27 @@ describe('WorkoutService', () => {
     repository.get.mockResolvedValue(existingWorkout);
     //when & then
     await expect(workoutService.saveSet(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow(
-      'Exercise not found in workout',
+      ExerciseNotFoundInWorkoutException,
     );
+    expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+  test('should throw error when saving non-existing set in exercise in workout', async () => {
+    //given
+    const userId = randomUUID();
+    const workoutId = randomUUID();
+
+    const existingWorkout: Workout = {
+      id: workoutId,
+      userId,
+      startTime: new Date(),
+      usedWorkoutTemplate: null,
+      endTime: null,
+      exercises: [{ exercise: { id: randomUUID(), name: 'Test Exercise 1' }, sets: [], order: 0, isCompleted: false }],
+    };
+    repository.get.mockResolvedValue(existingWorkout);
+    //when & then
+    await expect(workoutService.saveSet(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow(SetNotFoundInWorkoutExercise);
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -357,7 +403,7 @@ describe('WorkoutService', () => {
     repository.get.mockResolvedValue(null);
 
     //when & then
-    await expect(workoutService.saveSet(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow('Workout not found');
+    await expect(workoutService.saveSet(userId, workoutId, 0, 0, 80, 10)).rejects.toThrow(WorkoutNotFoundException);
     expect(repository.get).toHaveBeenCalledWith(workoutId, userId);
     expect(repository.save).not.toHaveBeenCalled();
   });
