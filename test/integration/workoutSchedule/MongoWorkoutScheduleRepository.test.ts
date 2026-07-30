@@ -1,7 +1,5 @@
-import {} from '@golevelup/ts-jest';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { MongoConnection } from '../../../src/application/MongoConnection';
-import process from 'process';
 import {
   type MongoWorkoutSchedule,
   MongoWorkoutScheduleRepository,
@@ -10,24 +8,24 @@ import { type Collection } from 'mongodb';
 import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule';
 import { randomUUID } from 'node:crypto';
 import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
+import { MongoDBContainer, type StartedMongoDBContainer } from '@testcontainers/mongodb';
+import { type Config } from '../../../src/application/config/Config';
 
 describe('MongoWorkoutScheduleRepository', () => {
-  let mongod: MongoMemoryServer;
+  let mongod: StartedMongoDBContainer;
   let mongoConnection: MongoConnection;
   let repository: MongoWorkoutScheduleRepository;
   let collection: Collection<MongoWorkoutSchedule>;
-  const originalUrl = process.env['MONGO_URL'];
-  const originalDb = process.env['MONGO_DATABASE'];
+  let config: DeepMocked<Config>;
 
   beforeAll(async () => {
-    mongod = await MongoMemoryServer.create();
-    process.env['MONGO_URL'] = mongod.getUri();
-    process.env['MONGO_DATABASE'] = 'test-workout-schedule-repository';
-    mongoConnection = await MongoConnection.create();
+    mongod = await new MongoDBContainer('mongo:8.3.7').withUsername('admin').withPassword('password').start();
+    config = createMock<Config>();
+    config.getDbName.mockReturnValue('workouter_test');
+    config.getMongoUrl.mockReturnValue(`${mongod.getConnectionString()}&directConnection=true`);
+    mongoConnection = await MongoConnection.create(config);
   });
   afterAll(async () => {
-    process.env['MONGO_URL'] = originalUrl;
-    process.env['MONGO_DATABASE'] = originalDb;
     await mongoConnection.disconnect();
     await mongod.stop();
   });
@@ -64,6 +62,7 @@ describe('MongoWorkoutScheduleRepository', () => {
     //given
     const workoutScheduleId = randomUUID();
     const userId = randomUUID();
+    const patternItemId = randomUUID();
     const workoutSchedule: MongoWorkoutSchedule = {
       _id: workoutScheduleId,
       userId: userId,
@@ -88,11 +87,11 @@ describe('MongoWorkoutScheduleRepository', () => {
       name: 'changed workout schedule',
       isActive: true,
       setActiveDate: new Date(),
-      pattern: [{ id: randomUUID(), order: 0, useOrder: 0, workoutTemplate: testWorkoutTemplate, restDays: 2 }],
+      pattern: [{ id: patternItemId, order: 0, useOrder: 0, workoutTemplate: testWorkoutTemplate, restDays: 2 }],
       lastFinishedWorkoutDate: null,
       lastOrder: null,
     };
-    const { id, ...changedWorkoutScheduleData } = changedWorkoutSchedule;
+    const { id, pattern, ...changedWorkoutScheduleData } = changedWorkoutSchedule;
     await collection.insertOne(workoutSchedule);
 
     //when
@@ -100,7 +99,11 @@ describe('MongoWorkoutScheduleRepository', () => {
 
     //then
     const savedWorkoutSchedule = await collection.findOne({ _id: workoutScheduleId, userId: userId });
-    expect(savedWorkoutSchedule).toEqual({ _id: workoutScheduleId, ...changedWorkoutScheduleData });
+    expect(savedWorkoutSchedule).toEqual({
+      _id: workoutScheduleId,
+      pattern: [{ id: patternItemId, order: 0, useOrder: 0, workoutTemplateId: testWorkoutTemplate.id, restDays: 2 }],
+      ...changedWorkoutScheduleData,
+    });
   });
   test('should get existing schedule', async () => {
     //given

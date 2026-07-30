@@ -1,36 +1,31 @@
-import {} from '@golevelup/ts-jest';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { MongoConnection } from '../../../src/application/MongoConnection';
 import {
   type MongoExercise,
   MongoExerciseRepository,
 } from '../../../src/application/repository/Exercise/MongoExerciseRepository';
-import process from 'process';
 import { type Exercise } from '../../../src/domain/exercise/model/Exercise';
 import { randomUUID } from 'crypto';
 import { type Collection } from 'mongodb';
+import { MongoDBContainer, type StartedMongoDBContainer } from '@testcontainers/mongodb';
+import { type Config } from '../../../src/application/config/Config';
 
 describe('MongoExerciseRepository', () => {
-  let mongod: MongoMemoryServer;
+  let mongod: StartedMongoDBContainer;
   let mongoConnection: MongoConnection;
+  let config: DeepMocked<Config>;
   let repository: MongoExerciseRepository;
   let collection: Collection<MongoExercise>;
 
-  const originalMongoUrl = process.env['MONGO_URL'];
-  const originalMongoDatabase = process.env['MONGO_DATABASE'];
-
   beforeAll(async () => {
-    mongod = await MongoMemoryServer.create();
-    process.env['MONGO_URL'] = mongod.getUri();
-    process.env['MONGO_DATABASE'] = 'test-exercise-repository';
-
-    mongoConnection = await MongoConnection.create();
+    mongod = await new MongoDBContainer('mongo:8.3.7').withUsername('admin').withPassword('password').start();
+    config = createMock<Config>();
+    config.getDbName.mockReturnValue('workouter_test');
+    config.getMongoUrl.mockReturnValue(`${mongod.getConnectionString()}&directConnection=true`);
+    mongoConnection = await MongoConnection.create(config);
   });
 
   afterAll(async () => {
-    process.env['MONGO_URL'] = originalMongoUrl;
-    process.env['MONGO_DATABASE'] = originalMongoDatabase;
-
     await mongoConnection.disconnect();
     await mongod.stop();
   });

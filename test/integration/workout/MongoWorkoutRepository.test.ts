@@ -1,39 +1,39 @@
-import {} from '@golevelup/ts-jest';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { MongoConnection } from '../../../src/application/MongoConnection';
 import {
-  type MongoWorkout,
   MongoWorkoutRepository,
+  type MongoWorkout,
 } from '../../../src/application/repository/Workout/MongoWorkoutRepository';
-import process from 'process';
 import { type Collection } from 'mongodb';
 import { type Workout } from '../../../src/domain/workout/model/Workout';
 import { randomUUID } from 'crypto';
+import { type Config } from '../../../src/application/config/Config';
+import { MongoDBContainer, type StartedMongoDBContainer } from '@testcontainers/mongodb';
 
 describe('MongoWorkoutRepository', () => {
-  let mongod: MongoMemoryServer;
+  let mongod: StartedMongoDBContainer;
   let mongoConnection: MongoConnection;
   let repository: MongoWorkoutRepository;
   let collection: Collection<MongoWorkout>;
-  const originalUrl = process.env['MONGO_URL'];
-  const originalDb = process.env['MONGO_DATABASE'];
+  let config: DeepMocked<Config>;
 
   beforeAll(async () => {
-    mongod = await MongoMemoryServer.create();
-    process.env['MONGO_URL'] = mongod.getUri();
-    process.env['MONGO_DATABASE'] = 'test-workout-repository';
-    mongoConnection = await MongoConnection.create();
+    mongod = await new MongoDBContainer('mongo:8.3.7').withUsername('admin').withPassword('password').start();
+    config = createMock<Config>();
+    config.getDbName.mockReturnValue('workouter_test');
+    config.getMongoUrl.mockReturnValue(`${mongod.getConnectionString()}&directConnection=true`);
+    mongoConnection = await MongoConnection.create(config);
   });
+
   afterAll(async () => {
     await mongoConnection.disconnect();
     await mongod.stop();
-    process.env['MONGO_URL'] = originalUrl;
-    process.env['MONGO_DATABASE'] = originalDb;
   });
+
   beforeEach(async () => {
-    collection = mongoConnection.getDb().collection<MongoWorkout>('workouts');
-    await collection.deleteMany({});
+    await mongoConnection.getDb().collection<MongoWorkout>('exercises').deleteMany({});
     repository = new MongoWorkoutRepository(mongoConnection.getDb());
+    collection = mongoConnection.getDb().collection<MongoWorkout>('workouts');
   });
 
   test('should save workout', async () => {
