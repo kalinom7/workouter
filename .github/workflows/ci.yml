@@ -166,6 +166,6 @@ jobs:
           path: coverage/e2e
 
       - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        uses: SonarSource/sonarqube-scan-action@v8.2.1
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
