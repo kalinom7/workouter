@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -42,10 +42,10 @@ jobs:
     needs: build
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -62,10 +62,10 @@ jobs:
     needs: [build, lint]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-unit
           path: coverage/unit
@@ -89,10 +89,10 @@ jobs:
     needs: test-unit
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-integration
           path: coverage/integration
@@ -116,10 +116,10 @@ jobs:
     needs: test-integration
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'npm'
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-e2e
           path: coverage/e2e
@@ -143,29 +143,29 @@ jobs:
     needs: test-e2e
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download unit coverage
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: coverage-unit
           path: coverage/unit
 
       - name: Download integration coverage
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: coverage-integration
           path: coverage/integration
 
       - name: Download e2e coverage
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: coverage-e2e
           path: coverage/e2e
 
       - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v8.1.0
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
