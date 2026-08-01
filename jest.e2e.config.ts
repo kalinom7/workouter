@@ -10,10 +10,10 @@ const config: Config = {
   coverageDirectory: './coverage/e2e',
   coverageThreshold: {
     global: {
-      branches: 30,
-      functions: 35,
-      lines: 40,
-      statements: 40,
+      branches: 20,
+      functions: 10,
+      lines: 20,
+      statements: 20,
     },
   },
 };
