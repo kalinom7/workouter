@@ -134,7 +134,11 @@ describe('MongoWorkoutTemplateRepository', () => {
       userId: userId,
       exercises: [
         {
-          exercise: exerciseId,
+          exercise: {
+            id: exerciseId,
+            userId: userId,
+            name: 'test exercise',
+          },
           sets: 0,
           restPeriod: 0,
           order: 0,
@@ -144,7 +148,11 @@ describe('MongoWorkoutTemplateRepository', () => {
     await collection.insertOne(workoutTemplate);
     const numberOfDocumentsBefore = await (await collection.find().toArray()).length;
     const changedWorkoutTemplateExercise: WorkoutTemplateExercise = {
-      exercise: exerciseId,
+      exercise: {
+        id: exerciseId,
+        userId: userId,
+        name: 'test exercise',
+      },
       sets: 3,
       restPeriod: 180,
       order: 0,
@@ -248,7 +256,11 @@ describe('MongoWorkoutTemplateRepository', () => {
     const exerciseId = randomUUID();
     const userId = randomUUID();
     const workoutTemplateExercise: WorkoutTemplateExercise = {
-      exercise: exerciseId,
+      exercise: {
+        id: exerciseId,
+        userId: userId,
+        name: 'test workoutTemplate exercise',
+      },
       sets: 3,
       restPeriod: 90,
       order: 1,
@@ -299,7 +311,11 @@ describe('MongoWorkoutTemplateRepository', () => {
     };
     await collection.insertOne(workoutTemplate);
     const workoutTemplateExercise: WorkoutTemplateExercise = {
-      exercise: randomUUID(),
+      exercise: {
+        id: randomUUID(),
+        userId: userId,
+        name: 'test exercise',
+      },
       sets: 3,
       restPeriod: 180,
       order: 0,
@@ -360,13 +376,21 @@ describe('MongoWorkoutTemplateRepository', () => {
     const workoutTemplateId = randomUUID();
     const userId = randomUUID();
     const remainingExercise: WorkoutTemplateExercise = {
-      exercise: randomUUID(),
+      exercise: {
+        id: randomUUID(),
+        userId: userId,
+        name: 'remaining test exercise',
+      },
       sets: 3,
       restPeriod: 90,
       order: 1,
     };
     const exerciseToRemove: WorkoutTemplateExercise = {
-      exercise: randomUUID(),
+      exercise: {
+        id: randomUUID(),
+        userId: userId,
+        name: 'test exercise to remove',
+      },
       sets: 4,
       restPeriod: 120,
       order: 0,

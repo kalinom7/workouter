@@ -31,8 +31,25 @@ describe('Workout Template E2E', () => {
     return request(app.getApp()).get('/non-existent-route').expect(404);
   });
 
+  describe('POST /workout-templates', () => {
+    it('should return 201 and created workoutTemplate when name is valid', async () => {
+      const userId = randomUUID();
+
+      const response = await request(app.getApp())
+        .post(`/workout-templates?userId=${userId}`)
+        .send({ name: 'Test Workout Template' })
+        .expect(201);
+      expect(response.body).toEqual({
+        id: expect.any(String),
+        name: 'Test Workout Template',
+        userId: userId,
+        exercises: [],
+      });
+    });
+  });
+
   describe('GET /workout-templates', () => {
-    it('should return 200 and an empty array', async () => {
+    it('should return 200 and an empty array when user has no workoutTemplates', async () => {
       const response = await request(app.getApp()).get(`/workout-templates?userId=${randomUUID()}`).expect(200);
       expect(response.body).toEqual([]);
     });
