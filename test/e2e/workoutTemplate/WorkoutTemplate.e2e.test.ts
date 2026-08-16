@@ -1,3 +1,4 @@
+import { describe, beforeAll, afterAll, it, expect } from '@jest/globals';
 import request from 'supertest';
 import { container } from '../../../src/inversify.config';
 import { Application } from '../../../src/application/Application';

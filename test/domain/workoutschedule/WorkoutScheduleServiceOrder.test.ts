@@ -1,3 +1,4 @@
+import { describe, beforeEach, afterEach, test, expect, jest } from '@jest/globals';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { type WorkoutScheduleRepository } from '../../../src/domain/workoutschedule/WorkoutScheduleRepository';
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService';
@@ -7,8 +8,8 @@ import {
   WorkoutScheduleScheduledActivitySkippedException,
 } from '../../../src/domain/workoutschedule/WorkoutScheduleExceptions';
 import { randomUUID } from 'node:crypto';
-import { jest } from '@jest/globals';
 import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService';
+import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule';
 
 describe('WorkoutScheduleService order', () => {
   let workoutScheduleService: WorkoutScheduleService;
@@ -33,7 +34,7 @@ describe('WorkoutScheduleService order', () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const patternItemId = randomUUID();
-    const workoutSchedule = {
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
@@ -45,7 +46,7 @@ describe('WorkoutScheduleService order', () => {
           order: 0,
           useOrder: 0,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template1',
             exercises: [],
@@ -99,7 +100,7 @@ describe('WorkoutScheduleService order', () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const patternItemId = randomUUID();
-    const workoutSchedule = {
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
@@ -111,7 +112,7 @@ describe('WorkoutScheduleService order', () => {
           order: 0,
           useOrder: 0,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template1',
             exercises: [],

@@ -1,3 +1,4 @@
+import { describe, beforeEach, test, expect } from '@jest/globals';
 import { randomUUID } from 'node:crypto';
 import { type Workout } from '../../../src/domain/workout/model/Workout.js';
 import { type WorkoutRepository } from '../../../src/domain/workout/WorkoutRepository.js';
@@ -35,8 +36,8 @@ describe('WorkoutService', () => {
       userId,
       name: 'Test Template',
       exercises: [
-        { exercise: randomUUID(), sets: 3, restPeriod: 60, order: 0 },
-        { exercise: randomUUID(), sets: 4, restPeriod: 90, order: 1 },
+        { exercise: { userId: userId, id: randomUUID(), name: 'test exercise1' }, sets: 3, restPeriod: 60, order: 0 },
+        { exercise: { userId: userId, id: randomUUID(), name: 'test exercise2' }, sets: 4, restPeriod: 90, order: 1 },
       ],
     });
 

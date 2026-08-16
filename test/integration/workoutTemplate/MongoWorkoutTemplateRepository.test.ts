@@ -1,5 +1,5 @@
+import { describe, beforeAll, afterAll, beforeEach, test, expect } from '@jest/globals';
 import { randomUUID } from 'node:crypto';
-import {} from '@golevelup/ts-jest';
 import {
   type MongoWorkoutTemplate,
   MongoWorkoutTemplateRepository,

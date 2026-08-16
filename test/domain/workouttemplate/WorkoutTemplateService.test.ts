@@ -1,3 +1,4 @@
+import { describe, beforeEach, test, expect } from '@jest/globals';
 import { randomUUID } from 'node:crypto';
 import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate.js';
 import { WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService.js';
@@ -24,30 +25,22 @@ describe('WorkoutTemplateService', () => {
   test('should create workoutTemplate', async () => {
     //given
     const userId = randomUUID();
-    const workoutTemplate: WorkoutTemplate = {
-      id: expect.any(String),
-      name: 'test workoutTemplate',
-      userId: userId,
-      exercises: [],
-    };
 
     //when
     const createdWorkoutTemplate = await workoutTemplateService.createWorkoutTemplate('test workoutTemplate', userId);
 
     //then
-    expect(repository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: expect.any(String),
-        name: 'test workoutTemplate',
-        userId: userId,
-        exercises: [],
-      }),
-    );
+    expect(repository.save).toHaveBeenCalledWith(createdWorkoutTemplate);
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(createdWorkoutTemplate.id).toBeDefined();
     expect(createdWorkoutTemplate.name).toBe('test workoutTemplate');
     expect(createdWorkoutTemplate.exercises).toEqual([]);
-    expect(createdWorkoutTemplate).toEqual(workoutTemplate);
+    expect(createdWorkoutTemplate).toEqual({
+      id: expect.any(String),
+      userId: userId,
+      name: 'test workoutTemplate',
+      exercises: [],
+    });
   });
 
   test('should get workoutTemplate', async () => {
@@ -85,8 +78,9 @@ describe('WorkoutTemplateService', () => {
       exercises: [],
     };
     repository.get.mockResolvedValue(workoutTemplate);
+    const exerciseId = randomUUID();
     const exercise: Exercise = {
-      id: randomUUID(),
+      id: exerciseId,
       userId: userId,
       name: 'test exercise',
       description: 'test description',
@@ -96,10 +90,16 @@ describe('WorkoutTemplateService', () => {
     exerciseService.get.mockResolvedValue(exercise);
 
     //when
-    await workoutTemplateService.addWorkoutTemplateExercise(exercise, workoutTemplate.id, userId, sets, restPeriod);
+    await workoutTemplateService.addWorkoutTemplateExercise(exerciseId, workoutTemplate.id, userId, sets, restPeriod);
 
     //then
     expect(workoutTemplate.exercises).toHaveLength(1);
+    expect(workoutTemplate.exercises[0]).toEqual({
+      exercise: exercise,
+      order: 0,
+      sets: sets,
+      restPeriod: restPeriod,
+    });
   });
   test('should add workoutTemplateExercise with sets and restPeriod to workoutTemplate', async () => {
     //given
@@ -112,8 +112,9 @@ describe('WorkoutTemplateService', () => {
       exercises: [],
     };
     repository.get.mockResolvedValue(workoutTemplate);
+    const exerciseId = randomUUID();
     const exercise: Exercise = {
-      id: randomUUID(),
+      id: exerciseId,
       userId: userId,
       name: 'test exercise',
       description: 'test description',
@@ -123,7 +124,7 @@ describe('WorkoutTemplateService', () => {
 
     exerciseService.get.mockResolvedValue(exercise);
     //when
-    await workoutTemplateService.addWorkoutTemplateExercise(exercise, workoutTemplate.id, userId, sets, restPeriod);
+    await workoutTemplateService.addWorkoutTemplateExercise(exerciseId, workoutTemplate.id, userId, sets, restPeriod);
 
     //then
     expect(workoutTemplate.exercises).toHaveLength(1);
@@ -247,13 +248,18 @@ describe('WorkoutTemplateService', () => {
     //given
     const userId = randomUUID();
     const templateId = randomUUID();
+    const existingExercise: Exercise = {
+      id: randomUUID(),
+      userId: userId,
+      name: 'exercise name',
+    };
     const workoutTemplate: WorkoutTemplate = {
       id: templateId,
       name: 'test workoutTemplate',
       userId: userId,
       exercises: [
         {
-          exercise: randomUUID(),
+          exercise: existingExercise,
           sets: 3,
           restPeriod: 180,
           order: 0,
@@ -282,7 +288,7 @@ describe('WorkoutTemplateService', () => {
       templateId,
       userId,
       0,
-      newExercise,
+      newExercise.id,
       newSets,
       newRestPeriod,
     );
@@ -304,13 +310,21 @@ describe('WorkoutTemplateService', () => {
       userId: userId,
       exercises: [
         {
-          exercise: randomUUID(),
+          exercise: {
+            id: randomUUID(),
+            userId: userId,
+            name: 'exercise1',
+          },
           sets: 3,
           restPeriod: 360,
           order: 0,
         },
         {
-          exercise: randomUUID(),
+          exercise: {
+            id: randomUUID(),
+            userId: userId,
+            name: 'exercise2',
+          },
           sets: 4,
           restPeriod: 180,
           order: 1,

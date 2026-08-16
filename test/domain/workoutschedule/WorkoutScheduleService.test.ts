@@ -1,3 +1,4 @@
+import { describe, beforeEach, test, expect } from '@jest/globals';
 import { randomUUID } from 'node:crypto';
 import { WorkoutScheduleService } from '../../../src/domain/workoutschedule/WorkoutScheduleService.js';
 import {
@@ -555,7 +556,7 @@ describe('WorkoutScheduleService', () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const patternItemIdToRemove = randomUUID();
-    const workoutSchedule = {
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
@@ -567,7 +568,7 @@ describe('WorkoutScheduleService', () => {
           order: 0,
           useOrder: 0,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template1',
             exercises: [],
@@ -579,7 +580,7 @@ describe('WorkoutScheduleService', () => {
           order: 1,
           useOrder: 1,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template2',
             exercises: [],
@@ -591,7 +592,7 @@ describe('WorkoutScheduleService', () => {
           order: 2,
           useOrder: 2,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template3',
             exercises: [],
@@ -624,7 +625,7 @@ describe('WorkoutScheduleService', () => {
     const userId = randomUUID();
     const workoutScheduleId = randomUUID();
     const patternItemIdToRemove = randomUUID();
-    const workoutSchedule = {
+    const workoutSchedule: WorkoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
       userId: userId,
@@ -636,7 +637,7 @@ describe('WorkoutScheduleService', () => {
           order: 0,
           useOrder: 1,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template1',
             exercises: [],
@@ -648,7 +649,7 @@ describe('WorkoutScheduleService', () => {
           order: 1,
           useOrder: 2,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template2',
             exercises: [],
@@ -660,7 +661,7 @@ describe('WorkoutScheduleService', () => {
           order: 2,
           useOrder: 0,
           workoutTemplate: {
-            id: randomUUID,
+            id: randomUUID(),
             userId: userId,
             name: 'template3',
             exercises: [],

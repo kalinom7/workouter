@@ -1,3 +1,4 @@
+import { describe, beforeEach, test, expect } from '@jest/globals';
 import { createMock, type DeepMocked } from '@golevelup/ts-jest';
 import { randomUUID } from 'node:crypto';
 import { type ExerciseRepository } from '../../../src/domain/exercise/ExerciseRepository.js';
@@ -17,39 +18,38 @@ describe('ExerciseService', () => {
   test('should create exercise', async () => {
     //given
     const userId = randomUUID();
-    const exercise: Exercise = {
-      id: expect.any(String),
-      name: 'Test exercise',
-      description: 'test description',
-      userId,
-    };
 
     //when
     const createdExercise = await exerciseService.create('Test exercise', userId, 'test description');
 
     //then
     expect(createdExercise).not.toBeNull();
-    expect(createdExercise).toEqual(exercise);
-    expect(repository.save).toHaveBeenCalledWith(exercise);
+    expect(createdExercise).toEqual({
+      id: expect.any(String),
+      userId: userId,
+      name: 'Test exercise',
+      description: 'test description',
+    });
+    expect(repository.save).toHaveBeenCalledWith(createdExercise);
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(createdExercise.description).toBe('test description');
   });
   test('should create exercise without description', async () => {
     //given
     const userId = randomUUID();
-    const exercise: Exercise = {
-      id: expect.any(String),
-      name: 'Test exercise',
-      userId,
-    };
 
     //when
     const createdExercise = await exerciseService.create('Test exercise', userId);
 
     //then
     expect(createdExercise).not.toBeNull();
-    expect(createdExercise).toEqual(exercise);
-    expect(repository.save).toHaveBeenCalledWith(exercise);
+    expect(createdExercise).toEqual({
+      id: expect.any(String),
+      name: 'Test exercise',
+      userId: userId,
+      description: undefined,
+    });
+    expect(repository.save).toHaveBeenCalledWith(createdExercise);
     expect(repository.save).toHaveBeenCalledTimes(1);
     expect(createdExercise.description).toBeUndefined();
   });
