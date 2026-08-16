@@ -1,4 +1,4 @@
-import { Container } from 'inversify';
+import { Container, type ServiceIdentifier } from 'inversify';
 import { Db } from 'mongodb';
 import { Validator } from './application/validation/Validator.js';
 import { ExerciseRepository } from './domain/exercise/ExerciseRepository.js';
@@ -35,8 +35,10 @@ container.bind(Controller).to(WorkoutScheduleController);
 /**
  * possible to solve also with const mongoConnection and then bind constant value
  */
+export const MongoConnectionId: ServiceIdentifier<MongoConnection> = Symbol.for('MongoConnection');
+
 container
-  .bind(MongoConnection)
+  .bind<MongoConnection>(MongoConnectionId)
   .toDynamicValue(async (context) => {
     const config = context.get(Config);
 
@@ -51,7 +53,7 @@ container
 container
   .bind(Db)
   .toDynamicValue(async (context) => {
-    const mongoConnection = await context.getAsync(MongoConnection);
+    const mongoConnection: MongoConnection = await context.getAsync(MongoConnectionId);
 
     return mongoConnection.getDb();
   })

@@ -1,5 +1,5 @@
 import express, { type Application as EA, type NextFunction, type Request, type Response } from 'express';
-import { injectable, multiInject } from 'inversify';
+import { injectable, multiInject, inject } from 'inversify';
 
 import { Controller } from './controller/Controller.js';
 
@@ -7,6 +7,7 @@ import cors from 'cors';
 import { HttpException, UnknownException } from './HttpException.js';
 import { Server } from 'http';
 import { MongoConnection } from './MongoConnection.js';
+import { MongoConnectionId } from '../inversify.config.js';
 
 @injectable()
 export class Application {
@@ -16,6 +17,7 @@ export class Application {
   constructor(
     @multiInject(Controller)
     private readonly controllers: Controller[],
+    @inject(MongoConnectionId)
     private readonly mongoConnection: MongoConnection,
   ) {
     console.log('Initializing application...');

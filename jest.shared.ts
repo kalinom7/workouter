@@ -13,6 +13,10 @@ const sharedConfig: Partial<Config> = {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: {
+          emitDecoratorMetadata: true,
+          experimentalDecorators: true,
+        },
       },
     ],
   },

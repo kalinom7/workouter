@@ -1,13 +1,12 @@
 import 'reflect-metadata';
 import { Application } from './application/Application.js';
-import { container } from './inversify.config.js';
-import { MongoConnection } from './application/MongoConnection.js';
+import { container, MongoConnectionId } from './inversify.config.js';
 
 try {
   const useMongoDb = typeof process.env['MONGO_URL'] === 'string' && process.env['MONGO_URL'].length > 0;
 
   if (useMongoDb) {
-    await container.getAsync(MongoConnection);
+    await container.getAsync(MongoConnectionId);
     console.log('Connected to MongoDB');
   } else {
     console.log('Using in-memory repositories');
