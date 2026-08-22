@@ -26,6 +26,10 @@ import {
   RenameWorkoutScheduleParamsDto,
   renameWorkoutScheduleBodyDto,
   renameWorkoutScheduleParamsDto,
+  updateWorkoutScheduleBodyDto,
+  updateWorkoutScheduleParamsDto,
+  UpdateWorkoutScheduleParamsDto,
+  UpdateWorkoutScheduleBodyDto,
 } from '../dto/WorkoutScheduleControllerDto.js';
 import { authorizationDto, AuthorizationDto } from '../dto/AuthorizationDto.js';
 import { Controller } from './Controller.js';
@@ -123,6 +127,16 @@ export class WorkoutScheduleController extends Controller {
         query: authorizationDto,
       }),
       (req, res) => this.renameWorkoutSchedule(req, res),
+    );
+
+    router.patch(
+      '/workout-schedules/:workoutScheduleId/update',
+      this.validator.validate({
+        params: updateWorkoutScheduleParamsDto,
+        body: updateWorkoutScheduleBodyDto,
+        query: authorizationDto,
+      }),
+      (req, res) => this.updateWorkoutSchedule(req, res),
     );
 
     router.use(this.workoutScheduleErrorHandler.getErrorHandler().bind(this));
@@ -255,5 +269,26 @@ export class WorkoutScheduleController extends Controller {
     const { userId } = response.locals.query;
     const scheduledActivity = await this.workoutScheduleService.getScheduledActivity(userId);
     response.status(200).json({ scheduledActivity });
+  }
+
+  public async updateWorkoutSchedule(
+    _request: Request<UpdateWorkoutScheduleParamsDto, unknown, UpdateWorkoutScheduleBodyDto, AuthorizationDto>,
+    response: Response<
+      unknown,
+      ParsedData<UpdateWorkoutScheduleParamsDto, UpdateWorkoutScheduleBodyDto, AuthorizationDto>
+    >,
+  ): Promise<void> {
+    const { workoutScheduleId } = response.locals.params;
+    const { finishedWorkoutTemplateId } = response.locals.body;
+    const { userId } = response.locals.query;
+
+    const workoutSchedule = await this.workoutScheduleService.update(
+      workoutScheduleId,
+      userId,
+      new Date(),
+      finishedWorkoutTemplateId,
+    );
+
+    response.status(200).json(workoutSchedule);
   }
 }

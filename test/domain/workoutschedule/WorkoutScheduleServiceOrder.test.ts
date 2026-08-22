@@ -10,6 +10,7 @@ import {
 import { randomUUID } from 'node:crypto';
 import { type WorkoutTemplateService } from '../../../src/domain/workouttemplate/WorkoutTemplateService';
 import { type WorkoutSchedule } from '../../../src/domain/workoutschedule/model/WorkoutSchedule';
+import { type WorkoutTemplate } from '../../../src/domain/workouttemplate/model/WorkoutTemplate';
 
 describe('WorkoutScheduleService order', () => {
   let workoutScheduleService: WorkoutScheduleService;
@@ -167,6 +168,7 @@ describe('WorkoutScheduleService order', () => {
     const patternItemId2 = randomUUID();
     const workoutTemplateId1 = randomUUID();
     const workoutTemplateId2 = randomUUID();
+
     const workoutSchedule = {
       id: workoutScheduleId,
       name: 'test schedule',
@@ -177,7 +179,7 @@ describe('WorkoutScheduleService order', () => {
         {
           id: patternItemId1,
           order: 0,
-          useOrder: 0,
+          useOrder: 1,
           workoutTemplate: {
             id: workoutTemplateId1,
             userId: userId,
@@ -189,7 +191,7 @@ describe('WorkoutScheduleService order', () => {
         {
           id: patternItemId2,
           order: 1,
-          useOrder: 1,
+          useOrder: 0,
           workoutTemplate: {
             id: workoutTemplateId2,
             userId: userId,
@@ -200,7 +202,7 @@ describe('WorkoutScheduleService order', () => {
         },
       ],
       lastOrder: 0,
-      lastFinishedWorkoutDate: new Date('2026-05-25T10:00:00Z'),
+      lastFinishedWorkoutDate: new Date('2026-05-24T10:00:00Z'),
     };
     workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
     //when
@@ -506,5 +508,42 @@ describe('WorkoutScheduleService order', () => {
     );
     expect(recalculatedWorkoutSchedule.lastOrder).toBe(2);
     expect(recalculatedWorkoutSchedule.lastFinishedWorkoutDate).toEqual(finishedTime);
+  });
+  test('should get workout as scheduled acitivity if its the only workout in schedule and it was finished yesterday', async () => {
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const finishedWorkoutTemplateId = randomUUID();
+
+    const workoutTemplateInPattern: WorkoutTemplate = {
+      id: finishedWorkoutTemplateId,
+      userId: userId,
+      name: 'test workout template',
+      exercises: [],
+    };
+
+    const workoutSchedule: WorkoutSchedule = {
+      id: workoutScheduleId,
+      userId: userId,
+      name: 'test workout schedule',
+      lastOrder: 0,
+      lastFinishedWorkoutDate: new Date('2026-05-25T10:00:00Z'),
+      isActive: true,
+      setActiveDate: new Date('2026-05-20T10:00:00Z'),
+      pattern: [
+        {
+          id: randomUUID(),
+          order: 0,
+          useOrder: 0,
+          restDays: 0,
+          workoutTemplate: workoutTemplateInPattern,
+        },
+      ],
+    };
+
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
+
+    const scheduledActivity = await workoutScheduleService.getScheduledActivity(userId);
+
+    expect(scheduledActivity).toEqual(workoutTemplateInPattern);
   });
 });

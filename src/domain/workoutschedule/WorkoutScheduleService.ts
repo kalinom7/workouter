@@ -231,7 +231,7 @@ export class WorkoutScheduleService {
       );
     }
 
-    if (daysFromLastFinished > lastFinishedPatternItem.restDays) {
+    if (daysFromLastFinished > lastFinishedPatternItem.restDays + 1) {
       throw new WorkoutScheduleScheduledActivitySkippedException('Scheduled activity was skipped');
     }
     if (daysFromLastFinished < lastFinishedPatternItem.restDays) {
