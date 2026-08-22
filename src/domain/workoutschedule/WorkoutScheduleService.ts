@@ -231,11 +231,12 @@ export class WorkoutScheduleService {
       );
     }
 
+    if (daysFromLastFinished < lastFinishedPatternItem.restDays || daysFromLastFinished === 0) {
+      return null;
+    }
+
     if (daysFromLastFinished > lastFinishedPatternItem.restDays + 1) {
       throw new WorkoutScheduleScheduledActivitySkippedException('Scheduled activity was skipped');
-    }
-    if (daysFromLastFinished < lastFinishedPatternItem.restDays) {
-      return null;
     }
 
     const nextPatternItem = workoutSchedule.pattern.find(

@@ -350,7 +350,8 @@ describe('WorkoutScheduleService order', () => {
         },
       ],
       lastOrder: 0,
-      lastFinishedWorkoutDate: new Date('2026-05-22T10:00:00Z'),
+      // lastFinishedWorkoutDate: new Date('2026-05-22T10:00:00Z'),
+      lastFinishedWorkoutDate: new Date('2026-05-23T10:00:00Z'),
     };
     workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
 
@@ -545,5 +546,42 @@ describe('WorkoutScheduleService order', () => {
     const scheduledActivity = await workoutScheduleService.getScheduledActivity(userId);
 
     expect(scheduledActivity).toEqual(workoutTemplateInPattern);
+  });
+  test('should get null as scheduled acitivity if todays workout was finished', async () => {
+    const userId = randomUUID();
+    const workoutScheduleId = randomUUID();
+    const finishedWorkoutTemplateId = randomUUID();
+
+    const workoutTemplateInPattern: WorkoutTemplate = {
+      id: finishedWorkoutTemplateId,
+      userId: userId,
+      name: 'test workout template',
+      exercises: [],
+    };
+
+    const workoutSchedule: WorkoutSchedule = {
+      id: workoutScheduleId,
+      userId: userId,
+      name: 'test workout schedule',
+      lastOrder: 0,
+      lastFinishedWorkoutDate: new Date('2026-05-26T09:00:00Z'),
+      isActive: true,
+      setActiveDate: new Date('2026-05-20T10:00:00Z'),
+      pattern: [
+        {
+          id: randomUUID(),
+          order: 0,
+          useOrder: 0,
+          restDays: 0,
+          workoutTemplate: workoutTemplateInPattern,
+        },
+      ],
+    };
+
+    workoutScheduleRepository.getActive.mockResolvedValueOnce(workoutSchedule);
+
+    const scheduledActivity = await workoutScheduleService.getScheduledActivity(userId);
+
+    expect(scheduledActivity).toBeNull();
   });
 });
