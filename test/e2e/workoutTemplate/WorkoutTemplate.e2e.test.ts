@@ -17,7 +17,7 @@ describe('Workout Template E2E', () => {
     config = createMock<Config>();
     config.getMongoUrl.mockReturnValue(`${mongod.getConnectionString()}&directConnection=true`);
     config.getDbName.mockReturnValue('workouter_test');
-    (await container.rebind<Config>(Config)).toConstantValue(config);
+    await container.rebind<Config>(Config).toConstantValue(config);
     app = await container.getAsync(Application);
 
     await app.start();
