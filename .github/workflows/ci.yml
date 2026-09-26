@@ -47,6 +47,6 @@ jobs:
         run: 'npm run test:e2e'
 
       - name: SonarQube analysis
-        uses: SonarSource/sonarqube-scan-action@v8.2.1
+        uses: SonarSource/sonarqube-scan-action@v8.2.2
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
