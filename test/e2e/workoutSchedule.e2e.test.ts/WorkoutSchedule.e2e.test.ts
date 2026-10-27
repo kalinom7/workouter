@@ -52,5 +52,55 @@ describe('Workout Schedule E2E', () => {
         lastFinishedWorkoutDate: null,
       });
     });
+    it('should return 400 when provided incorrect data', async () => {
+      const userId = randomUUID();
+
+      await request(app.getApp()).post(`/workout-schedules?userId=${userId}`).send({ name: '' }).expect(400);
+    });
+  });
+
+  describe('GET /workout-schedules', () => {
+    it('should return 200 and an empty array for given user', async () => {
+      const userId = randomUUID();
+
+      const response = await request(app.getApp()).get(`/workout-schedules?userId=${userId}`).expect(200);
+
+      expect(response.body).toEqual([]);
+    });
+  });
+  describe('DELETE /workout-schedules/:id', () => {
+    it('should delete workout schedule and return 204', async () => {
+      const userId = randomUUID();
+      const createResponse = await request(app.getApp())
+        .post(`/workout-schedules?userId=${userId}`)
+        .send({ name: 'Test Workout Schedule' })
+        .expect(201);
+
+      const workoutScheduleId = createResponse.body.id;
+
+      await request(app.getApp()).delete(`/workout-schedules/${workoutScheduleId}?userId=${userId}`).expect(204);
+    });
+  });
+  describe('user journey tests', () => {
+    it('should create workout schedule, get it, delete it and return 404 on get', async () => {
+      const userId = randomUUID();
+
+      const createResponse = await request(app.getApp())
+        .post(`/workout-schedules?userId=${userId}`)
+        .send({ name: 'Test Workout Schedule' })
+        .expect(201);
+
+      const workoutScheduleId = createResponse.body.id;
+
+      const getResponse = await request(app.getApp())
+        .get(`/workout-schedules/${workoutScheduleId}?userId=${userId}`)
+        .expect(200);
+
+      expect(getResponse.body).toEqual(createResponse.body);
+
+      await request(app.getApp()).delete(`/workout-schedules/${workoutScheduleId}?userId=${userId}`).expect(204);
+
+      await request(app.getApp()).get(`/workout-schedules/${workoutScheduleId}?userId=${userId}`).expect(404);
+    });
   });
 });
